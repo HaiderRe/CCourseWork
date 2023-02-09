@@ -1,3 +1,3 @@
-g++ main.cpp -o main.exe -O1 -Wall -std=c++11 
-start-sleep 1
-start-process main.exe
+gcc main.cpp -o game.exe -O1 -Wall -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm
+Start-Sleep 3 
+ .\game.exe
