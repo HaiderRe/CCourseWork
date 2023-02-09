@@ -9,8 +9,15 @@ int age;
 cout << "Give me your age:" <<endl;
 cin >> age;
 cout << cin.rdstate() << endl; 
-cin.clear(); //new line is here :-)
-cout << cin.rdstate()<< endl;  //new line is here :-)
+cin.clear();
+cin.ignore(10000, '\n'); //ignore after clear
+cout << cin.rdstate() << endl;
+while(!(cin >> age)){
+    cin.clear();
+    cin.ignore(10000, '\n');
+}//new line is here :-)
+cout << age << endl;
+//cout << age << endl;
 system("Pause");
 return 0;
 }
