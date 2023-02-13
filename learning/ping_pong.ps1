@@ -1,0 +1,3 @@
+g++ ping_pong.cpp -o ping_pong.exe -O1 -Wall -std=c++11 -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 
+start-sleep 1.2
+start-process ping_pong.exe
