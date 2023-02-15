@@ -4,6 +4,7 @@
 #include "include/raylib.h"
 #include "include/rlgl.h"
 #include "include/raymath.h"
+#include <vector>
 
 /*******************************************************************************************
 *
@@ -36,14 +37,36 @@
 void should_move();
 void ball_speed(int &ballspeedx, int &ballspeedy);
 bool check_scored(unsigned int &l_score, unsigned int &r_score);
+
+
+struct texture_struct{
+    Texture2D t_texture;
+    float x;
+    float y;
+    float width;
+    float height;
+    int scale = 1;
+    int frame = -1;
+    int iteration = 1;
+    float frame_timer = 0;
+    float b_x;
+    float b_y;
+};
 struct objects{             // Structure declaration
   int x = 0;
-  int y = 0;      // Member (int variable)   // Member (string variable)
+  int y = 0;
+  int p_counter = 1;   // p = powerup
+  bool is_parrying = false;
+  int parry_cool_down = 0;  
+  bool has_texture = false;  
+  texture_struct c_texture;
 } leftRect,rightRect, ball;
+void shoot_gun();
 int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
+    std::vector<texture_struct> vec_textures;
     leftRect.x = 20;
     leftRect.y = 540;
     rightRect.x = 1900;
@@ -109,6 +132,8 @@ int main(void)
                 }
                 
                 score_timer = false;
+                leftRect.p_counter = 1;
+                rightRect.p_counter = 1;
             }
         }
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
@@ -122,11 +147,14 @@ int main(void)
        if(!score_timer){
        score_timer = check_scored(left_rect_score, right_rect_score);
        }
+       shoot_gun();
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-
             ClearBackground(BLACK);
+            if(leftRect.c_texture.frame > -1){
+                DrawTexturePro(leftRect.c_texture.t_texture,Rectangle{leftRect.c_texture.x, leftRect.c_texture.y, leftRect.c_texture.width, leftRect.c_texture.height}, Rectangle{leftRect.c_texture.b_x, leftRect.c_texture.b_y, 8, 8},Vector2{leftRect.c_texture.b_x + 4, leftRect.c_texture.b_y + 4}, 0.0f ,RAYWHITE);
+            }
             DrawCircle(ball.x, ball.y, 10, RAYWHITE);
             DrawRectangle(leftRect.x, leftRect.y, 4, 60, WHITE);
             DrawRectangle(rightRect.x, rightRect.y, 4, 60, WHITE);
@@ -181,7 +209,7 @@ void ball_speed(int &ball_speedx, int &ball_speedy){
     ball.x = ball.x + ball_speedx; 
     if(CheckCollisionCircleRec(Vector2{float(ball.x), float(ball.y)}, 10 , Rectangle{float(leftRect.x),float(leftRect.y), 4, 60 })){
         ball_speedx *= -1;
-        if(ball.y > leftRect.y + 5){
+        if(ball.y > leftRect.y){
             ball_speedy = abs(ball_speedy) * -1;
         }
         else{
@@ -190,7 +218,7 @@ void ball_speed(int &ball_speedx, int &ball_speedy){
     }
     else if(CheckCollisionCircleRec(Vector2{float(ball.x), float(ball.y)}, 10 , Rectangle{float(rightRect.x),float(rightRect.y), 4, 60 })){
         ball_speedx *= -1;
-        if(ball.y > rightRect.y + 5){
+        if(ball.y  > rightRect.y ){
             ball_speedy = abs(ball_speedy) * -1;
         }
         else{
@@ -212,4 +240,67 @@ bool check_scored(unsigned int &l_score, unsigned int &r_score){
         return true;
     }
     return false;
+}
+void shoot_gun(){
+   // texture_struct arr [2];
+    if(IsKeyPressed(KEY_F) && leftRect.p_counter > 0){
+        struct texture_struct bullet;
+        bullet.t_texture = LoadTexture("./asset/Air_I_16x16.png");
+        bullet.width = float(16);
+        bullet.height = bullet.width;
+        bullet.frame = 0;
+        leftRect.p_counter += -1;
+        leftRect.c_texture = bullet;
+        leftRect.has_texture = true;
+        leftRect.c_texture.b_y = float(leftRect.y);
+        std::cout << "spawned" << std::endl;
+    }
+    if(IsKeyPressed(KEY_SPACE) && rightRect.p_counter > 0){
+        struct texture_struct bullet_Right;
+        bullet_Right.t_texture = LoadTexture("./asset/Air_I_16x16.png");
+        bullet_Right.width = float(16);
+        bullet_Right.height = bullet_Right.width;
+        bullet_Right.frame = 0; 
+        rightRect.p_counter += -1;
+        rightRect.c_texture = bullet_Right;
+        rightRect.has_texture = true;
+        rightRect.c_texture.b_y = float(rightRect.y);
+    }
+    if(leftRect.c_texture.frame > -1){
+        //arr[0] = leftRect.c_texture;
+        leftRect.c_texture.b_x += 4;
+        leftRect.c_texture.frame_timer += GetFrameTime();
+        if(leftRect.c_texture.frame_timer >= float(0.2) ){
+            std::cout << "frame incremented" << std::endl;
+            leftRect.c_texture.frame += 1;
+            leftRect.c_texture.x += 16;
+            if(leftRect.c_texture.frame == 4){
+                leftRect.c_texture.x = 0;
+                leftRect.c_texture.y += 16;
+            }
+            leftRect.c_texture.frame_timer = float(0);
+            if(leftRect.c_texture.frame > 6){
+                leftRect.c_texture.frame = 1;
+            }
+        }
+        // std::cout << "leftrect frame > -1" << std::endl;
+    }
+    if(rightRect.c_texture.frame > -1){
+       // arr[1] = rightRect.c_texture;
+        rightRect.c_texture.b_x += -4;
+        rightRect.c_texture.frame_timer += GetFrameTime();
+        if(rightRect.c_texture.frame_timer >= float(0.2) ){
+            std::cout << "frame incremented" << std::endl;
+            rightRect.c_texture.frame += 1;
+            rightRect.c_texture.x += 16;
+            if(rightRect.c_texture.frame == 4){
+                rightRect.c_texture.x = 0;
+                rightRect.c_texture.y += 16;
+            }
+            rightRect.c_texture.frame_timer = float(0);
+            if(rightRect.c_texture.frame > 6){
+                rightRect.c_texture.frame = 1;
+            }
+        }
+    }
 }
