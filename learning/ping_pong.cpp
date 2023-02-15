@@ -58,7 +58,8 @@ struct objects{             // Structure declaration
   int p_counter = 1;   // p = powerup
   bool is_parrying = false;
   int parry_cool_down = 0;  
-  bool has_texture = false;  
+  bool has_texture = false;
+  bool b_collide = false;  
   texture_struct c_texture;
 } leftRect,rightRect, ball;
 void shoot_gun();
@@ -153,8 +154,10 @@ int main(void)
         BeginDrawing();
             ClearBackground(BLACK);
             if(leftRect.c_texture.frame > -1){
-                DrawTexturePro(leftRect.c_texture.t_texture,Rectangle{leftRect.c_texture.x, leftRect.c_texture.y, leftRect.c_texture.width, leftRect.c_texture.height}, Rectangle{leftRect.c_texture.b_x, leftRect.c_texture.b_y, 8, 8},Vector2{leftRect.c_texture.b_x + 4, leftRect.c_texture.b_y + 4}, 0.0f ,RAYWHITE);
+                DrawTexturePro(leftRect.c_texture.t_texture,Rectangle{leftRect.c_texture.x, leftRect.c_texture.y, leftRect.c_texture.width, leftRect.c_texture.height}, Rectangle{leftRect.c_texture.b_x, leftRect.c_texture.b_y, 64, 64},Vector2{32, 32}, 0.0f ,RAYWHITE);
+                // DrawRectangle(leftRect.c_texture.b_x, leftRect.c_texture.b_y,10, 10 ,GREEN); visual representation of the hitbox/used for hitbox experimentation
             }
+            // if(leftRect.c_texture.frame > -1){}
             DrawCircle(ball.x, ball.y, 10, RAYWHITE);
             DrawRectangle(leftRect.x, leftRect.y, 4, 60, WHITE);
             DrawRectangle(rightRect.x, rightRect.y, 4, 60, WHITE);
@@ -170,6 +173,12 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    if(leftRect.c_texture.frame > -1){
+        UnloadTexture(leftRect.c_texture.t_texture);
+    }
+    if(rightRect.c_texture.frame > -1){
+        UnloadTexture(rightRect.c_texture.t_texture);
+    }
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -252,7 +261,8 @@ void shoot_gun(){
         leftRect.p_counter += -1;
         leftRect.c_texture = bullet;
         leftRect.has_texture = true;
-        leftRect.c_texture.b_y = float(leftRect.y);
+        leftRect.c_texture.b_y = float(leftRect.y) + 30.00f ;
+        leftRect.c_texture.b_x = float(leftRect.x);
         std::cout << "spawned" << std::endl;
     }
     if(IsKeyPressed(KEY_SPACE) && rightRect.p_counter > 0){
@@ -268,7 +278,7 @@ void shoot_gun(){
     }
     if(leftRect.c_texture.frame > -1){
         //arr[0] = leftRect.c_texture;
-        leftRect.c_texture.b_x += 4;
+        leftRect.c_texture.b_x += 16;
         leftRect.c_texture.frame_timer += GetFrameTime();
         if(leftRect.c_texture.frame_timer >= float(0.2) ){
             std::cout << "frame incremented" << std::endl;
@@ -278,11 +288,34 @@ void shoot_gun(){
                 leftRect.c_texture.x = 0;
                 leftRect.c_texture.y += 16;
             }
-            leftRect.c_texture.frame_timer = float(0);
-            if(leftRect.c_texture.frame > 6){
+            else if(leftRect.c_texture.frame == 6){
                 leftRect.c_texture.frame = 1;
+                leftRect.c_texture.x = 16; 
+                leftRect.c_texture.y = 0;
+                std::cout << "else if 6/7" << std::endl;
             }
+            std::cout << "the frame ="  + std::to_string(leftRect.c_texture.frame) + "y = " + std::to_string(leftRect.c_texture.y) << std::endl;
+            // leftRect.c_texture.frame = 1; // why odesnt it work without this
+            leftRect.c_texture.frame_timer = float(0);
         }
+        if(CheckCollisionRecs(Rectangle{leftRect.c_texture.b_x, leftRect.c_texture.b_y, 10, 64},Rectangle{float(rightRect.x), float(rightRect.y), 4, 60})){
+                std::cout << "collided!" << std::endl;
+                leftRect.c_texture.b_x = leftRect.c_texture.b_x - 16;
+               if(leftRect.c_texture.frame < 9){
+                leftRect.c_texture.x = 0;
+                leftRect.c_texture.y = 32; 
+                leftRect.c_texture.frame = 8;
+               // std::cout << "b_x "+ std::to_string(leftRect.c_texture.b_x) << std::endl;
+               }
+            }
+        if(leftRect.c_texture.frame > 9){
+                leftRect.c_texture.frame = -1;
+                leftRect.c_texture.b_x = 0;
+                leftRect.c_texture.b_y = 0;
+                leftRect.c_texture.x = 0;
+                leftRect.c_texture.y = 0;
+                UnloadTexture(leftRect.c_texture.t_texture); 
+               }     
         // std::cout << "leftrect frame > -1" << std::endl;
     }
     if(rightRect.c_texture.frame > -1){
