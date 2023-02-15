@@ -58,8 +58,10 @@ struct objects{             // Structure declaration
   int p_counter = 1;   // p = powerup
   bool is_parrying = false;
   int parry_cool_down = 0;  
-  bool has_texture = false;
+  bool dead = false;
   bool b_collide = false;  
+  Color colour = WHITE;
+  float death_counter = 0.00f;
   texture_struct c_texture;
 } leftRect,rightRect, ball;
 void shoot_gun();
@@ -76,6 +78,10 @@ int main(void)
     unsigned int right_rect_score = 0;
     bool score_timer = false;
     unsigned int counter_of_time = 1;
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
+    unsigned int counter_of_loops = 0;
+    InitWindow(screenWidth, screenHeight, "Pong");
     int ball_speedx = GetRandomValue(5, 8);
     int ball_speedy = GetRandomValue(4, 7);
     int tmp = GetRandomValue(0,3);
@@ -89,10 +95,6 @@ int main(void)
     else if(tmp == 3){
         ball_speedy *= -1;
     }
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
-    unsigned int counter_of_loops = 0;
-    InitWindow(screenWidth, screenHeight, "Pong");
     ball.x = static_cast<int>(GetScreenWidth() / 2); 
     ball.y = static_cast<int>(GetScreenHeight() / 2 );
 
@@ -131,10 +133,15 @@ int main(void)
                 else if(tmp == 3){
                     ball_speedy *= -1;
                 }
-                
                 score_timer = false;
-                leftRect.p_counter = 1;
-                rightRect.p_counter = 1;
+                leftRect.p_counter += 1;
+                rightRect.p_counter += 1;
+                leftRect.dead = false;
+                rightRect.dead = false;
+                leftRect.death_counter = 0.00f;
+                rightRect.death_counter = 0.00f;
+                leftRect.colour = WHITE;
+                rightRect.colour = WHITE;
             }
         }
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
@@ -142,13 +149,52 @@ int main(void)
             ToggleFullscreen();
         }
         if(counter_of_loops % 30 == 0){
-            ball_speedx *= 1.04;
-            ball_speedy *= 1.02;
+            if(ball_speedx == abs(ball_speedx)){
+                ball_speedx += 0.8;
+            }
+            else{
+                ball_speedx += -0.8;
+            }
+            if(ball_speedy == abs(ball_speedy)){
+                ball_speedy += 0.7;
+            }
+            else{
+                ball_speedy += -0.7;
+            }
         }
        if(!score_timer){
        score_timer = check_scored(left_rect_score, right_rect_score);
        }
        shoot_gun();
+       if(rightRect.dead && rightRect.death_counter == 0.00f){
+        //std::cout << "TRUE TRUE TRUE " << std::endl;
+        rightRect.colour = RED;
+        rightRect.death_counter = 0.10f;
+       }
+       if(leftRect.dead && leftRect.death_counter == 0.00f){
+        leftRect.colour = RED;
+        leftRect.death_counter = 0.10f;
+       }
+     //  std::cout << "get frame time " + std::to_string(GetFrameTime()) << std::endl;
+       if(leftRect.death_counter != 0.00f){
+        leftRect.death_counter += GetFrameTime();
+        if(leftRect.death_counter > 1.02f){
+            leftRect.dead = false;
+            leftRect.death_counter = 0.00f;
+            leftRect.colour = WHITE;
+        }
+       }
+       if(rightRect.death_counter != 0.00f){
+        rightRect.death_counter += GetFrameTime();
+       // std::cout << "r dea " + std::to_string(rightRect.death_counter);
+        if(rightRect.death_counter > 1.02f){
+        rightRect.dead = false;
+        rightRect.death_counter = 0.00f;
+        rightRect.colour = WHITE;
+        }
+       }
+       //rightRect.colour = RED;
+
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
@@ -159,8 +205,8 @@ int main(void)
             }
             // if(leftRect.c_texture.frame > -1){}
             DrawCircle(ball.x, ball.y, 10, RAYWHITE);
-            DrawRectangle(leftRect.x, leftRect.y, 4, 60, WHITE);
-            DrawRectangle(rightRect.x, rightRect.y, 4, 60, WHITE);
+            DrawRectangle(leftRect.x, leftRect.y, 4, 60, leftRect.colour);
+            DrawRectangle(rightRect.x, rightRect.y, 4, 60, rightRect.colour);
             DrawRectangle(960,0, 4, 1080, WHITE);
             DrawText(TextFormat(" %i", left_rect_score),490, 108, 32, WHITE);
             DrawText(TextFormat(" %i", right_rect_score),1459, 108, 32, WHITE);
@@ -185,16 +231,16 @@ int main(void)
     return 0;
 }
 void should_move(){
-    if(IsKeyDown(KEY_W)){
+    if(IsKeyDown(KEY_W) && !leftRect.dead){
         leftRect.y = leftRect.y - 10;
     }
-    else if(IsKeyDown(KEY_S)){
+    else if(IsKeyDown(KEY_S) && !leftRect.dead){
         leftRect.y = leftRect.y + 10;
     }
-    if(IsKeyDown(KEY_DOWN)){
+    if(IsKeyDown(KEY_DOWN) && !rightRect.dead){
         rightRect.y = rightRect.y + 10;
     }
-    else if(IsKeyDown(KEY_UP)){
+    else if(IsKeyDown(KEY_UP) && !rightRect.dead){
         rightRect.y = rightRect.y - 10;
     }
     if(leftRect.y < 0){
@@ -218,7 +264,7 @@ void ball_speed(int &ball_speedx, int &ball_speedy){
     ball.x = ball.x + ball_speedx; 
     if(CheckCollisionCircleRec(Vector2{float(ball.x), float(ball.y)}, 10 , Rectangle{float(leftRect.x),float(leftRect.y), 4, 60 })){
         ball_speedx *= -1;
-        if(ball.y > leftRect.y){
+        if(ball.y > leftRect.y + 25){
             ball_speedy = abs(ball_speedy) * -1;
         }
         else{
@@ -227,7 +273,7 @@ void ball_speed(int &ball_speedx, int &ball_speedy){
     }
     else if(CheckCollisionCircleRec(Vector2{float(ball.x), float(ball.y)}, 10 , Rectangle{float(rightRect.x),float(rightRect.y), 4, 60 })){
         ball_speedx *= -1;
-        if(ball.y  > rightRect.y ){
+        if(ball.y  > rightRect.y + 25){
             ball_speedy = abs(ball_speedy) * -1;
         }
         else{
@@ -260,10 +306,10 @@ void shoot_gun(){
         bullet.frame = 0;
         leftRect.p_counter += -1;
         leftRect.c_texture = bullet;
-        leftRect.has_texture = true;
+       // leftRect.has_texture = true;
         leftRect.c_texture.b_y = float(leftRect.y) + 30.00f ;
         leftRect.c_texture.b_x = float(leftRect.x);
-        std::cout << "spawned" << std::endl;
+       // std::cout << "spawned" << std::endl;
     }
     if(IsKeyPressed(KEY_SPACE) && rightRect.p_counter > 0){
         struct texture_struct bullet_Right;
@@ -273,7 +319,7 @@ void shoot_gun(){
         bullet_Right.frame = 0; 
         rightRect.p_counter += -1;
         rightRect.c_texture = bullet_Right;
-        rightRect.has_texture = true;
+        //rightRect.has_texture = true;
         rightRect.c_texture.b_y = float(rightRect.y);
     }
     if(leftRect.c_texture.frame > -1){
@@ -281,7 +327,7 @@ void shoot_gun(){
         leftRect.c_texture.b_x += 16;
         leftRect.c_texture.frame_timer += GetFrameTime();
         if(leftRect.c_texture.frame_timer >= float(0.2) ){
-            std::cout << "frame incremented" << std::endl;
+            //std::cout << "frame incremented" << std::endl;
             leftRect.c_texture.frame += 1;
             leftRect.c_texture.x += 16;
             if(leftRect.c_texture.frame == 4){
@@ -292,14 +338,15 @@ void shoot_gun(){
                 leftRect.c_texture.frame = 1;
                 leftRect.c_texture.x = 16; 
                 leftRect.c_texture.y = 0;
-                std::cout << "else if 6/7" << std::endl;
+             //   std::cout << "else if 6/7" << std::endl;
             }
-            std::cout << "the frame ="  + std::to_string(leftRect.c_texture.frame) + "y = " + std::to_string(leftRect.c_texture.y) << std::endl;
+           // std::cout << "the frame ="  + std::to_string(leftRect.c_texture.frame) + "y = " + std::to_string(leftRect.c_texture.y) << std::endl;
             // leftRect.c_texture.frame = 1; // why odesnt it work without this
             leftRect.c_texture.frame_timer = float(0);
         }
         if(CheckCollisionRecs(Rectangle{leftRect.c_texture.b_x, leftRect.c_texture.b_y, 10, 64},Rectangle{float(rightRect.x), float(rightRect.y), 4, 60})){
-                std::cout << "collided!" << std::endl;
+               // std::cout << "collided!" << std::endl;
+                rightRect.dead = true;
                 leftRect.c_texture.b_x = leftRect.c_texture.b_x - 16;
                if(leftRect.c_texture.frame < 9){
                 leftRect.c_texture.x = 0;
@@ -308,12 +355,18 @@ void shoot_gun(){
                // std::cout << "b_x "+ std::to_string(leftRect.c_texture.b_x) << std::endl;
                }
             }
+        else if(leftRect.c_texture.b_x > GetScreenWidth()){
+            UnloadTexture(leftRect.c_texture.t_texture);
+            leftRect.c_texture.frame = -1;
+            leftRect.c_texture.frame_timer = 0.00f;
+        }
         if(leftRect.c_texture.frame > 9){
                 leftRect.c_texture.frame = -1;
                 leftRect.c_texture.b_x = 0;
                 leftRect.c_texture.b_y = 0;
                 leftRect.c_texture.x = 0;
                 leftRect.c_texture.y = 0;
+                leftRect.c_texture.frame_timer = 0.00f;
                 UnloadTexture(leftRect.c_texture.t_texture); 
                }     
         // std::cout << "leftrect frame > -1" << std::endl;
@@ -323,7 +376,7 @@ void shoot_gun(){
         rightRect.c_texture.b_x += -4;
         rightRect.c_texture.frame_timer += GetFrameTime();
         if(rightRect.c_texture.frame_timer >= float(0.2) ){
-            std::cout << "frame incremented" << std::endl;
+           // std::cout << "frame incremented" << std::endl;
             rightRect.c_texture.frame += 1;
             rightRect.c_texture.x += 16;
             if(rightRect.c_texture.frame == 4){
