@@ -16,6 +16,7 @@ struct tile{
     Color col = RED;
     Texture2D c_texture;
 };
+
 class tilemap{
     public:
     int width;
@@ -23,7 +24,7 @@ class tilemap{
     int x_size; 
     int y_size; 
     int pixel_size;
-    tile *arr_tiles;
+    tile *arr_tiles; // Change this to a Vector of tile vectors // Easier
     void draw();
     void set_width_height(int w, int h); 
     void set_width_height_of_arr(int x, int y); 
@@ -56,7 +57,7 @@ void tilemap::draw(){
     }
 }
 void tilemap::set_width_height_of_arr(int w, int h){  
-    // H = Height 
+    // H = Height (of 2D Array)
     // W = Width (Of 2D Array)
     arr_tiles = new tile[w*h];
     x_size = w; 
@@ -64,14 +65,16 @@ void tilemap::set_width_height_of_arr(int w, int h){
 }
 void tilemap::set_width_height(int w, int h){ 
     //sets widths of height of each tile  
+    int x_offset = GetScreenWidth() / 2; // X_offset, so that the tiles start from an offset of // (0,0) origin - x_offset ( - left) 
+    int y_offset = GetScreenHeight() /2; // Y_offset, so that the tiles start from an offset of // (0,0) origin - Y_offset (- up) 
     width = w; 
     height = h;
     for(int i = 0; i < y_size; i++){
         for(int j = 0; j < x_size; j++){
-            arr_tiles[i*y_size+j].coordx = (width * j);
-            arr_tiles[i*y_size+j].coordy = (height * i); 
-            //std::cout << "x coord " + std::to_string(arr_tiles[i * y_size + j].coordx) << std::endl;
-            //std::cout << "y coord " + std::to_string(arr_tiles[i * y_size + j].coordy) << std::endl;
+            arr_tiles[i*y_size+j].coordx = ((width * j) - x_offset);
+            arr_tiles[i*y_size+j].coordy = ((height * i) - y_offset); 
+            //std::cout << "x coord " + std::to_string(arr_tiles[i * y_size + j].coordx) << std::endl; Debugging
+            //std::cout << "y coord " + std::to_string(arr_tiles[i * y_size + j].coordy) << std::endl; Debugging 
         }
     }
  //   width = (GetScreenWidth()/ x_size);
