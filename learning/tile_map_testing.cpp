@@ -12,6 +12,8 @@
 struct tile{
     int coordx;
     int coordy; 
+    bool is_black = false;
+    Color col = RED;
     Texture2D c_texture;
 };
 class tilemap{
@@ -28,20 +30,26 @@ class tilemap{
     void read_from_file(std::string c_map); //c_map being the map to load
 };
 void tilemap::draw(){
-    Color col = RED;
+   Color col = RED;
     for(int i = 0; i < y_size; i++){
         for(int j = 0; j < x_size; j++){
             //arr_tiles[i*y_size+j].coordx;
             if(i % 2 == 0 && j % 2 == 0){
-                col = GREEN;
+               arr_tiles[i*y_size+j].col = GREEN;
             }
             else if(!(i % 2 == 0) && !(j % 2 == 0)){
-                col = GREEN;
+                arr_tiles[i*y_size+j].col = GREEN;
             }
             else{
-                col = RED;
+                arr_tiles[i*y_size+j].col = RED;
             }
-            DrawRectangle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, width, height, col);
+            if(j == 59 && i == 34){
+                arr_tiles[i*y_size+j].col = BLACK;
+            }
+          if(arr_tiles[i*y_size+j].is_black){
+            arr_tiles[i*y_size+j].col = BLACK;
+          }
+            DrawRectangle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, width, height, arr_tiles[i*y_size+j].col);
             DrawCircle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, 3.00f,BLUE);
             
         }
@@ -74,6 +82,8 @@ void tilemap::read_from_file(std::string c_map){
 }
 
 
+    
+
 int main(void)
 {
     // Initialization
@@ -82,7 +92,16 @@ int main(void)
     const int screenWidth = 1920;
     const int screenHeight = 1080;
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
-
+    Camera2D cam = {0};
+    cam.zoom = 1.0f;
+    cam.target = Vector2{ 00.0f, 00.0f };
+    cam.offset = Vector2{ screenWidth/2.0f, screenHeight/2.0f };
+    cam.rotation = 0.0f;
+    int y_size = default_map.y_size;
+    int y = 0;
+    int x  = 0;
+    int oldx = 0; 
+    int oldy = 0;
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     default_map.set_width_height_of_arr(64,64);
@@ -93,6 +112,32 @@ int main(void)
     {
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
+        
+      if(IsKeyDown(KEY_RIGHT) ) {
+        cam.target.x = cam.target.x + 4.00f;
+        }
+        else if(IsKeyDown(KEY_LEFT)){
+            
+          cam.target.x = cam.target.x - 2.00f;
+        }
+        if(IsKeyDown(KEY_DOWN)){
+      
+          cam.target.y = cam.target.y + 4.00f;
+        }
+        else if(IsKeyDown(KEY_UP)){
+           cam.target.y = cam.target.y - 2.00f;
+        }
+        if(IsKeyPressed(KEY_SPACE)){
+            std::cout << "x " + std::to_string(x) + " y " + std::to_string(y) << std::endl;
+        } 
+        if(x > 63){
+            x = 0; 
+            y = y +  1;
+        } 
+     //  default_map.arr_tiles[oldx*y_size+oldy].is_black = false;
+        default_map.arr_tiles[0*y_size+2171].is_black = true;
+      //  oldx = x;
+      //  oldy = y; 
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
         //----------------------------------------------------------------------------------
@@ -101,10 +146,15 @@ int main(void)
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
-            ClearBackground(RAYWHITE);
 
+            ClearBackground(RAYWHITE);
             DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
+           BeginMode2D(cam);
             default_map.draw();
+          EndMode2D();
+
+            
+            
 
         EndDrawing();
         //----------------------------------------------------------------------------------
