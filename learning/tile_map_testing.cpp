@@ -23,7 +23,7 @@ class tilemap{
     int pixel_size;
     tile *arr_tiles;
     void draw();
-    void set_width_height(); 
+    void set_width_height(int w, int h); 
     void set_width_height_of_arr(int x, int y); 
     void read_from_file(std::string c_map); //c_map being the map to load
 };
@@ -31,8 +31,7 @@ void tilemap::draw(){
     Color col = RED;
     for(int i = 0; i < y_size; i++){
         for(int j = 0; j < x_size; j++){
-            //arr_tiles[i*y_size+j].coordx ;
-            
+            //arr_tiles[i*y_size+j].coordx;
             if(i % 2 == 0 && j % 2 == 0){
                 col = GREEN;
             }
@@ -43,24 +42,32 @@ void tilemap::draw(){
                 col = RED;
             }
             DrawRectangle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, width, height, col);
+            DrawCircle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, 3.00f,BLUE);
+            
         }
     }
 }
-void tilemap::set_width_height_of_arr(int w, int h){  // H = Height W = Width (Of 2D Array)
-    //tile **arr_tiles = new tile*[h];
+void tilemap::set_width_height_of_arr(int w, int h){  
+    // H = Height 
+    // W = Width (Of 2D Array)
     arr_tiles = new tile[w*h];
     x_size = w; 
     y_size = h;
 }
-void tilemap::set_width_height(){
+void tilemap::set_width_height(int w, int h){ 
+    //sets widths of height of each tile  
+    width = w; 
+    height = h;
     for(int i = 0; i < y_size; i++){
         for(int j = 0; j < x_size; j++){
-            arr_tiles[i*y_size+j].coordx = (GetScreenWidth() / x_size * j);
-            arr_tiles[i*y_size+j].coordy = (GetScreenHeight() / y_size * i); 
+            arr_tiles[i*y_size+j].coordx = (width * j);
+            arr_tiles[i*y_size+j].coordy = (height * i); 
+            //std::cout << "x coord " + std::to_string(arr_tiles[i * y_size + j].coordx) << std::endl;
+            //std::cout << "y coord " + std::to_string(arr_tiles[i * y_size + j].coordy) << std::endl;
         }
     }
-    width = (GetScreenWidth()/ x_size);
-    height = (GetScreenHeight() / y_size);
+ //   width = (GetScreenWidth()/ x_size);
+   // height = (GetScreenHeight() / y_size);
 }
 void tilemap::read_from_file(std::string c_map){
     c_map = c_map;
@@ -78,8 +85,8 @@ int main(void)
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-    default_map.set_width_height_of_arr(40,40);
-    default_map.set_width_height();
+    default_map.set_width_height_of_arr(64,64);
+    default_map.set_width_height(32, 32);
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
