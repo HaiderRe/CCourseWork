@@ -28,7 +28,7 @@ class tilemap{
     void draw();
     void set_width_height(int w, int h); 
     void set_width_height_of_arr(int x, int y); 
-    void read_from_file(std::string c_map); //c_map being the map to load
+    // void read_from_file(std::string c_map); //c_map being the map to load // +1 No need to handle this here.
 };
 void tilemap::draw(){
    Color col = RED;
@@ -80,9 +80,10 @@ void tilemap::set_width_height(int w, int h){
  //   width = (GetScreenWidth()/ x_size);
    // height = (GetScreenHeight() / y_size);
 }
-void tilemap::read_from_file(std::string c_map){
+/*void tilemap::read_from_file(std::string c_map){
     c_map = c_map;
 }
+*/
 
 
     
