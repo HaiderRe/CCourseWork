@@ -1,0 +1,1 @@
+Thus, I looked online thorugh C++ Classes and Methods decleration, examining the difference between examples and my own, to find the error.  
