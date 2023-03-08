@@ -7,8 +7,10 @@
 #include "include/rapidxml_print.hpp"
 #include "include/rapidxml_utils.hpp"
 class file_to_read{
+    private:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
+    bool draw_xml_file();
     public:
        file_to_read(std::string input_path){ //Constructor
         path = input_path; //path to the tilemap
@@ -45,4 +47,9 @@ bool file_to_read::read_xml_file(){
      ++current_row; //Increment row after reading from the whole row
     }
     return true; //Return true as we successfully (hopefully) read from the tilemap 
+}
+bool file_to_read::draw_xml_file(){
+    if(tileIDs.size() <= 0){ 
+        return false; //Return if the size of the vector of vectors is null.
+    }
 }
