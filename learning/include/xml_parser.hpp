@@ -10,6 +10,7 @@ class file_to_read{
     private:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
+    std::vector<std::string> tileSets;
     bool draw_xml_file();
     public:
        file_to_read(std::string input_path){ //Constructor
@@ -28,6 +29,7 @@ bool file_to_read::read_xml_file(){
     tileIDs = std::vector<std::vector<int>>(tilemapHeight, std::vector<int>(tilemapWidth)); //Create a vector of size the tile map's height and width.
     rapidxml::xml_node<>* tilesetNode = mapNode->first_node("tileset"); //Get tileset node
     int firstGID = std::stoi(tilesetNode->first_attribute("firstgid")->value()); //First Global ID
+    tileSets.push_back(tilesetNode->first_attribute("source")->value()); //Get Tileset name
     rapidxml::xml_node<>* layerNode = mapNode->first_node("layer"); //point to the Layer node
     rapidxml::xml_node<>* dataNode = layerNode->first_node("data"); // point to data node
     if(dataNode == nullptr){ // return if the pointer is nulll
