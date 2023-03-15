@@ -2,6 +2,7 @@
 #include <string> 
 #include <vector>
 #include <sstream>
+#include <windows.h>
 #include "rapidxml.hpp"
 // #include "rapidxml_iterators.hpp"
 #include "rapidxml_print.hpp"
@@ -21,22 +22,24 @@ class file_to_read{
        void file_to_read_xml(std::string ipath){
         path = ipath;
         read_xml_file();
-        draw_xml_file();
+        //draw_xml_file();
     }
         bool read_xml_file(); //method to read the file.
         bool draw_xml_file();
         bool make_tileset_file();
 };
 
-bool file_to_read::read_xml_file(){
+bool file_to_read::read_xml_file(){;
     rapidxml::file<> xmlFile(path.c_str()); //Intilsise Class file
     rapidxml::xml_document<> doc; 
-    doc.parse<0>(xmlFile.data()); //Read from the file 
+    doc.parse<0>(xmlFile.data()); //Read from the file
+    system("pause"); 
     rapidxml::xml_node<>* mapNode = doc.first_node("map"); //Create pointer to the first node/root node, which is the map node in all tilemaps created by Tiled.
     int tilemapWidth = std::stoi(mapNode->first_attribute("width")->value());  //Get the width of the tilemap 
     int tilemapHeight = std::stoi(mapNode->first_attribute("height")->value());//Get the height of the tilemap
     tileIDs = std::vector<std::vector<int>>(tilemapHeight, std::vector<int>(tilemapWidth)); //Create a vector of size the tile map's height and width.
     rapidxml::xml_node<>* tilesetNode = mapNode->first_node("tileset"); //Get tileset node
+    system("pause");
     if (tilesetNode)
     {
        /* rapidxml::xml_node<>* secondNode = tilesetNode->first_node()->next_sibling(); // get the second child node
@@ -50,22 +53,47 @@ bool file_to_read::read_xml_file(){
     else{
         return false;
     }
-    int firstGID = std::stoi(tilesetNode->first_attribute("firstgid")->value()); //First Global ID
+    system("pause");
+    int firstGID = std::atoi(tilesetNode->first_attribute("firstgid")->value()); //First Global ID
+    std::cout << "after first gid" << std::endl;
+    system("pause");
     tileSets.push_back(tilesetNode->first_attribute("source")->value()); //Get Tileset name
+    std::cout << "after push back" << std::endl;
+    system("pause");
+    std::cout<< "layernode and datanode";
     rapidxml::xml_node<>* layerNode = mapNode->first_node("layer"); //point to the Layer node
     rapidxml::xml_node<>* dataNode = layerNode->first_node("data"); // point to data node
+    system("pause");
     if(dataNode == nullptr){ // return if the pointer is nulll
         std::cout << "No data node"<<std::endl; //For Debugging 
      return false; // Return if pointer is null
      }   
+     std::cout<< "after datanode check" << std::endl;
+     system("pause");
     std::istringstream stringstream(dataNode->value()); //Create string stream to read from CSV (Comma Seperated Values) formatted tile IDs
     std::string temp; //Temporarily store ID while reading
+    for (char c : data) {
+    if (isdigit(c)) {
+        temp += c;
+    } else if (c == ',' || c == '\n') {
+        int tile_id = stoi(temp);
+        tile_ids.push_back(tile_id);
+        temp.clear(); // reset temp
+    }
+}
     int current_row = 0; //Store current row in CSV we are reading from
+    std::cout << "after int current row" << std::endl;
     while(std::getline(stringstream, temp, '\n') && current_row < tilemapHeight){ //While the data is valid/ We are in the CSV data
         std::istringstream stringstreamcurrent_row(temp); 
         int current_column = 0;//Store current column in CSV we are reading from
         while(std::getline(stringstreamcurrent_row, temp, ',') && current_column < tilemapWidth){ //While the data is valid/ We are in the CSV data
+        std::cout << "before std::stoi(temp)" << std::endl;
+        system("pause");
+        std::cout << temp << std::endl;
+        system("pause");
          tileIDs[current_row][current_column] = std::stoi(temp) - firstGID; //Get the actual tileID from the tileset
+         std::cout << "after" << std::endl;
+        // system("pause");
          ++current_column; //Increment column after reading from the whole column
          }
      ++current_row; //Increment row after reading from the whole row
