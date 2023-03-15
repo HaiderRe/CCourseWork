@@ -1,2 +1,4 @@
 Firstly, I checked where the first instance of "std::stoi" is an I assumed that was the error as it is after where "rah" is printed to command line. I then checked the type of the tilesetnode, which was char*, so instead of using "std::stoi" I used "std::atoi". 
 After running it futher I ran into another error of "std::stoi", therefore I assumed that it was the same error as before. But to confirm I added pauses to my code and couts to test if the "std::atoi" code was  After getting to the next std::stoi error, I tried debugging.And after printing the temp string, it was empty, leading me to think a few possibilites.		
+
+-After going home, and working on debugging. It worked on my home pc. For some unknown reason.
