@@ -8,21 +8,36 @@
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
 namespace my_xml_parser{
+class tileset{
+    public:
+    std::string name;
+    int firstGID;
+    tileset(std::string path){
+        std::string name = path; 
+    }
+};
 class file_to_read{
     private:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<std::string> tileSets;
+    
     public:
-    file_to_read(){
-    std::string path; //create a string to hold the path
+    file_to_read(std::string ipath){
+    std::string path = ipath; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<std::string> tileSets;
     } 
+    file_to_read(){
+        std::cerr << "file_to_read with no parameters :/" << std::endl;
+    }
        void file_to_read_xml(std::string ipath){
         path = ipath;
         read_xml_file();
         //draw_xml_file();
+    }
+    void file_to_read_xml(){
+        read_xml_file();
     }
         bool read_xml_file(); //method to read the file.
         bool draw_xml_file();
@@ -66,7 +81,7 @@ bool file_to_read::read_xml_file(){;
     }
    // system("pause");
     int firstGID = std::atoi(tilesetNode->first_attribute("firstgid")->value()); //First Global ID
-    std::cout << "after first gid" << std::endl;
+ //   std::cout << "after first gid" << std::endl;
   //  system("pause");
     tileSets.push_back(tilesetNode->first_attribute("source")->value()); //Get Tileset name
     std::cout << "after push back" << std::endl;
@@ -76,17 +91,19 @@ bool file_to_read::read_xml_file(){;
     rapidxml::xml_node<>* dataNode = layerNode->first_node("data"); // point to data node
   //  system("pause");
     if(dataNode == nullptr){ // return if the pointer is nulll
-        std::cout << "No data node"<<std::endl; //For Debugging 
+   //   std::cout << "No data node"<<std::endl; //For Debugging 
      return false; // Return if pointer is null
      }   
   //   std::cout<< "after datanode check" << std::endl;
   //   system("pause");
-    std::istringstream stringstream(dataNode->value()); //Create string stream to read from CSV (Comma Seperated Values) formatted tile IDs
+   // std::stringstream stringstream(dataNode->value()); //Create string stream to read from CSV (Comma Seperated Values) formatted tile IDs
+   std::string stringstream1 = dataNode->value();
+   std::stringstream stringstream(stringstream1);
     std::string temp; //Temporarily store ID while reading
     int current_row = 0; //Store current row in CSV we are reading from
    // std::cout << "after int current row" << std::endl;
-    while(std::getline(stringstream, temp, '\n') && current_row < tilemapHeight){ //While the data is valid/ We are in the CSV data
-        std::istringstream stringstreamcurrent_row(temp); 
+    while(std::getline(stringstream, temp) && current_row < tilemapHeight){ //While the data is valid/ We are in the CSV data
+        std::stringstream stringstreamcurrent_row(temp); 
         int current_column = 0;//Store current column in CSV we are reading from
         while(std::getline(stringstreamcurrent_row, temp, ',') && current_column < tilemapWidth){ //While the data is valid/ We are in the CSV data
       //  std::cout << "before std::stoi(temp)" << std::endl;
@@ -94,7 +111,14 @@ bool file_to_read::read_xml_file(){;
       //  std::cout << temp << std::endl;
         //system("pause");
        // if (isInteger(temp)) {
+        try{
         tileIDs[current_row][current_column] = std::stoi(temp);
+        }
+        catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument: " << temp << std::endl;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Out of range: " << temp << std::endl;
+    }
         ++current_column;
     //}
      //    tileIDs[current_row][current_column] = std::stoi(temp) - firstGID; //Get the actual tileID from the tileset
@@ -126,5 +150,6 @@ bool file_to_read::make_tileset_file(){
     rapidxml::xml_document<> doc; 
     doc.parse<0>(xmlFile.data()); //Read from the file
     } 
+    return true;
  }
 }
