@@ -8,26 +8,29 @@
 #include "rapidxml.hpp"
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
+#include "raylib.h"
 namespace my_xml_parser{
 class tileset{
     public:
     std::string name;
     int firstGID;
-    tileset(std::string path){
+    Texture2D texture; // store texture
+    tileset(std::string path, std::string imgPath) {
         std::string name = path; 
+        texture = LoadTexture(imgPath.c_str()); // load texture
     }
 };
 class file_to_read{
     private:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
-    std::vector<std::string> tileSets;
+    std::vector<tileset> tileSets;
     
     public:
     file_to_read(std::string ipath){
     std::string path = ipath; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
-    std::vector<std::string> tileSets;
+    std::vector<tileset> tileSets;
     } 
     file_to_read(){
         std::cerr << "file_to_read with no parameters :/" << std::endl;
@@ -41,9 +44,25 @@ class file_to_read{
         read_xml_file();
     }
         bool read_xml_file(); //method to read the file.
-        bool draw_xml_file();
+        void draw_xml_file(std::string xmlFile);
         bool make_tileset_file();
         bool is_int(const std::string& str);
+        const std::vector<tileset>& getTileSets() const {
+        return tileSets;
+    }   
+
+    // Given a tile ID, returns the appropriate texture
+    const Texture2D& getTextureForTileID(int tileID) const {
+        // Logic to map tileID to the appropriate tileset
+        // This highly depends on how your tileID is structured
+        // As an example, if tileID corresponds to index in tileSets
+        if(tileID >= 0 && tileID < tileSets.size()) {
+            return tileSets[tileID].texture;
+        }
+
+        // If no matching tileID is found, throw an error or return a default texture
+        throw std::runtime_error("TileID does not correspond to any tileset");
+    }
 };
 bool isInteger(const std::string& str) {
     if (str.empty()) {

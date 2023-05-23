@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="2" nextobjectid="1">
- <tileset firstgid="1" source="../../../../../../f/testing tiled/Tileset_v1.xml"/>
- <tileset firstgid="2129" source="../../../../../../f/testing tiled/caves.xml"/>
+ <tileset firstgid="1" source="../testing tiled/Tileset_v1.xml"/>
+ <tileset firstgid="2129" source="../testing tiled/caves.xml"/>
  <layer id="1" name="Tile Layer 1" width="32" height="32">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,74,74,74,
