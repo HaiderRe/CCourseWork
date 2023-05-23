@@ -11,6 +11,7 @@
 #include "raylib.h"
 namespace my_xml_parser{
 <<<<<<< HEAD
+<<<<<<< HEAD
 class tileset{
     public:
     std::string name;
@@ -23,10 +24,13 @@ class tileset{
 };
 =======
 >>>>>>> parent of 5077214 (Fixed xml_parser)
+=======
+>>>>>>> parent of 5077214 (Fixed xml_parser)
 class file_to_read{
     private:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
+<<<<<<< HEAD
 <<<<<<< HEAD
     std::vector<tileset> tileSets;
     
@@ -38,6 +42,14 @@ class file_to_read{
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<tileset> tileSets;
+=======
+    std::vector<std::string> tileSets;
+    public:
+    file_to_read(){
+    std::string path; //create a string to hold the path
+    std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
+    std::vector<std::string> tileSets;
+>>>>>>> parent of 5077214 (Fixed xml_parser)
     } 
        void file_to_read_xml(std::string ipath){
         path = ipath;
