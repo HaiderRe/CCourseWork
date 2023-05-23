@@ -45,19 +45,6 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "fstream": "cpp",
-        "sstream": "cpp",
-        "array": "cpp",
-        "*.tcc": "cpp",
-        "cstdarg": "cpp",
-        "cwctype": "cpp",
-        "deque": "cpp",
-        "unordered_map": "cpp",
-        "algorithm": "cpp",
-        "functional": "cpp",
-        "memory_resource": "cpp",
-        "numeric": "cpp",
-        "random": "cpp",
-        "string_view": "cpp",
-        "numbers": "cpp"
+        "sstream": "cpp"
     }
 }

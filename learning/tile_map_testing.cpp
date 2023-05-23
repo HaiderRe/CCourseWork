@@ -16,71 +16,70 @@ struct tile{
     bool is_black = false;
     Color col = RED;
     Texture2D c_texture;
-    int tileID;  
 };
 
-class tilemap {
-public:
+class tilemap{
+    public:
     int width;
     int height;
-    int x_size;
-    int y_size;
+    int x_size; 
+    int y_size; 
     int pixel_size;
-    std::vector<std::vector<tile>> arr_tiles;
-
-    // Reference to xml parser
-    const my_xml_parser::file_to_read& parser;
-
-    // Constructor accepts a reference to the xml parser
-    tilemap(const my_xml_parser::file_to_read& parser)
-        : parser(parser) {
-        // Populate arr_tiles with tiles, each having the corresponding tileset texture
-        const auto& tileSets = parser.getTileSets();  // Assuming getTileSets() returns tileSets vector
-        for (const auto& tileset : tileSets) {
-            // Iterate and assign texture to each tile
-            // Details depend on your specific logic
-        }
-    }
+    tile *arr_tiles; // Change this to a Vector of tile vectors // Easier
+    void draw();
+    void set_width_height(int w, int h); 
+    void set_width_height_of_arr(int x, int y); 
+    // void read_from_file(std::string c_map); //c_map being the map to load // +1 No need to handle this here.
 };
-tilemap::tilemap(const my_xml_parser& parser) {
-    const auto& tileSets = parser.getTileSets();
-    for (const auto& tileset : tileSets) {
-        Texture2D texture = LoadTexture(tileset.getImagePath().c_str());
-        // Populate your arr_tiles with tiles having appropriate textures
-        // You need to decide on tile placement and orientation
-    }
-}
-void tilemap::draw() {
-    for (int i = 0; i < y_size; i++) {
-        for (int j = 0; j < x_size; j++) {
-            // get the current tile
-            tile& currentTile = arr_tiles[i][j];
-            Texture2D tileTexture = parser.getTextureForTileID(currentTile.tileID);  //  need to implement getTextureForTileID() in file_to_read
-            // draw the tile with the texture
-            DrawTexture(tileTexture, currentTile.coordx, currentTile.coordy, WHITE);
+void tilemap::draw(){
+   Color col = RED;
+    for(int i = 0; i < y_size; i++){
+        for(int j = 0; j < x_size; j++){
+            //arr_tiles[i*y_size+j].coordx;
+            if(i % 2 == 0 && j % 2 == 0){
+               arr_tiles[i*y_size+j].col = GREEN;
+            }
+            else if(!(i % 2 == 0) && !(j % 2 == 0)){
+                arr_tiles[i*y_size+j].col = GREEN;
+            }
+            else{
+                arr_tiles[i*y_size+j].col = RED;
+            }
+            if(j == 59 && i == 34){
+                arr_tiles[i*y_size+j].col = BLACK;
+            }
+          if(arr_tiles[i*y_size+j].is_black){
+            arr_tiles[i*y_size+j].col = BLACK;
+          }
+            DrawRectangle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, width, height, arr_tiles[i*y_size+j].col);
+            DrawCircle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, 3.00f,BLUE);
+            
         }
     }
 }
-
-
-void tilemap::set_width_height_of_arr(int w, int h){
-    arr_tiles.resize(h, std::vector<tile>(w));
+void tilemap::set_width_height_of_arr(int w, int h){  
+    // H = Height (of 2D Array)
+    // W = Width (Of 2D Array)
+    arr_tiles = new tile[w*h];
     x_size = w; 
     y_size = h;
 }
-
-void tilemap::set_width_height(int w, int h){
-    int x_offset = GetScreenWidth() / 2;
-    int y_offset = GetScreenHeight() / 2;
+void tilemap::set_width_height(int w, int h){ 
+    //sets widths of height of each tile  
+    int x_offset = GetScreenWidth() / 2; // X_offset, so that the tiles start from an offset of // (0,0) origin - x_offset ( - left) 
+    int y_offset = GetScreenHeight() /2; // Y_offset, so that the tiles start from an offset of // (0,0) origin - Y_offset (- up) 
     width = w; 
     height = h;
-
     for(int i = 0; i < y_size; i++){
         for(int j = 0; j < x_size; j++){
-            arr_tiles[i][j].coordx = ((width * j) - x_offset);
-            arr_tiles[i][j].coordy = ((height * i) - y_offset); 
+            arr_tiles[i*y_size+j].coordx = ((width * j) - x_offset);
+            arr_tiles[i*y_size+j].coordy = ((height * i) - y_offset); 
+            //std::cout << "x coord " + std::to_string(arr_tiles[i * y_size + j].coordx) << std::endl; Debugging
+            //std::cout << "y coord " + std::to_string(arr_tiles[i * y_size + j].coordy) << std::endl; Debugging 
         }
     }
+ //   width = (GetScreenWidth()/ x_size);
+   // height = (GetScreenHeight() / y_size);
 }
 /*void tilemap::read_from_file(std::string c_map){
     c_map = c_map;
@@ -141,7 +140,7 @@ int main(void)
             y = y +  1;
         } 
      //  default_map.arr_tiles[oldx*y_size+oldy].is_black = false;
-      //  default_map.arr_tiles[0*y_size+2171].is_black = true;
+        default_map.arr_tiles[0*y_size+2171].is_black = true;
       //  oldx = x;
       //  oldy = y; 
         //----------------------------------------------------------------------------------
@@ -167,7 +166,7 @@ int main(void)
     }
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    
+    delete[] default_map.arr_tiles;
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
