@@ -1,10 +1,11 @@
+#ifndef xml_parser
+#define xml_parser
 #include <iostream>
 #include <string> 
 #include <vector>
 #include <sstream>
 #include <windows.h>
 #include "rapidxml.hpp"
-// #include "rapidxml_iterators.hpp"
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
 namespace my_xml_parser{
@@ -130,16 +131,48 @@ bool file_to_read::read_xml_file(){;
     }
     return true; //Return true as we successfully (hopefully) read from the tilemap 
 }
-bool file_to_read::draw_xml_file(){
-    if(tileIDs.size() <= 0){ 
-        return false; //Return if the size of the vector of vectors is null.
-    }
-    for(int i = 0; i < tileIDs.size(); i++){
-        for(int j = 0; j < tileIDs[0].size();j++){
-            std::cout << tileIDs[i][j] << std::endl; 
+void file_to_read::draw_xml_file(std::string xmlFile) {
+    std::ifstream file(xmlFile);
+    std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    buffer.push_back('\0');
+  
+    rapidxml::xml_document<> doc;
+    doc.parse<0>(&buffer[0]);
+
+    // Find the map node
+    rapidxml::xml_node<> *mapnode = doc.first_node("map");
+
+    // Get map attributes
+    int mapWidth = std::stoi(mapnode->first_attribute("width")->value());
+    int mapHeight = std::stoi(mapnode->first_attribute("height")->value());
+    int tileWidth = std::stoi(mapnode->first_attribute("tilewidth")->value());
+    int tileHeight = std::stoi(mapnode->first_attribute("tileheight")->value());
+
+    tilemap tileMap; 
+    tileMap.set_width_height_of_arr(mapWidth, mapHeight);
+    tileMap.set_width_height(tileWidth, tileHeight);
+
+    // Find the layer node
+    rapidxml::xml_node<> *layernode = mapnode->first_node("layer");
+
+    // Find the data node
+    rapidxml::xml_node<> *datanode = layernode->first_node("data");
+
+    // Read the data content (csv format)
+    std::string data = datanode->value();
+    std::stringstream ss(data);
+    for (int y = 0; y < mapHeight; y++)
+    {
+        for (int x = 0; x < mapWidth; x++)
+        {
+            std::string val;
+            std::getline(ss, val, ',');
+            int gid = std::stoi(val);
+            tileMap.set_tile(x, y, gid);
         }
     }
-    return true;    
+    // then you can draw your tilemap
+    tileMap.draw();
 }
 bool file_to_read::make_tileset_file(){
     if(tileSets.size() <= 0){
@@ -153,3 +186,7 @@ bool file_to_read::make_tileset_file(){
     return true;
  }
 }
+
+
+
+#endif // xml_parser
