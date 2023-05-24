@@ -110,7 +110,7 @@ int main(void)
     int oldx = 0; 
     int oldy = 0;
     player_objects::player nPlayer;
-    cam.target = nPlayer.pos;
+    cam.target = nPlayer.destRecPos;
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     default_map.set_width_height_of_arr(256,256);
@@ -123,18 +123,18 @@ int main(void)
         // Update
         
       if(IsKeyDown(KEY_RIGHT) ) {
-        nPlayer.pos.x += 2.00f;
+        nPlayer.destRecPos.x += 2.00f;
         }
         else if(IsKeyDown(KEY_LEFT)){
             
-        nPlayer.pos.x += -2.00f;
+        nPlayer.destRecPos.x += -2.00f;
         }
         if(IsKeyDown(KEY_DOWN)){
       
-        nPlayer.pos.y += 2.00f;
+        nPlayer.destRecPos.y += 2.00f;
         }
         else if(IsKeyDown(KEY_UP)){
-        nPlayer.pos.y += -2.00f;
+        nPlayer.destRecPos.y += -2.00f;
         }
         if(IsKeyPressed(KEY_SPACE)){
             std::cout << "x " + std::to_string(cam.target.x) + " y " + std::to_string(cam.target.y) << std::endl;

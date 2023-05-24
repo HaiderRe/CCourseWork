@@ -13,13 +13,21 @@ namespace player_objects{
         public:
         float xCord;
         float yCord;
-        Vector2 pos = {0.0f,0.0f};
-        int width = 24;
-        int height = 32;
+        int width = 24; // Rect
+        int height = 32; // Rect
+        Vector2 destRecPos = {0.0f,0.0f};
+        std::string currentAnim;
+        Texture2D playerSprite;
+        Vector2 sourceRecPos; 
+        int health; 
         void draw();
+        void checkFrame(); // Checks that need to be checked every frame, Plan to make this the "caller method" that calls other methods, rather than one BIG method
+        void death();
+
+        // void stateManager();    
     };
   void player::draw(){
-   DrawRectangle(pos.x, pos.y, width, height, BLUE);  
+   DrawRectangle(destRecPos.x, destRecPos.y, width, height, BLUE);  
   } 
 };
 
