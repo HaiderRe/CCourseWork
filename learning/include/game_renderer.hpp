@@ -8,11 +8,14 @@
 #include "rlgl.h"
 #include "raymath.h"
 #include <vector>
-#include "enemy_objects.hpp"
-namespace game_renderer_h{
+#include "tile_map.hpp"
+namespace enemy_objects_h_1 {
+    class projectile;
+};
+namespace game_renderer_h_1{
     struct textureWrapper{ //Needed as we will be Dynamically DeAlloc textures using different methods 
     Texture2D texture;
-    bool isLoaded = true; 
+    bool isLoaded = true;  // This is what we need to track whether a texture is loaded or not, this prevents unloading an already loaded texture.
     };
     struct gameObject{
         Texture2D textureWrapper;
@@ -27,7 +30,7 @@ namespace game_renderer_h{
     class game_renderer{
     public:
     std::vector<textureWrapper> textureDeAlloc;
-    std::vector<projectile> projectilesEnemy;
+    std::vector<enemy_objects_h_1::projectile*> projectilesEnemy;
     gameObject jameObject;
     void draw(gameObject jameObject);
     bool DeAlloc();
@@ -44,16 +47,14 @@ bool game_renderer::DeAlloc(){
             UnloadTexture(textureToBe.texture);
         }
     }
-    for(projectile &proj : projectilesEnemy){
-        projectile* ptr = &proj;
-        delete ptr;
-        ptr = nullptr;
+    for(enemy_objects_h_1::projectile* proj : projectilesEnemy){
+        delete proj;
     }
     return true;
 }
 class state_manager{
     public:
-    tilemap currentTilemap;
+    tilemap_ns::tilemap currentTilemap;
  };
 }
 #endif
