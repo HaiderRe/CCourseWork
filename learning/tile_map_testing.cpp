@@ -6,6 +6,8 @@
 #include "include/raymath.h"
 #include <vector>
 #include "include/xml_parser.hpp"
+#include "include/game_renderer.hpp"
+#include "include/player_objects.hpp"
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -37,22 +39,22 @@ void tilemap::draw(){
         for(int j = 0; j < x_size; j++){
             //arr_tiles[i*y_size+j].coordx;
             if(i % 2 == 0 && j % 2 == 0){
-               arr_tiles[i*y_size+j].col = GREEN;
+               arr_tiles[i*y_size+j].col = GREEN; //GREEN
             }
             else if(!(i % 2 == 0) && !(j % 2 == 0)){
-                arr_tiles[i*y_size+j].col = GREEN;
+                arr_tiles[i*y_size+j].col = GREEN; //GREEN
             }
             else{
-                arr_tiles[i*y_size+j].col = RED;
+                arr_tiles[i*y_size+j].col = RED; //RED
             }
             if(j == 59 && i == 34){
-                arr_tiles[i*y_size+j].col = BLACK;
+                arr_tiles[i*y_size+j].col = BLACK; //BLACK
             }
           if(arr_tiles[i*y_size+j].is_black){
-            arr_tiles[i*y_size+j].col = BLACK;
+            arr_tiles[i*y_size+j].col = BLACK; //BLACK
           }
             DrawRectangle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, width, height, arr_tiles[i*y_size+j].col);
-            DrawCircle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, 3.00f,BLUE);
+          //  DrawCircle(arr_tiles[i*y_size+j].coordx, arr_tiles[i*y_size+j].coordy, 3.00f,BLUE);
             
         }
     }
@@ -94,8 +96,8 @@ int main(void)
     // Initialization
     //--------------------------------------------------------------------------------------
     tilemap default_map; 
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
+    const int screenWidth = GetScreenWidth();
+    const int screenHeight = GetScreenHeight();
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
     Camera2D cam = {0};
     cam.zoom = 1.0f;
@@ -107,9 +109,11 @@ int main(void)
     int x  = 0;
     int oldx = 0; 
     int oldy = 0;
+    player_objects::player nPlayer;
+    cam.target = nPlayer.pos;
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-    default_map.set_width_height_of_arr(64,64);
+    default_map.set_width_height_of_arr(256,256);
     default_map.set_width_height(32, 32);
 
     // Main game loop
@@ -119,21 +123,21 @@ int main(void)
         // Update
         
       if(IsKeyDown(KEY_RIGHT) ) {
-        cam.target.x = cam.target.x + 4.00f;
+        nPlayer.pos.x += 2.00f;
         }
         else if(IsKeyDown(KEY_LEFT)){
             
-          cam.target.x = cam.target.x - 2.00f;
+        nPlayer.pos.x += -2.00f;
         }
         if(IsKeyDown(KEY_DOWN)){
       
-          cam.target.y = cam.target.y + 4.00f;
+        nPlayer.pos.y += 2.00f;
         }
         else if(IsKeyDown(KEY_UP)){
-           cam.target.y = cam.target.y - 2.00f;
+        nPlayer.pos.y += -2.00f;
         }
         if(IsKeyPressed(KEY_SPACE)){
-            std::cout << "x " + std::to_string(x) + " y " + std::to_string(y) << std::endl;
+            std::cout << "x " + std::to_string(cam.target.x) + " y " + std::to_string(cam.target.y) << std::endl;
         } 
         if(x > 63){
             x = 0; 
@@ -153,10 +157,13 @@ int main(void)
 
 
             ClearBackground(RAYWHITE);
-            DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
+           
+
            BeginMode2D(cam);
             default_map.draw();
+            nPlayer.draw();
           EndMode2D();
+          
 
             
             

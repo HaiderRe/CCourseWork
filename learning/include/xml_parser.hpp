@@ -1,8 +1,9 @@
+#ifndef xml_parser
+#define xml_parser
 #include <iostream>
 #include <string> 
 #include <vector>
 #include <sstream>
-#include <windows.h>
 #include "rapidxml.hpp"
 // #include "rapidxml_iterators.hpp"
 #include "rapidxml_print.hpp"
@@ -153,3 +154,4 @@ bool file_to_read::make_tileset_file(){
     return true;
  }
 }
+#endif
