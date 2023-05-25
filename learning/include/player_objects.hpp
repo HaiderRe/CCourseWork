@@ -28,7 +28,7 @@ namespace player_objects{
         // void stateManager();    
     };
   void player::draw(){
-   DrawRectangle(playerRect, BLUE);  
+   DrawRectangleRec(playerRect, BLUE);  
   } 
 };
 

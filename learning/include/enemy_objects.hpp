@@ -1,6 +1,7 @@
 #ifndef enemy_objects_h
 #define enemy_objects_h
 #include <iostream> 
+#include <algorithm>
 #include <string>
 #include <cmath>
 #include <vector>
@@ -12,20 +13,20 @@
 #include "player_objects.hpp"
 namespace enemy_objects_h_1{
     class projectile{ //need to implement a lot more here, code for deleteing projectiles  + more 
-    // Polymorphism 
+    //  Use Polymorphism 
         public: 
         float speedX; 
         float speedY;
         Vector2 pos; 
         basicEnemy* owner;
         Rectangle projectileRect = {pos.x, pos.y, float(width), float(height)};
-        game_renderer_h_1::game_renderer gameRenderP;
-        projectile(Vector2 aPos, float IspeedX, float IspeedY, game_renderer_h_1::game_renderer tGameRender){
+        game_renderer_h_1::game_renderer* gameRenderP;
+        projectile(Vector2 aPos, float IspeedX, float IspeedY, game_renderer_h_1::game_renderer* tGameRender){
             pos = aPos;
             speedX = IspeedX;
             speedY = IspeedY;
             gameRenderP = tGameRender;
-            gameRenderP.projectilesEnemy.push_back(this);
+            gameRenderP->projectilesEnemy.push_back(this);
         }
         int width = 24;
         int height = 24;
@@ -55,12 +56,21 @@ namespace enemy_objects_h_1{
         extern player_objects::player nplayer;
         if(CheckCollisionRecs(nplayer.playerRect, projectileRect)){
             nplayer.health += -1;
-            gameRenderP.projectilesEnemy.erase(std::remove(gameRenderP.projectilesEnemy.begin(), gameRenderP.projectilesEnemy.end(), this), gameRenderP.projectilesEnemy.end());
-            delete this;
+            // check if the object is in the vector, if it is, delete it
+           if(std::find(gameRenderP->projectilesEnemy.begin(), gameRenderP->projectilesEnemy.end(), this) != gameRenderP->projectilesEnemy.end()
+            ){
+                gameRenderP->projectilesEnemy.erase(std::remove(gameRenderP->projectilesEnemy.begin(), gameRenderP->projectilesEnemy.end(), this), gameRenderP->projectilesEnemy.end()); // As a pointer, also as long as the projectile is in the vector, it will be deleted
+                delete this;
+            }           
         }
         else if(pos.x > 4000 || pos.x < -400 || pos.y > 3000 || pos.y < -3000){
-            gameRenderP.projectilesEnemy.erase(std::remove(gameRenderP.projectilesEnemy.begin(), gameRenderP.projectilesEnemy.end(), this), gameRenderP.projectilesEnemy.end());
-            delete this;
+            // check if the object is in the vector, if it is, delete it
+            if(std::find(gameRenderP->projectilesEnemy.begin(), gameRenderP->projectilesEnemy.end(), this) != gameRenderP->projectilesEnemy.end()
+            ){
+                gameRenderP->projectilesEnemy.erase(std::remove(gameRenderP->projectilesEnemy.begin(), gameRenderP->projectilesEnemy.end(), this), gameRenderP->projectilesEnemy.end()); // As a pointer, also as long as the projectile is in the vector, it will be deleted
+                delete this;
+            }
+            
         }
 
     }
@@ -137,10 +147,11 @@ namespace enemy_objects_h_1{
     }
     void basicEnemy::createProjectile(){
         extern player_objects::player nplayer;
+        extern game_renderer_h_1::game_renderer gameRenderer;
         Vector2 Tpos = {enemyRect.x, enemyRect.y};
         float TspeedX = (nplayer.destRecPos.x - enemyRect.x)/100;
         float TspeedY = (nplayer.destRecPos.y - enemyRect.y)/100;
-        projectiles.push_back(new projectile(Tpos, TspeedX, TspeedY, game_renderer_h_1::game_renderer()));
+        projectiles.push_back(new projectile(Tpos, TspeedX, TspeedY, &gameRenderer));
         hasProjectile = true;
     }
     void basicEnemy::projectileCollision(){
