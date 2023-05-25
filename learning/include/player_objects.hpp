@@ -19,6 +19,7 @@ namespace player_objects{
         std::string currentAnim;
         Texture2D playerSprite;
         Vector2 sourceRecPos; 
+        Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         int health; 
         void draw();
         void checkFrame(); // Checks that need to be checked every frame, Plan to make this the "caller method" that calls other methods, rather than one BIG method
@@ -27,7 +28,7 @@ namespace player_objects{
         // void stateManager();    
     };
   void player::draw(){
-   DrawRectangle(destRecPos.x, destRecPos.y, width, height, BLUE);  
+   DrawRectangle(playerRect, BLUE);  
   } 
 };
 
