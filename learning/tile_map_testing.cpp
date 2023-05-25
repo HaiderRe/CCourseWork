@@ -23,7 +23,7 @@ int main(void)
     tilemap default_map; 
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+    InitWindow(screenWidth, screenHeight, "Raylib Test");
     Camera2D cam = {0};
     cam.zoom = 1.0f;
     cam.target = Vector2{ 00.0f, 00.0f };
