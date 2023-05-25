@@ -16,7 +16,8 @@ namespace enemy_objects_h_1{
         public: 
         float speedX; 
         float speedY;
-        Vector2 pos;
+        Vector2 pos; 
+        basicEnemy* owner;
         Rectangle projectileRect = {pos.x, pos.y, float(width), float(height)};
         game_renderer_h_1::game_renderer gameRenderP;
         projectile(Vector2 aPos, float IspeedX, float IspeedY, game_renderer_h_1::game_renderer tGameRender){
@@ -57,6 +58,10 @@ namespace enemy_objects_h_1{
             gameRenderP.projectilesEnemy.erase(std::remove(gameRenderP.projectilesEnemy.begin(), gameRenderP.projectilesEnemy.end(), this), gameRenderP.projectilesEnemy.end());
             delete this;
         }
+        else if(pos.x > 4000 || pos.x < -400 || pos.y > 3000 || pos.y < -3000){
+            gameRenderP.projectilesEnemy.erase(std::remove(gameRenderP.projectilesEnemy.begin(), gameRenderP.projectilesEnemy.end(), this), gameRenderP.projectilesEnemy.end());
+            delete this;
+        }
 
     }
     class basicEnemy{
@@ -68,15 +73,19 @@ namespace enemy_objects_h_1{
         float speedX;
         Vector2 destRecPos = {0.0f,0.0f};
         Vector2 sourceRecPos;
+        std::vector<projectile*> projectiles;
+        bool hasProjectile = false;
         Rectangle enemyRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         game_renderer_h_1::textureWrapper texture;
         void movement();
         void draw();
         void death();
-        void playerCollision();
-
+       // void playerCollision();
         void healthCheck();
         void frameCheck();
+        void createProjectile();
+        void projectileCollision();
+        void createProjectilebehavior();
     };
     void basicEnemy::movement(){
      extern player_objects::player nplayer;
@@ -103,6 +112,10 @@ namespace enemy_objects_h_1{
         healthCheck();
         movement();
         draw();
+        createProjectilebehavior();
+        if(hasProjectile){
+            projectileCollision();
+        }
     }
     void basicEnemy::death(){
         delete this;
@@ -111,6 +124,27 @@ namespace enemy_objects_h_1{
         if(health <= 0){
             death();
         }
+    }
+    void basicEnemy::createProjectilebehavior(){
+        if(hasProjectile){
+            for(int i = 0; i < projectiles.size(); i++){
+                projectiles[i]->behaviour(); //Arrow as a pointer
+            }
+        }
+        else{
+            createProjectile();
+        }
+    }
+    void basicEnemy::createProjectile(){
+        extern player_objects::player nplayer;
+        Vector2 Tpos = {enemyRect.x, enemyRect.y};
+        float TspeedX = (nplayer.destRecPos.x - enemyRect.x)/100;
+        float TspeedY = (nplayer.destRecPos.y - enemyRect.y)/100;
+        projectiles.push_back(new projectile(Tpos, TspeedX, TspeedY, game_renderer_h_1::game_renderer()));
+        hasProjectile = true;
+    }
+    void basicEnemy::projectileCollision(){
+
     }
 };
 
