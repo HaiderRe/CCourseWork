@@ -9,19 +9,39 @@
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
 namespace my_xml_parser{
+    /*
+class aTileSet{
+    public:
+    std::vector<std::vector<int>> tileIDs; // Create an 2D Vector of ints to hold the tileIDs of the tilemap.
+    int tileWidth;
+    int tileHeight;
+    aTileSet(std::string path){
+        std::string name = path; 
+    }
+};
+*/
 class tileset{
     public:
     std::string name;
     int firstGID;
-    tileset(std::string path){
-        std::string name = path; 
-    }
+    std::vector<std::vector<int>> tileSetIDs; // Create an 2D Vector of ints to hold the tileIDs of the tilemap.
+    int tileWidth;
+    int tileHeight;
+    int tileCount;
+    int imageWidth;
+    int imageHeight;
+    int columns;
+    std::string image;
+   // tileset(std::string path){
+     //   std::string name = path; 
+    //}
 };
 class file_to_read{
     private:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<std::string> tileSets;
+    std::vector<tileset> tileset_vector;
     
     public:
     file_to_read(std::string ipath){
@@ -148,8 +168,29 @@ bool file_to_read::make_tileset_file(){
     }
     for(int i = 0; i < tileSets.size(); i++){ //For each tileset in the file    
     rapidxml::file<> xmlFile(("tilesets/" + tileSets[i]).c_str()); //Intilsise Class file
-    rapidxml::xml_document<> doc; 
+    rapidxml::xml_document<> doc; //Create a document
     doc.parse<0>(xmlFile.data()); //Read from the file
+    rapidxml::xml_node<>* tilesetNode = doc.first_node("tileset"); //Get tileset node
+    int tileWidth = std::stoi(tilesetNode->first_attribute("tilewidth")->value()); //Get tile width
+    int tileHeight = std::stoi(tilesetNode->first_attribute("tileheight")->value()); //Get tile height
+    int tileCount = std::stoi(tilesetNode->first_attribute("tilecount")->value()); //Get tile count
+    int columns = std::stoi(tilesetNode->first_attribute("columns")->value()); //Get columns
+    tileset temp_tileset; //Create a tileset
+    temp_tileset.name = tileSets[i]; //Set the name of the tileset
+    temp_tileset.tileWidth = tileWidth; //Set the tile width
+    temp_tileset.tileHeight = tileHeight; //Set the tile height
+    temp_tileset.tileCount = tileCount; //Set the tile count
+    rapidxml::xml_node<>* imageNode = tilesetNode->first_node("image"); //Get image node
+    std::string imageSource = imageNode->first_attribute("source")->value(); //Get image source
+    temp_tileset.image = imageSource; //Set image source
+    temp_tileset.tileSetIDs.resize(temp_tileset.tileCount / temp_tileset.columns, std::vector<int>(temp_tileset.columns)); //Resize the vector of tileset IDs
+    int imageWidth = std::stoi(imageNode->first_attribute("width")->value()); //Get image width
+    int imageHeight = std::stoi(imageNode->first_attribute("height")->value()); //Get image height
+    temp_tileset.imageWidth = imageWidth; //Set image width
+    temp_tileset.imageHeight = imageHeight; //Set image height
+    tileset_vector.push_back(temp_tileset); //Push back the tileset
+
+   
     } 
     return true;
  }
