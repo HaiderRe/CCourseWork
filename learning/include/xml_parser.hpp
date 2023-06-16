@@ -63,6 +63,8 @@ class file_to_read{
         bool read_xml_file(); //method to read the file.
         bool draw_xml_file();
         bool make_tileset_file();
+        bool draw_tileset_file(std::string name);
+        bool draw_tileset_file(int pKey);
         bool is_int(const std::string& str);
 };
 bool isInteger(const std::string& str) {
@@ -184,15 +186,52 @@ bool file_to_read::make_tileset_file(){
     std::string imageSource = imageNode->first_attribute("source")->value(); //Get image source
     temp_tileset.image = imageSource; //Set image source
     temp_tileset.tileSetIDs.resize(temp_tileset.tileCount / temp_tileset.columns, std::vector<int>(temp_tileset.columns)); //Resize the vector of tileset IDs
+    for(int i = 0; i < temp_tileset.tileSetIDs.size(); i++){ //For each row in the vector
+        for(int j = 0; j < temp_tileset.tileSetIDs[0].size(); j++){ //For each column in the vector
+            temp_tileset.tileSetIDs[i][j] = i * temp_tileset.columns + j; //Set the tileset ID
+        }
+    }
+    // temp_tileset.tileSetIDs  
     int imageWidth = std::stoi(imageNode->first_attribute("width")->value()); //Get image width
     int imageHeight = std::stoi(imageNode->first_attribute("height")->value()); //Get image height
     temp_tileset.imageWidth = imageWidth; //Set image width
     temp_tileset.imageHeight = imageHeight; //Set image height
     tileset_vector.push_back(temp_tileset); //Push back the tileset
-
-   
-    } 
+    }
     return true;
  }
-}
+ bool file_to_read::draw_tileset_file(std::string tileset_name){
+    if(tileset_vector.size() <= 0){
+        return false;   
+    }
+   int pKey = 0;
+    for(int i = 0; i < tileset_vector.size(); i++){
+        if(tileset_name == tileset_vector[i].name){
+            pKey = i;
+            break;
+        }
+        
+    return true;
+  }
+ }
+ bool file_to_read::draw_tileset_file(int pKey){
+   Rectangle sourceRect = {};
+   Rectangle destRect = {};
+   sourceRect.width = tileset_vector[pKey].imageWidth/tileset_vector[pKey].tileWidth;
+   sourceRect.height = tileset_vector[pKey].imageHeight/tileset_vector[pKey].tileHeight;
+
+    if(tileset_vector.size() <= 0){
+        return false;   
+    }
+      for(int j = 0; j < tileIDs.size(); j++){
+          for(int k = 0; k < tileIDs[0].size(); k++){
+              std::cout << "Still Testing" << std::endl;
+          }
+      }
+    return true;
+ 
+ }
+};
+
+
 #endif
