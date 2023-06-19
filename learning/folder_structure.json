@@ -1,0 +1,89 @@
+{
+    ".": {
+        "checker.py": null,
+        "tile_map_testing.cpp": null,
+        "tile_map_testing.exe": null,
+        "tile_map_testing.ps1": null,
+        "tile_map_testing_testing.cpp": null,
+        "tile_map_testing_testing.exe": null,
+        "tile_map_testing_testing.ps1": null
+    },
+    ".vscode": {
+        "settings.json": null
+    },
+    "Assets": {
+        "Air_I_16x16.png": null,
+        "Tileset_v1.png": null
+    },
+    "C++Learning": {
+        "dyn_mem_acc.cpp": null,
+        "dyn_mem_acc.exe": null,
+        "dyn_mem_acc.ps1": null,
+        "main.cpp": null,
+        "main.exe": null,
+        "ping_pong.cpp": null,
+        "ping_pong.exe": null,
+        "ping_pong.ps1": null,
+        "rim.bmp": null,
+        "run.ps1": null,
+        "short_if.cpp": null,
+        "short_if.exe": null,
+        "stuff.py": null,
+        "testing.exe": null,
+        "testing.ps1": null,
+        "testing_cin_clear.cpp": null
+    },
+    "include": {
+        "enemy_objects.hpp": null,
+        "game_renderer.hpp": null,
+        "player_objects.hpp": null,
+        "rah.txt": null,
+        "rapidxml.hpp": null,
+        "rapidxml_iterators.hpp": null,
+        "rapidxml_print.hpp": null,
+        "rapidxml_utils.hpp": null,
+        "raylib.h": null,
+        "raymath.h": null,
+        "rlgl.h": null,
+        "testing.exe": null,
+        "testing_functionalilty_of_parser.xml": null,
+        "testing_xml_parser.cpp": null,
+        "testing_xml_parser.ps1": null,
+        "tile_map.hpp": null,
+        "two_tilesets.xml": null,
+        "xml_parser.hpp": null
+    },
+    "lib": {
+        "libraylib.a": null,
+        "txt.txt": null
+    },
+    "Log": {
+        "Errors": {
+            "Xml_parser": {
+                "Creating_Xmlfile_to_read_From": {
+                    "Error+code.png": null,
+                    "Error+code.txt": null,
+                    "Fixed_with_cstr().png": null
+                },
+                "Forgot_To_add_scope_to_method": {
+                    "Description.txt": null,
+                    "Forgot_To_add_scope_to_method.png": null
+                },
+                "Stoi_error": {
+                    "adding_try_catch.jpg": null,
+                    "after_adding_pausing_I'm_wrong.jpg": null,
+                    "after_printing_temp.jpg": null,
+                    "code.jpg": null,
+                    "is_char.jpg": null,
+                    "log_of_error.txt": null,
+                    "Picture_of_error.bmp": null,
+                    "proof_of_more_code.png": null
+                }
+            }
+        }
+    },
+    "tilemaps": {},
+    "tilesets": {
+        "Tileset_v1.tsx": null
+    }
+}

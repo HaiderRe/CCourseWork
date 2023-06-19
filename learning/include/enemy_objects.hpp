@@ -12,6 +12,29 @@
 #include "game_renderer.hpp"
 #include "player_objects.hpp"
 namespace enemy_objects_h_1{
+    class basicEnemy{
+        public:
+        int health = 1; 
+        int width = 32; // Rect
+        int height = 32; // Rect
+        float speedY;
+        float speedX;
+        Vector2 destRecPos = {0.0f,0.0f};
+        Vector2 sourceRecPos;
+        std::vector<projectile*> projectiles;
+        bool hasProjectile = false;
+        Rectangle enemyRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
+        game_renderer_h_1::textureWrapper texture;
+        void movement();
+        void draw();
+        void death();
+       // void playerCollision();
+        void healthCheck();
+        void frameCheck();
+        void createProjectile();
+        void projectileCollision();
+        void createProjectilebehavior();
+    };
     class projectile{ //need to implement a lot more here, code for deleteing projectiles  + more 
     //  Use Polymorphism 
         public: 
@@ -74,29 +97,7 @@ namespace enemy_objects_h_1{
         }
 
     }
-    class basicEnemy{
-        public:
-        int health = 1; 
-        int width = 32; // Rect
-        int height = 32; // Rect
-        float speedY;
-        float speedX;
-        Vector2 destRecPos = {0.0f,0.0f};
-        Vector2 sourceRecPos;
-        std::vector<projectile*> projectiles;
-        bool hasProjectile = false;
-        Rectangle enemyRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
-        game_renderer_h_1::textureWrapper texture;
-        void movement();
-        void draw();
-        void death();
-       // void playerCollision();
-        void healthCheck();
-        void frameCheck();
-        void createProjectile();
-        void projectileCollision();
-        void createProjectilebehavior();
-    };
+    
     void basicEnemy::movement(){
      extern player_objects::player nplayer;
      if(CheckCollisionCircleRec(nplayer.destRecPos, nplayer.width/2, enemyRect)){

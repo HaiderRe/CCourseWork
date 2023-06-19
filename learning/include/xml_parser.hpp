@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include "rapidxml.hpp"
+#include "raylib.h"
 // #include "rapidxml_iterators.hpp"
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
@@ -79,6 +80,7 @@ bool isInteger(const std::string& str) {
     return true;
 }
 bool file_to_read::read_xml_file(){;
+    std::cout << "OUt" << std::endl;
     rapidxml::file<> xmlFile(path.c_str()); //Intilsise Class file
     rapidxml::xml_document<> doc; 
     doc.parse<0>(xmlFile.data()); //Read from the file
@@ -214,23 +216,38 @@ bool file_to_read::make_tileset_file(){
     return true;
   }
  }
- bool file_to_read::draw_tileset_file(int pKey){
-   Rectangle sourceRect = {};
-   Rectangle destRect = {};
-   sourceRect.width = tileset_vector[pKey].imageWidth/tileset_vector[pKey].tileWidth;
-   sourceRect.height = tileset_vector[pKey].imageHeight/tileset_vector[pKey].tileHeight;
-
+bool file_to_read::draw_tileset_file(int pKey){
     if(tileset_vector.size() <= 0){
         return false;   
     }
-      for(int j = 0; j < tileIDs.size(); j++){
-          for(int k = 0; k < tileIDs[0].size(); k++){
-              std::cout << "Still Testing" << std::endl;
-          }
-      }
+
+    // Load the tileset image
+    Texture2D tilesetImage = LoadTexture(tileset_vector[pKey].image.c_str());
+    std::cout << tileset_vector[pKey].image.c_str() << std::endl;
+
+    for(int j = 0; j < tileIDs.size(); j++){ // For each row in the tilemap
+        for(int k = 0; k < tileIDs[0].size(); k++){
+            // Calculate the source rectangle for the current tile
+            std::cout <<  std::to_string(tileIDs[j][k]) + "current tile" << std::endl;
+            int tileId = tileIDs[j][k];
+            int tilesetRow = tileId / tileset_vector[pKey].columns;
+            int tilesetColumn = tileId % tileset_vector[pKey].columns;
+            Rectangle sourceRect = { tilesetColumn * tileset_vector[pKey].tileWidth, tilesetRow * tileset_vector[pKey].tileHeight, tileset_vector[pKey].tileWidth, tileset_vector[pKey].tileHeight };
+
+            // Calculate the destination rectangle for the current tile
+            Rectangle destRect = { k * tileset_vector[pKey].tileWidth, j * tileset_vector[pKey].tileHeight, tileset_vector[pKey].tileWidth, tileset_vector[pKey].tileHeight };
+
+            // Draw the tile
+            DrawTextureRec(tilesetImage, sourceRect, { destRect.x, destRect.y }, WHITE);
+
+        }
+    }
+
+    // Unload the tileset image
+    UnloadTexture(tilesetImage);
+
     return true;
- 
- }
+}
 };
 
 
