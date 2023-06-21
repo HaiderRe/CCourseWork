@@ -1,3 +1,9 @@
+// Note for self 
+// Instead of whatever we do right now for xml parseing, combine tilesets into one 
+// so one image for one tilemap 
+// Then have image as same name as tilemap 
+// Then get image divide into sections by tile width and height  
+// And then pray 
 #ifndef main_game
 #define main_game
 #include <iostream> 
@@ -44,7 +50,8 @@ int main(void)
 
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
-  my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
+ my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
+xmlFile.make_tileset_file();
   
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -52,6 +59,7 @@ int main(void)
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
         nPlayer.update();
+ 
      //  default_map.arr_tiles[oldx*y_size+oldy].is_black = false;
         default_map.arr_tiles[0*y_size+2171].is_black = true;
         
@@ -63,11 +71,16 @@ int main(void)
 
         // Draw
         //----------------------------------------------------------------------------------
-        for(int aB = 0; aB < sizeof(xmlFile.get_tileIDs()[0]); aB++){
-          for(int aC = 0; aC < sizeof(xmlFile.get_tileIDs()[0][0]); aC++){
-            std::cout<< std::to_string(xmlFile.get_tileIDs()[aB][aC]) << std::endl;
+        std::vector<std::vector<int>> xmlTileIDs = xmlFile.get_tileIDs();
+  //      std::cout << "Size of xmlTileIDs: " << xmlTileIDs.size() << std::endl;
+
+      /*  for(int aB = 0; aB < xmlTileIDs.size(); aB++){
+          for(int aC = 0; aC < xmlTileIDs[0].size(); aC++){
+//            std::cout<< "in" << std::endl;
+            std::cout<< std::to_string(xmlTileIDs[aB][aC]) << std::endl;
           }
         }
+        */
          BeginDrawing();
 
             ClearBackground(RAYWHITE);

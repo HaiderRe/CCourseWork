@@ -46,9 +46,10 @@ class file_to_read{
     
     public:
     file_to_read(std::string ipath){
-    std::string path = ipath; //create a string to hold the path
+    path = ipath; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<std::string> tileSets;
+    read_xml_file();
     } 
     file_to_read(){
         std::cerr << "file_to_read with no parameters :/" << std::endl;
@@ -64,10 +65,10 @@ class file_to_read{
     std::vector<std::vector<int>> get_tileIDs(){
         return tileIDs;
     }
-    std::vector<std::vector<int>> get_tileIDs();
+        
         bool read_xml_file(); //method to read the file.
         bool draw_xml_file();
-        std::vector<std::vector<int>> get_tileIDs();
+    
         bool make_tileset_file();
         bool draw_tileset_file(std::string name);
         bool draw_tileset_file(int pKey);
@@ -85,8 +86,13 @@ bool isInteger(const std::string& str) {
     return true;
 }
 bool file_to_read::read_xml_file(){;
+std::cout << "File path: " << path << std::endl;
     std::cout << "OUt" << std::endl;
     rapidxml::file<> xmlFile(path.c_str()); //Intilsise Class file
+    if (xmlFile.data() == nullptr) {
+    std::cerr << "Failed to open file: " << path << std::endl;
+    return false;
+}
     rapidxml::xml_document<> doc; 
     doc.parse<0>(xmlFile.data()); //Read from the file
   //  system("pause"); 
@@ -96,6 +102,7 @@ bool file_to_read::read_xml_file(){;
     tileIDs = std::vector<std::vector<int>>(tilemapHeight, std::vector<int>(tilemapWidth)); //Create a vector of size the tile map's height and width.
     rapidxml::xml_node<>* tilesetNode = mapNode->first_node("tileset"); //Get tileset node
    // system("pause");
+  // std::cout<< "NOt rah " << std::endl;
     if (tilesetNode)
     {
        /* rapidxml::xml_node<>* secondNode = tilesetNode->first_node()->next_sibling(); // get the second child node
@@ -104,7 +111,8 @@ bool file_to_read::read_xml_file(){;
             std::cout << "Value of second node: " << secondNode->value() << std::endl; // print the value of the second node
         }
         */
-       std::cout << "rah" << std::endl;
+      // std::cout << "rah" << std::endl;
+
     }
     else{
         return false;
@@ -114,7 +122,7 @@ bool file_to_read::read_xml_file(){;
  //   std::cout << "after first gid" << std::endl;
   //  system("pause");
     tileSets.push_back(tilesetNode->first_attribute("source")->value()); //Get Tileset name
-    std::cout << "after push back" << std::endl;
+   // std::cout << "after push back" << std::endl;
    // system("pause");
    // std::cout<< "layernode and datanode";
     rapidxml::xml_node<>* layerNode = mapNode->first_node("layer"); //point to the Layer node
@@ -165,11 +173,11 @@ bool file_to_read::draw_xml_file(){
     if(tileIDs.size() <= 0){ 
         return false; //Return if the size of the vector of vectors is null.
     }
-    for(int i = 0; i < tileIDs.size(); i++){
-        for(int j = 0; j < tileIDs[0].size();j++){
-            std::cout << std::to_string(tileIDs[i][j]) << std::endl; 
-        }
-    }
+   // for(int i = 0; i < tileIDs.size(); i++){
+   //     for(int j = 0; j < tileIDs[0].size();j++){
+   //         std::cout << std::to_string(tileIDs[i][j]) << std::endl; 
+   //     }
+   // }
     return true;    
 }
 bool file_to_read::make_tileset_file(){
@@ -229,7 +237,9 @@ bool file_to_read::draw_tileset_file(int pKey){
 
     // Load the tileset image
     Texture2D tilesetImage = LoadTexture(tileset_vector[pKey].image.c_str());
-    std::cout << tileset_vector[pKey].image.c_str() << std::endl;
+    std::cout << tileset_vector[pKey].image.c_str() << " IMAge" << std::endl;
+    std::cout << " NAH " << std::endl;
+    // std::cout << tileset_vector[pKey].image.c_str() << std::endl;
 
     for(int j = 0; j < tileIDs.size(); j++){ // For each row in the tilemap
         for(int k = 0; k < tileIDs[0].size(); k++){
