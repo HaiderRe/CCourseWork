@@ -24,9 +24,32 @@ namespace player_objects{
         void draw();
         void checkFrame(); // Checks that need to be checked every frame, Plan to make this the "caller method" that calls other methods, rather than one BIG method
         void death();
+        void update();
+        void movement();
 
         // void stateManager();    
     };
+    void player::movement(){
+      if(IsKeyDown(KEY_RIGHT) ) {
+        destRecPos.x += 2.00f;
+        }
+        else if(IsKeyDown(KEY_LEFT)){
+            
+        destRecPos.x += -2.00f;
+        }
+        if(IsKeyDown(KEY_DOWN)){
+      
+        destRecPos.y += 2.00f;
+        }
+        else if(IsKeyDown(KEY_UP)){
+        destRecPos.y += -2.00f;
+        }
+        playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
+    }
+  void player::update(){
+    movement();
+    draw();
+  }
   void player::draw(){
    DrawRectangleRec(playerRect, BLUE);  
   } 

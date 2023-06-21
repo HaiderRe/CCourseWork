@@ -51,30 +51,10 @@ int main(void)
     {
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
-        
-      if(IsKeyDown(KEY_RIGHT) ) {
-        nPlayer.destRecPos.x += 2.00f;
-        }
-        else if(IsKeyDown(KEY_LEFT)){
-            
-        nPlayer.destRecPos.x += -2.00f;
-        }
-        if(IsKeyDown(KEY_DOWN)){
-      
-        nPlayer.destRecPos.y += 2.00f;
-        }
-        else if(IsKeyDown(KEY_UP)){
-        nPlayer.destRecPos.y += -2.00f;
-        }
-        if(IsKeyPressed(KEY_SPACE)){
-            std::cout << "x " + std::to_string(cam.target.x) + " y " + std::to_string(cam.target.y) << std::endl;
-        } 
-        if(x > 63){
-            x = 0; 
-            y = y +  1;
-        } 
+        nPlayer.update();
      //  default_map.arr_tiles[oldx*y_size+oldy].is_black = false;
         default_map.arr_tiles[0*y_size+2171].is_black = true;
+        
       //  oldx = x;
       //  oldy = y; 
         //----------------------------------------------------------------------------------
@@ -83,6 +63,11 @@ int main(void)
 
         // Draw
         //----------------------------------------------------------------------------------
+        for(int aB = 0; aB < sizeof(xmlFile.get_tileIDs()[0]); aB++){
+          for(int aC = 0; aC < sizeof(xmlFile.get_tileIDs()[0][0]); aC++){
+            std::cout<< std::to_string(xmlFile.get_tileIDs()[aB][aC]) << std::endl;
+          }
+        }
          BeginDrawing();
 
             ClearBackground(RAYWHITE);

@@ -61,8 +61,13 @@ class file_to_read{
     void file_to_read_xml(){
         read_xml_file();
     }
+    std::vector<std::vector<int>> get_tileIDs(){
+        return tileIDs;
+    }
+    std::vector<std::vector<int>> get_tileIDs();
         bool read_xml_file(); //method to read the file.
         bool draw_xml_file();
+        std::vector<std::vector<int>> get_tileIDs();
         bool make_tileset_file();
         bool draw_tileset_file(std::string name);
         bool draw_tileset_file(int pKey);
@@ -138,6 +143,7 @@ bool file_to_read::read_xml_file(){;
        // if (isInteger(temp)) {
         try{
         tileIDs[current_row][current_column] = std::stoi(temp);
+        std::cout << std::to_string(tileIDs[current_row][current_column]); 
         }
         catch (const std::invalid_argument& e) {
         std::cerr << "Invalid argument: " << temp << std::endl;
@@ -161,7 +167,7 @@ bool file_to_read::draw_xml_file(){
     }
     for(int i = 0; i < tileIDs.size(); i++){
         for(int j = 0; j < tileIDs[0].size();j++){
-            std::cout << tileIDs[i][j] << std::endl; 
+            std::cout << std::to_string(tileIDs[i][j]) << std::endl; 
         }
     }
     return true;    
