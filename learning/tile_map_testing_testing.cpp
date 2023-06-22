@@ -51,7 +51,9 @@ int main(void)
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
  my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
+ xmlFile.get_map_texture();
 xmlFile.make_tileset_file();
+
   
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key

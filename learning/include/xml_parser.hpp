@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include "rapidxml.hpp"
+#include "game_renderer.hpp"
 #include "raylib.h"
 // #include "rapidxml_iterators.hpp"
 #include "rapidxml_print.hpp"
@@ -43,6 +44,7 @@ class file_to_read{
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<std::string> tileSets;
     std::vector<tileset> tileset_vector;
+    game_renderer_h_1::textureWrapper mapTexture;
     
     public:
     file_to_read(std::string ipath){
@@ -62,13 +64,14 @@ class file_to_read{
     void file_to_read_xml(){
         read_xml_file();
     }
+
     std::vector<std::vector<int>> get_tileIDs(){
         return tileIDs;
     }
         
         bool read_xml_file(); //method to read the file.
         bool draw_xml_file();
-    
+        bool get_map_texture();
         bool make_tileset_file();
         bool draw_tileset_file(std::string name);
         bool draw_tileset_file(int pKey);
@@ -84,6 +87,12 @@ bool isInteger(const std::string& str) {
         }
     }
     return true;
+}
+bool file_to_read::get_map_texture(){
+   std::string name = path.substr(path.find_last_of("/\\") + 1); // Remove the path from the tileset name
+   std::cout << name << " name of tileset" << std::endl;
+   game_renderer_h_1::textureWrapper H;
+   return false;
 }
 bool file_to_read::read_xml_file(){;
 std::cout << "File path: " << path << std::endl;
