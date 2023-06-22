@@ -51,8 +51,8 @@ int main(void)
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
  my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
- xmlFile.get_map_texture();
-xmlFile.make_tileset_file();
+ xmlFile.set_map_texture();
+//xmlFile.make_tileset_file();
 
   
     // Main game loop
@@ -74,6 +74,7 @@ xmlFile.make_tileset_file();
         // Draw
         //----------------------------------------------------------------------------------
         std::vector<std::vector<int>> xmlTileIDs = xmlFile.get_tileIDs();
+        std::cout << " pass bullshit" << std::endl;
   //      std::cout << "Size of xmlTileIDs: " << xmlTileIDs.size() << std::endl;
 
       /*  for(int aB = 0; aB < xmlTileIDs.size(); aB++){
@@ -86,14 +87,14 @@ xmlFile.make_tileset_file();
          BeginDrawing();
 
             ClearBackground(RAYWHITE);
-
+              xmlFile.new_draw_tilemap();
+            DrawFPS(10, 10);  // Draw current FPS
             BeginMode2D(cam);
                // default_map.draw();
                 nPlayer.draw();
-
                 // Draw the tilemap and tileset
-                xmlFile.draw_xml_file();
-                xmlFile.draw_tileset_file(0); // replace 0 with the index of the tileset you want to draw
+                // xmlFile.draw_xml_file();
+                 // replace 0 with the index of the tileset you want to draw
 
             EndMode2D();
 
@@ -104,6 +105,7 @@ xmlFile.make_tileset_file();
     // De-Initialization
     //--------------------------------------------------------------------------------------
     delete[] default_map.arr_tiles;
+    UnloadTexture(xmlFile.get_map_texture().texture);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

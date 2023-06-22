@@ -45,7 +45,8 @@ class file_to_read{
     std::vector<std::string> tileSets;
     std::vector<tileset> tileset_vector;
     game_renderer_h_1::textureWrapper mapTexture;
-    
+    int imageWidth;
+    int imageHeight;
     public:
     file_to_read(std::string ipath){
     path = ipath; //create a string to hold the path
@@ -71,11 +72,13 @@ class file_to_read{
         
         bool read_xml_file(); //method to read the file.
         bool draw_xml_file();
-        bool get_map_texture();
+        bool set_map_texture();
         bool make_tileset_file();
         bool draw_tileset_file(std::string name);
         bool draw_tileset_file(int pKey);
         bool is_int(const std::string& str);
+        bool new_draw_tilemap();
+        game_renderer_h_1::textureWrapper get_map_texture();
 };
 bool isInteger(const std::string& str) {
     if (str.empty()) {
@@ -88,11 +91,20 @@ bool isInteger(const std::string& str) {
     }
     return true;
 }
-bool file_to_read::get_map_texture(){
+game_renderer_h_1::textureWrapper file_to_read::get_map_texture(){
+    return mapTexture;
+}
+bool file_to_read::set_map_texture(){
    std::string name = path.substr(path.find_last_of("/\\") + 1); // Remove the path from the tileset name
-   std::cout << name << " name of tileset" << std::endl;
-   game_renderer_h_1::textureWrapper H;
-   return false;
+    name = name.substr(0, name.find_last_of(".")); // also need to remove the .xml from the end of the name
+    
+   game_renderer_h_1::textureWrapper mapTexture1;
+   mapTexture1.texture = LoadTexture(("Assets/" + name + ".png").c_str());
+   std::cout << "HI" << std::endl;
+   std:: cout << "Image path: " << "Assets/" + name << std::endl;
+   mapTexture = mapTexture1;
+   std::cout << " we are out boiiiis" << std::endl;
+   return true;
 }
 bool file_to_read::read_xml_file(){;
 std::cout << "File path: " << path << std::endl;
@@ -191,6 +203,7 @@ bool file_to_read::draw_xml_file(){
 }
 bool file_to_read::make_tileset_file(){
     if(tileSets.size() <= 0){
+        std::cout<< " tilsets size is 0" << std::endl;
         return false;   
     }
     for(int i = 0; i < tileSets.size(); i++){ //For each tileset in the file    
@@ -217,8 +230,9 @@ bool file_to_read::make_tileset_file(){
         }
     }
     // temp_tileset.tileSetIDs  
-    int imageWidth = std::stoi(imageNode->first_attribute("width")->value()); //Get image width
-    int imageHeight = std::stoi(imageNode->first_attribute("height")->value()); //Get image height
+    
+     imageWidth = std::stoi(imageNode->first_attribute("width")->value()); //Get image width
+     imageHeight = std::stoi(imageNode->first_attribute("height")->value()); //Get image height
     temp_tileset.imageWidth = imageWidth; //Set image width
     temp_tileset.imageHeight = imageHeight; //Set image height
     tileset_vector.push_back(temp_tileset); //Push back the tileset
@@ -247,15 +261,15 @@ bool file_to_read::draw_tileset_file(int pKey){
     // Load the tileset image
     Texture2D tilesetImage = LoadTexture(tileset_vector[pKey].image.c_str());
     std::cout << tileset_vector[pKey].image.c_str() << " IMAge" << std::endl;
-    std::cout << " NAH " << std::endl;
+   // std::cout << " NAH " << std::endl;
     // std::cout << tileset_vector[pKey].image.c_str() << std::endl;
 
     for(int j = 0; j < tileIDs.size(); j++){ // For each row in the tilemap
         for(int k = 0; k < tileIDs[0].size(); k++){
             // Calculate the source rectangle for the current tile
-            std::cout <<  std::to_string(tileIDs[j][k]) + "current tile" << std::endl;
+         //   std::cout <<  std::to_string(tileIDs[j][k]) + "current tile" << std::endl;
             int tileId = tileIDs[j][k];
-            int tilesetRow = tileId / tileset_vector[pKey].columns;
+            int tilesetRow = tileId % imageWidth;
             int tilesetColumn = tileId % tileset_vector[pKey].columns;
             Rectangle sourceRect = { tilesetColumn * tileset_vector[pKey].tileWidth, tilesetRow * tileset_vector[pKey].tileHeight, tileset_vector[pKey].tileWidth, tileset_vector[pKey].tileHeight };
 
@@ -271,6 +285,36 @@ bool file_to_read::draw_tileset_file(int pKey){
     // Unload the tileset image
     UnloadTexture(tilesetImage);
 
+    return true;
+}
+bool file_to_read::new_draw_tilemap(){
+    std::cout << "before crash" << std::endl;
+    Rectangle sourceRect;
+    Rectangle destRect;
+    std::cout << "size of TileIds " << std::to_string(tileIDs.size()) << std::endl;
+    std::cout << "size of TileIds[0] " << std::to_string(tileIDs[0].size()) << std::endl;
+    for(int j = 0; j < 64; j++){ // tileIds.size() is the number of rows
+        for(int k = 0; k < 64; k++){ // tileIds[0].size() is the number of columns
+            // Calculate the source rectangle for the current tile
+          //  std::cout <<  std::to_string(tileIDs[j][k]) + "current tile" << std::endl;
+            int tileId = tileIDs[j][k];
+            int numTimes = tileId / 16;
+            int remainder = tileId % 16;
+            Rectangle sourceRect = { remainder * 16, numTimes * 16, 16, 16 };
+            //std::cout << "numTimes " << std::to_string(numTimes) << std::endl;
+            // std::cout << "remainder " << std::to_string(remainder) << std::endl;
+          //  std::cout << "sourceRect " << std::to_string(sourceRect.x) << std::endl;
+            
+            // Calculate the destination rectangle for the current tile
+            Rectangle destRect = { k * 16, j * 16, GetScreenWidth()/16, GetScreenHeight()/16 };
+
+            // Draw the tile.
+
+            DrawTextureRec(mapTexture.texture, sourceRect, { destRect.x, destRect.y }, WHITE);
+            
+
+        }
+    }
     return true;
 }
 };
