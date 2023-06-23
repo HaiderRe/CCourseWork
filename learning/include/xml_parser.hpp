@@ -10,6 +10,8 @@
 // #include "rapidxml_iterators.hpp"
 #include "rapidxml_print.hpp"
 #include "rapidxml_utils.hpp"
+#include "json.hpp"
+using json = nlohmann::json;
 namespace my_xml_parser{
     /*
 class aTileSet{
@@ -47,6 +49,9 @@ class file_to_read{
     game_renderer_h_1::textureWrapper mapTexture;
     int imageWidth;
     int imageHeight;
+    int tileColumns;
+    int tileMapColumns;
+    std::string tileMapName;
     public:
     file_to_read(std::string ipath){
     path = ipath; //create a string to hold the path
@@ -97,12 +102,13 @@ game_renderer_h_1::textureWrapper file_to_read::get_map_texture(){
 bool file_to_read::set_map_texture(){
    std::string name = path.substr(path.find_last_of("/\\") + 1); // Remove the path from the tileset name
     name = name.substr(0, name.find_last_of(".")); // also need to remove the .xml from the end of the name
-    
+    tileMapName = name;
    game_renderer_h_1::textureWrapper mapTexture1;
    mapTexture1.texture = LoadTexture(("Assets/" + name + ".png").c_str());
    std::cout << "HI" << std::endl;
    std:: cout << "Image path: " << "Assets/" + name << std::endl;
    mapTexture = mapTexture1;
+   tileColumns = mapTexture1.texture.height / 16;
    std::cout << " we are out boiiiis" << std::endl;
    return true;
 }
@@ -201,6 +207,7 @@ bool file_to_read::draw_xml_file(){
    // }
     return true;    
 }
+
 bool file_to_read::make_tileset_file(){
     if(tileSets.size() <= 0){
         std::cout<< " tilsets size is 0" << std::endl;
@@ -214,7 +221,9 @@ bool file_to_read::make_tileset_file(){
     int tileWidth = std::stoi(tilesetNode->first_attribute("tilewidth")->value()); //Get tile width
     int tileHeight = std::stoi(tilesetNode->first_attribute("tileheight")->value()); //Get tile height
     int tileCount = std::stoi(tilesetNode->first_attribute("tilecount")->value()); //Get tile count
-    int columns = std::stoi(tilesetNode->first_attribute("columns")->value()); //Get columns
+    
+    int column = std::stoi(tilesetNode->first_attribute("columns")->value()); //Get columns
+    tileColumns = column;
     tileset temp_tileset; //Create a tileset
     temp_tileset.name = tileSets[i]; //Set the name of the tileset
     temp_tileset.tileWidth = tileWidth; //Set the tile width
@@ -288,29 +297,51 @@ bool file_to_read::draw_tileset_file(int pKey){
     return true;
 }
 bool file_to_read::new_draw_tilemap(){
+    int columns = 64;
     std::cout << "before crash" << std::endl;
     Rectangle sourceRect;
     Rectangle destRect;
     std::cout << "size of TileIds " << std::to_string(tileIDs.size()) << std::endl;
     std::cout << "size of TileIds[0] " << std::to_string(tileIDs[0].size()) << std::endl;
-    for(int j = 0; j < 64; j++){ // tileIds.size() is the number of rows
-        for(int k = 0; k < 64; k++){ // tileIds[0].size() is the number of columns
+    std::ifstream file("tilemaps.json");
+
+    if (!file.is_open()) {
+        std::cerr << "Could not open file" << std::endl;
+        return -1;
+    
+    }
+    json json_file;
+    file >> json_file;
+    std::string tilemapName_J = tileMapName; 
+if (json_file.find(tilemapName_J) != json_file.end()) {
+        int tileMapColumns = json_file[tilemapName_J];
+        std::cout << "columns: " << std::to_string(columns) << std::endl;
+        std::cout << "name of tilemap: " << tilemapName_J << std::endl;
+    } 
+
+
+  //  std::cout << "tile column = " << std::to_string(tileColumns) << std::endl;
+    for(int j = 0; j < tileIDs.size(); j++){ // tileIds.size() is the number of rows
+        for(int k = 0; k < tileIDs[0].size(); k++){ // tileIds[0].size() is the number of columns
             // Calculate the source rectangle for the current tile
           //  std::cout <<  std::to_string(tileIDs[j][k]) + "current tile" << std::endl;
             int tileId = tileIDs[j][k];
-            int numTimes = tileId / 16;
-            int remainder = tileId % 16;
-            Rectangle sourceRect = { remainder * 16, numTimes * 16, 16, 16 };
+            int numTimes = tileId / 113;
+            int remainder = tileId % 113;
+        //    std::cout << "numtime for tile id: " << std::to_string(tileId) << " is " << std::to_string(numTimes) << std::endl;
+      //      std::cout << "remainder for tile id: " << std::to_string(tileId) << " is " << std::to_string(remainder) << std::endl;
+            Rectangle sourceRect = { (remainder * 16), (numTimes * 16), 16, 16 };
             //std::cout << "numTimes " << std::to_string(numTimes) << std::endl;
             // std::cout << "remainder " << std::to_string(remainder) << std::endl;
           //  std::cout << "sourceRect " << std::to_string(sourceRect.x) << std::endl;
             
             // Calculate the destination rectangle for the current tile
-            Rectangle destRect = { k * 16, j * 16, GetScreenWidth()/16, GetScreenHeight()/16 };
+            Rectangle destRect = { k * 16, j * 16, 16, 16 };
 
             // Draw the tile.
 
-            DrawTextureRec(mapTexture.texture, sourceRect, { destRect.x, destRect.y }, WHITE);
+            //DrawTextureRec(mapTexture.texture, sourceRect, { destRect.x, destRect.y }, WHITE);
+            DrawTexturePro(mapTexture.texture, sourceRect, destRect, {0,0}, 0, WHITE);
             
 
         }
