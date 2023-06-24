@@ -33,9 +33,9 @@ namespace camera_h {
     }
     void camera_class::followPlayer() {
     Vector2 targetPos = Vector2{player.destRecPos.x + (player.width /2), player.destRecPos.y + (player.height /2)};
-    float LinearInter = 0.1f;   // Factor of linear interpolation for camera smoothing, needs to be changed to a variable that can be changed in game as doesn't work well with different speeds of player
-    cam.target.x = cam.target.x + (targetPos.x - cam.target.x) * LinearInter;
-    cam.target.y = cam.target.y + (targetPos.y - cam.target.y) * LinearInter;
+    float linearInter = 0.1f;   // Factor of linear interpolation for camera smoothing, needs to be changed to a variable that can be changed in game as doesn't work well with different speeds of player
+    cam.target.x = cam.target.x + (targetPos.x - cam.target.x) * linearInter;
+    cam.target.y = cam.target.y + (targetPos.y - cam.target.y) * linearInter;
     }
     void camera_class::debugger(){
         if(IsKeyDown(KEY_F8)){

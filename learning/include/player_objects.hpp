@@ -22,8 +22,6 @@ namespace player_objects{
         Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         int health; 
         void draw();
-        void checkFrame(); // Checks that need to be checked every frame, Plan to make this the "caller method" that calls other methods, rather than one BIG method
-        void death();
         void update();
         void movement();
 
