@@ -15,7 +15,10 @@ namespace animations_h {
         int frames = 0;
         int currentFrame = 0;
         int frameSpeed = 6;
+        bool isInfinte = false;
+        bool isDone = false;
         float width;
+        float rotation = 0.0f;
         int oldDirection = 0;
         float sWidth = 16;  // Update this In a method
         float sHeight = 16; // Update this in a method
@@ -26,6 +29,7 @@ namespace animations_h {
         bool hasVector = false;
         Rectangle frameRec = {0.0f, 0.0f, (float)width, (float)height};
         Texture2D texture1;
+        std::vector<Texture2D> texturesVector;
         animationManager(std::string iPath,  int iWidth, int iHeight, int iAmount_of_times){
             texture1 = LoadTexture(("Assets/" + iPath + ".png").c_str());
             path = iPath;
@@ -43,7 +47,10 @@ namespace animations_h {
             std::cout << "called without wdith height and amount of frames" << std::endl; 
         }
         animationManager(std::string iPath, std::vector<std::string> iPaths){
-            texture1 = LoadTexture(("Assets/" + iPath + ".png").c_str());
+            for(int i = 0; i < iPaths.size(); i++){
+                //std::cout << "the path of the texutre is " << "Assets/" + iPaths[i] + ".png" << std::endl;
+                texturesVector.push_back(LoadTexture(("Assets/" + iPaths[i] + ".png").c_str()));
+            }
             path = iPaths[0];
             hasVector = true;
             paths = iPaths;
@@ -62,7 +69,7 @@ namespace animations_h {
         
          Rectangle destRec = { position.x, position.y, sWidth, sHeight};
          Vector2 origin = { width/2, height/2 };
-         DrawTexturePro(texture1, frameRec, destRec, origin, 0.00f, WHITE);
+         DrawTexturePro(texture1, frameRec, destRec, origin, rotation, WHITE);
         }
         
         void draw(float x, float y, int direction){
@@ -80,21 +87,27 @@ namespace animations_h {
            if (frames >= (60/frameSpeed)){
               frames = 0;
               currentFrame++;
-              if (currentFrame >= 4) currentFrame = 0;
+             if (currentFrame >= 4){
+                currentFrame = 0;
+                std::cout << "is done  =" << isDone << std::endl;
+                if(isInfinte == false){
+                    isDone = true;
+                }
+              }
               frameRec.x = (float)currentFrame*(float)sWidth;
              }
-             std::cout << "current frame is " << currentFrame << std::endl;
-             std::cout << "frames is " << frames << std::endl;
-             std::cout << "frame speed is " << frameSpeed << std::endl;
-             std::cout << "60/framespeed is " << 60/frameSpeed << std::endl;
+          std::cout << "current frame is " << currentFrame << std::endl;
+         //    std::cout << "frames is " << frames << std::endl;
+         //    std::cout << "frame speed is " << frameSpeed << std::endl;
+         //    std::cout << "60/framespeed is " << 60/frameSpeed << std::endl;
          Rectangle destRec = { position.x, position.y, sWidth, sHeight};
          Rectangle frameRec1 = {frameRec.x, frameRec.y, 64, 64}; 
          Vector2 origin = {  frameRec1.width/2, frameRec1.height/2};
       //   DrawTexture(texture1, 0.00f, 0.00f, WHITE);
          DrawTexturePro(texture1, frameRec1, destRec, origin, 0.00f, WHITE);
-         std::cout << "the frame rec is " << frameRec1.x << " " << frameRec1.y << " " << frameRec1.width << " " << frameRec1.height << std::endl;
-         std::cout << "the dest rec is " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;
-         std::cout << "the origin is " << origin.x << " " << origin.y << std::endl;
+     //    std::cout << "the frame rec is " << frameRec1.x << " " << frameRec1.y << " " << frameRec1.width << " " << frameRec1.height << std::endl;
+     //    std::cout << "the dest rec is " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;
+      //   std::cout << "the origin is " << origin.x << " " << origin.y << std::endl;
         }
         // make a draw function that takes an array of paths an overlays them for the animation 
         void drawV(float x, float y, int direction){
@@ -107,15 +120,21 @@ namespace animations_h {
            if (frames >= (60/frameSpeed)){
               frames = 0;
               currentFrame++;
-              if (currentFrame >= 4) currentFrame = 0;
+              if (currentFrame >= 4){
+                currentFrame = 0;
+                 std::cout << "is done  =" << isDone << std::endl;
+                 std::cout << "is infinite  =" << isInfinte << std::endl;   
+                if(isInfinte == false){
+                    isDone = true;
+                }
+              }
               frameRec.x = (float)currentFrame*(float)sWidth;
              }
-         Rectangle destRec = { position.x, position.y, sWidth, sHeight};
+         Rectangle destRec = { position.x + 32 , position.y  + 32, sWidth, sHeight};
          Rectangle frameRec1 = {frameRec.x, frameRec.y, 64, 64}; 
          Vector2 origin = {  frameRec1.width/2, frameRec1.height/2};
          for(int i = 0; i < paths.size(); i++){
-             Texture2D texture = LoadTexture(("Assets/" + paths[i] + ".png").c_str());
-             DrawTexturePro(texture, frameRec1, destRec, origin, 0.00f, WHITE);
+             DrawTexturePro(texturesVector[i], frameRec1, destRec, origin, rotation, WHITE);
          }
         }
         void set_position(float x, float y){
@@ -138,7 +157,7 @@ namespace animations_h {
             }
             else{
                 for(int i = 0; i < paths.size(); i++){
-                    UnloadTexture(LoadTexture(("Assets/" + paths[i] + ".png").c_str()));
+                    UnloadTexture(texturesVector[i]);
                 }
             }
         }
