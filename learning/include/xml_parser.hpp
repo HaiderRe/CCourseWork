@@ -83,6 +83,7 @@ class file_to_read{
         bool draw_tileset_file(int pKey);
         bool is_int(const std::string& str);
         bool new_draw_tilemap();
+        bool set_column();
         game_renderer_h_1::textureWrapper get_map_texture();
 };
 bool isInteger(const std::string& str) {
@@ -296,6 +297,24 @@ bool file_to_read::draw_tileset_file(int pKey){
 
     return true;
 }
+bool file_to_read::set_column(){
+     std::ifstream file("tilemaps.json");
+
+    if (!file.is_open()) {
+        std::cerr << "Could not open file" << std::endl;
+        return false;
+    
+    }
+    json json_file;
+    file >> json_file;
+    std::string tilemapName_J = tileMapName; 
+if (json_file.find(tilemapName_J) != json_file.end()) {
+        tileMapColumns = json_file[tilemapName_J];
+        std::cout << "columns: from josn " << std::to_string(tileMapColumns) << std::endl;
+        std::cout << "name of tilemap:json  " << tilemapName_J << std::endl;
+    } 
+    return true;
+}
 bool file_to_read::new_draw_tilemap(){
     int columns = 64;
     std::cout << "before crash" << std::endl;
@@ -303,21 +322,7 @@ bool file_to_read::new_draw_tilemap(){
     Rectangle destRect;
     std::cout << "size of TileIds " << std::to_string(tileIDs.size()) << std::endl;
     std::cout << "size of TileIds[0] " << std::to_string(tileIDs[0].size()) << std::endl;
-    std::ifstream file("tilemaps.json");
-
-    if (!file.is_open()) {
-        std::cerr << "Could not open file" << std::endl;
-        return -1;
-    
-    }
-    json json_file;
-    file >> json_file;
-    std::string tilemapName_J = tileMapName; 
-if (json_file.find(tilemapName_J) != json_file.end()) {
-        int tileMapColumns = json_file[tilemapName_J];
-        std::cout << "columns: " << std::to_string(columns) << std::endl;
-        std::cout << "name of tilemap: " << tilemapName_J << std::endl;
-    } 
+   
 
 
   //  std::cout << "tile column = " << std::to_string(tileColumns) << std::endl;
@@ -325,9 +330,10 @@ if (json_file.find(tilemapName_J) != json_file.end()) {
         for(int k = 0; k < tileIDs[0].size(); k++){ // tileIds[0].size() is the number of columns
             // Calculate the source rectangle for the current tile
           //  std::cout <<  std::to_string(tileIDs[j][k]) + "current tile" << std::endl;
+        //  std::cout << "columns = " << std::to_string(tileMapColumns) << std::endl;
             int tileId = tileIDs[j][k];
-            int numTimes = tileId / 113;
-            int remainder = tileId % 113;
+            int numTimes = tileId / tileMapColumns;
+            int remainder = tileId % tileMapColumns;
         //    std::cout << "numtime for tile id: " << std::to_string(tileId) << " is " << std::to_string(numTimes) << std::endl;
       //      std::cout << "remainder for tile id: " << std::to_string(tileId) << " is " << std::to_string(remainder) << std::endl;
             Rectangle sourceRect = { (remainder * 16), (numTimes * 16), 16, 16 };

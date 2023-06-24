@@ -32,11 +32,20 @@ namespace game_renderer_h_1{
     std::vector<textureWrapper> textureDeAlloc;
     std::vector<enemy_objects_h_1::projectile*> projectilesEnemy;
     gameObject jameObject;
+    Camera2D cam;
     void draw(gameObject jameObject);
     bool DeAlloc();
+    void init();
     
     
 }; 
+void game_renderer::init(){
+    cam = {0};
+    cam.zoom = 2.0f;
+    cam.target = Vector2{ 00.0f, 00.0f };
+    cam.offset = Vector2{ GetScreenWidth()/2.0f, GetScreenHeight()/2.0f };
+    cam.rotation = 0.0f;
+}
 void game_renderer::draw(gameObject jameObject){
     DrawRectangle(jameObject.xCord, jameObject.yCord, jameObject.width, jameObject.height, jameObject.testColor);
 

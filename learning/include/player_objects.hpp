@@ -48,7 +48,7 @@ namespace player_objects{
     }
   void player::update(){
     movement();
-    draw();
+  //  draw();
   }
   void player::draw(){
    DrawRectangleRec(playerRect, BLUE);  
