@@ -74,7 +74,7 @@ int main(void)
         // Draw
         //----------------------------------------------------------------------------------
         std::vector<std::vector<int>> xmlTileIDs = xmlFile.get_tileIDs();
-        std::cout << " pass bullshit" << std::endl;
+      // std::cout << " pass bullshit" << std::endl;
   //      std::cout << "Size of xmlTileIDs: " << xmlTileIDs.size() << std::endl;
 
       /*  for(int aB = 0; aB < xmlTileIDs.size(); aB++){
@@ -108,7 +108,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     delete[] default_map.arr_tiles;
     UnloadTexture(xmlFile.get_map_texture().texture);
-    // UnloadTexture(nPlayer.playerSprite);
+    UnloadTexture(nPlayer.playerAnims.animations[0].texture1);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

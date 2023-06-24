@@ -317,11 +317,11 @@ if (json_file.find(tilemapName_J) != json_file.end()) {
 }
 bool file_to_read::new_draw_tilemap(){
     int columns = 64;
-    std::cout << "before crash" << std::endl;
+    //N std::cout << "before crash" << std::endl;
     Rectangle sourceRect;
     Rectangle destRect;
-    std::cout << "size of TileIds " << std::to_string(tileIDs.size()) << std::endl;
-    std::cout << "size of TileIds[0] " << std::to_string(tileIDs[0].size()) << std::endl;
+    //N std::cout << "size of TileIds " << std::to_string(tileIDs.size()) << std::endl;
+   //N std::cout << "size of TileIds[0] " << std::to_string(tileIDs[0].size()) << std::endl;
    
 
 
