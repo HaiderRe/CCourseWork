@@ -22,6 +22,8 @@ namespace animations_h {
         int amount_of_frames = 4;
         Vector2 position = {0.0f, 0.0f};
         float height;
+        std::vector<std::string> paths;
+        bool hasVector = false;
         Rectangle frameRec = {0.0f, 0.0f, (float)width, (float)height};
         Texture2D texture1;
         animationManager(std::string iPath,  int iWidth, int iHeight, int iAmount_of_times){
@@ -40,6 +42,13 @@ namespace animations_h {
             height = (float) texture1.height;
             std::cout << "called without wdith height and amount of frames" << std::endl; 
         }
+        animationManager(std::string iPath, std::vector<std::string> iPaths){
+            texture1 = LoadTexture(("Assets/" + iPath + ".png").c_str());
+            path = iPaths[0];
+            hasVector = true;
+            paths = iPaths;
+            frameRec = {0.0f, 0.0f, (float)width/amount_of_frames, (float)height};
+        }
         void draw(float x, float y){
             // Test draw the whole texture  
          //   DrawTexture(texture1, 0.00f, 0.00f, WHITE);
@@ -55,7 +64,12 @@ namespace animations_h {
          Vector2 origin = { width/2, height/2 };
          DrawTexturePro(texture1, frameRec, destRec, origin, 0.00f, WHITE);
         }
+        
         void draw(float x, float y, int direction){
+            if(hasVector){
+                drawV(x, y, direction);
+                return; 
+            } 
            // DrawTexture(texture1, 0.00f, 0.00f, WHITE);
          frames++;
          if(direction != oldDirection){ 
@@ -82,6 +96,28 @@ namespace animations_h {
          std::cout << "the dest rec is " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;
          std::cout << "the origin is " << origin.x << " " << origin.y << std::endl;
         }
+        // make a draw function that takes an array of paths an overlays them for the animation 
+        void drawV(float x, float y, int direction){
+            frames++;
+            if(direction != oldDirection){ 
+          //    currentFrame = 0;
+              oldDirection = direction;
+              frameRec.y = (float)direction*(float)sHeight;
+            }
+           if (frames >= (60/frameSpeed)){
+              frames = 0;
+              currentFrame++;
+              if (currentFrame >= 4) currentFrame = 0;
+              frameRec.x = (float)currentFrame*(float)sWidth;
+             }
+         Rectangle destRec = { position.x, position.y, sWidth, sHeight};
+         Rectangle frameRec1 = {frameRec.x, frameRec.y, 64, 64}; 
+         Vector2 origin = {  frameRec1.width/2, frameRec1.height/2};
+         for(int i = 0; i < paths.size(); i++){
+             Texture2D texture = LoadTexture(("Assets/" + paths[i] + ".png").c_str());
+             DrawTexturePro(texture, frameRec1, destRec, origin, 0.00f, WHITE);
+         }
+        }
         void set_position(float x, float y){
             position.x = x;
             position.y = y;
@@ -97,7 +133,14 @@ namespace animations_h {
             set_position(x, y);
         }
         void destroy(){
+            if(!hasVector){
             UnloadTexture(texture1); // Alternative to de-constructor
+            }
+            else{
+                for(int i = 0; i < paths.size(); i++){
+                    UnloadTexture(LoadTexture(("Assets/" + paths[i] + ".png").c_str()));
+                }
+            }
         }
        //  ~animationManager(){
          //   UnloadTexture(texture1); // create de-constructor

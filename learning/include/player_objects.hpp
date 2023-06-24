@@ -27,6 +27,14 @@ namespace player_objects{
     anim.sHeight = height;
     anim.amount_of_frames = anim.sWidth / width;
 }
+void addAnimation(std::string path, int width, int height, std::vector<std::string> iPaths){
+    // Make the animation manager have the amount of frames equal to its width divided by the player's width.
+    animations.push_back(animations_h::animationManager(path, iPaths));
+    animations_h::animationManager& anim = animations.back();
+    anim.sWidth = width;
+    anim.sHeight = height;
+    anim.amount_of_frames = anim.sWidth / width;
+}
     void currentAnimationManager(){
       for(int i = 0; i < animations.size(); i++){
         if(animations[i].path == currentAnimation){
@@ -62,7 +70,20 @@ namespace player_objects{
         void update();
         void movement();
         player(){
-          playerAnims.addAnimation("Base_Attack", width, height);
+          std::vector<std::string> iPaths;
+          iPaths.push_back("Assets/Player/base/Base_Idle");
+          iPaths.push_back("Assets/Player/hair/Base_Idle_Hair_3");
+          iPaths.push_back("Assets/Player/armor/06_fateful/Base_Idle_Fateful_Shoes_1");
+          iPaths.push_back("Assets/Player/armor/06_fateful/Base_Idle_Fateful_Pants_1");
+          iPaths.push_back("Assets/Player/armor/06_fateful/Base_Idle_Fateful_Gloves_1");
+          iPaths.push_back("Assets/Player/armor/06_fateful/Base_Idle_Fateful_Chest_1");
+          iPaths.push_back("Assets/Player/armor/06_fateful/Base_Idle_Fateful_Hat_1");
+          iPaths.push_back("Assets/Player/armor/06_fateful/Base_Idle_Fateful_Chest_1A");
+          playerAnims.addAnimation("Base_Attack", width, height, iPaths);
+          playerAnims.addAnimation("Base_Idle", width, height);
+          playerAnims.addAnimation("Base_Walk", width, height);
+          playerAnims.addAnimation("Base_Dead", width, height);
+
        /*   playerAnims.addAnimation("player2", width, height);
           playerAnims.addAnimation("player3", width, height);
           playerAnims.addAnimation("player4", width, height);
@@ -101,7 +122,8 @@ namespace player_objects{
         }
         playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         // set poisition of the player in the animation manager using set_position
-        playerAnims.animations[0].set_position(destRecPos.x, destRecPos.y);
+        playerAnims.currentAnimationManager();
+        playerAnims.animations[playerAnims.pKey].set_position(destRecPos.x, destRecPos.y);
     }
   void player::update(){
     movement();
