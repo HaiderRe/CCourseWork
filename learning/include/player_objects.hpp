@@ -148,16 +148,23 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
     void player::movement(){
       bool isRight = false;
       bool isLeft = false;
+      bool vert = false;
       if(IsKeyDown(KEY_RIGHT) ) {
         isRight = true;
         destRecPos.x += 2.00f;
         direction = 2;
+        if(vert == false){
+            changeRotation1(0.00f);
+          }
         if(currentAnim != "Player/base/Base_Walk" && currentAnim != "Player/base/Base_Attack"){
           switchAnimation("Player/base/Base_Walk");
           currentAnim = "Player/base/Base_Walk";
         }
         }
         else if(IsKeyDown(KEY_LEFT)){
+          if(vert == false){
+            changeRotation1(0.00f);
+          }
           isLeft = true;
         destRecPos.x += -2.00f;
         direction = 1;
@@ -167,8 +174,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         }
         if(IsKeyDown(KEY_DOWN)){
+          vert = true;
           if(isLeft == true){
-            changeRotation1(225.0f);
+            changeRotation1(45.0f);
           }
           else if(isRight == true){
             changeRotation1(315.0f);
@@ -181,8 +189,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         }
         else if(IsKeyDown(KEY_UP)){
+          vert = true;
           if(isLeft == true){
-            changeRotation1(135.0f);
+            changeRotation1(315.0f);
           }
           else if(isRight == true){
             changeRotation1(45.0f);
@@ -200,6 +209,10 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         if(isRight == false && isLeft == false){
           changeRotation1(0.00f);
+        }
+        if(isRight == false && isLeft == false && vert == false && currentAnim != "Player/base/Base_Attack"){
+          switchAnimation("Player/base/Base_Idle");
+          currentAnim = "Player/base/Base_Idle";
         }
         playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         // set poisition of the player in the animation manager using set_position
