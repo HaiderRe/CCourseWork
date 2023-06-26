@@ -51,6 +51,7 @@ class file_to_read{
     int imageHeight;
     int tileColumns;
     int tileMapColumns;
+    std::vector<int> collisionIDs;
     std::string tileMapName;
     public:
     file_to_read(std::string ipath){
@@ -61,6 +62,41 @@ class file_to_read{
     } 
     file_to_read(){
         std::cerr << "file_to_read with no parameters :/" << std::endl;
+    }
+    bool setCollisionIDs(){
+        std::string path = tileMapName + "collision.json"; 
+        std::ifstream ifs(path); 
+
+     if(!ifs.is_open()){
+            std::cerr << "Error opening file!" << std::endl;
+        return false;
+         }
+
+    json j;
+    ifs >> j;
+    std::vector<int> vec;
+    if(j.is_array()){
+        for(auto& element : j){
+            if(element.is_number()){
+                vec.push_back(element.get<int>());
+            }
+            else{
+                std::cerr << "Non-integer value in the array, skipping..." << std::endl;
+            }
+        }
+    }
+    else{
+        std::cerr << "JSON is not an array!" << std::endl;
+    }
+
+    // Printing the vector to check the results
+    for(auto& num : vec){
+        std::cout << num << " " << std::endl;
+    }
+    std::cout << std::endl;
+
+        return true;
+
     }
        void file_to_read_xml(std::string ipath){
         path = ipath;
@@ -341,7 +377,7 @@ bool file_to_read::new_draw_tilemap(){
             // std::cout << "remainder " << std::to_string(remainder) << std::endl;
           //  std::cout << "sourceRect " << std::to_string(sourceRect.x) << std::endl;
             
-            // Calculate the destination rectangle for the current tile
+            // Calculate the destination rectang+2le for the current tile
             Rectangle destRect = { k * 16, j * 16, 16, 16 };
 
             // Draw the tile.
