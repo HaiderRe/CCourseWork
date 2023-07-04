@@ -44,6 +44,7 @@ class file_to_read{
     private:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
+    std::vector<std::vector<int>> tileIDsCollision;  // Vector of a vector of ints containing the tileIDs of a tilemap for collision.
     std::vector<std::string> tileSets;
     std::vector<tileset> tileset_vector;
     game_renderer_h_1::textureWrapper mapTexture;
