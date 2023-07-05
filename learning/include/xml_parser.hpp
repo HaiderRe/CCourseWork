@@ -232,6 +232,32 @@ std::cout << "File path: " << path << std::endl;
          }
      ++current_row; //Increment row after reading from the whole row
     }
+    rapidxml::xml_node<>* secondLayerNode = layerNode->next_sibling("layer"); // point to the second Layer node
+    if (secondLayerNode) { // if the second layer node exists
+        rapidxml::xml_node<>* secondDataNode = secondLayerNode->first_node("data"); // point to data node of the second layer
+        if (secondDataNode) { // if the data node of the second layer exists
+            tileIDsCollision = std::vector<std::vector<int>>(tilemapHeight, std::vector<int>(tilemapWidth)); // Create a vector of size the tile map's height and width for collision layer.
+            std::string stringstream2 = secondDataNode->value();
+            std::stringstream stringstreamCollision(stringstream2);
+            std::string tempCollision;
+            int current_row_collision = 0;
+            while(std::getline(stringstreamCollision, tempCollision) && current_row_collision < tilemapHeight) {
+                std::stringstream stringstreamcurrent_row_collision(tempCollision);
+                int current_column_collision = 0;
+                while(std::getline(stringstreamcurrent_row_collision, tempCollision, ',') && current_column_collision < tilemapWidth) {
+                    try {
+                        tileIDsCollision[current_row_collision][current_column_collision] = std::stoi(tempCollision);
+                    } catch (const std::invalid_argument& e) {
+                        std::cerr << "Invalid argument: " << tempCollision << std::endl;
+                    } catch (const std::out_of_range& e) {
+                        std::cerr << "Out of range: " << tempCollision << std::endl;
+                    }
+                    ++current_column_collision;
+                }
+                ++current_row_collision;
+            }
+        }
+    }
     return true; //Return true as we successfully (hopefully) read from the tilemap 
 }
 bool file_to_read::draw_xml_file(){
