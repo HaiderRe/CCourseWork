@@ -59,6 +59,9 @@ class file_to_read{
     path = ipath; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<std::string> tileSets;
+    std::vector<std::vector<int>> getCollisionTileIDs();
+        
+   
     read_xml_file();
     } 
     file_to_read(){
@@ -106,6 +109,9 @@ class file_to_read{
     }
     void file_to_read_xml(){
         read_xml_file();
+    }
+    std::vector<std::vector<int>> getCollisionTileIDs(){
+        return tileIDsCollision;
     }
 
     std::vector<std::vector<int>> get_tileIDs(){

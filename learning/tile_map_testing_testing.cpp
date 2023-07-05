@@ -59,7 +59,7 @@ int main(void)
     {
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
-        nPlayer.update();
+        nPlayer.update(xmlFile.getCollisionTileIDs());
         camera.update();
  
      //  default_map.arr_tiles[oldx*y_size+oldy].is_black = false;

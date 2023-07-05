@@ -225,12 +225,17 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
   } 
   bool player::mapCollision(std::vector<std::vector<int>> collisionIDs){
+   // std::clog<<"We are in the collsiion" << std::endl;
+   // std::clog << " size of collision map " << collisionIDs.size() << std::endl;
+   // std::clog << "size y of collision map " << collisionIDs[0].size() << std::endl;
     bool isColliding = false;
   
-    int playerX = destRecPos.x / 32; // player cordinates to tile map cordiantes
-    int playerY = destRecPos.y / 32;
-    
-    if(collisionIDs[playerY][playerX] == 1){ // check the tile cord against the tile map in each direction and move the player back if they are colliding by getting the animation direction
+    int playerX = destRecPos.x / 16; // player cordinates to tile map cordiantes
+    int playerY = destRecPos.y / 16;
+    std::clog << "player x " << playerX << " player y " << playerY << std::endl;
+    std::clog << "collision vector at player x " << collisionIDs[playerY][playerX] << std::endl;
+    // Later Change collision Code as this is garbage
+    if(collisionIDs[playerY][playerX] != 0){ // check the tile cord against the tile map in each direction and move the player back if they are colliding by getting the animation direction
       isColliding = true;
       if(direction == 0){
         destRecPos.y += -2.00f;
@@ -244,6 +249,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       else if(direction == 3){
         destRecPos.y += 2.00f;
       }
+      std::clog << "collision" << std::endl;
     }
     return isColliding;
   }
