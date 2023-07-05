@@ -84,7 +84,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         int health; 
         void draw();
         void update();
+        void update(std::vector<std::vector<int>> collisionIDs);
         void movement();
+        bool mapCollision(std::vector<std::vector<int>> collisionIDs);
         player(){
           std::vector<std::string> iPaths;
           iPaths.push_back("Player/base/Base_Idle");
@@ -175,12 +177,6 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         if(IsKeyDown(KEY_DOWN)){
           vert = true;
-          if(isLeft == true){
-            changeRotation1(45.0f);
-          }
-          else if(isRight == true){
-            changeRotation1(315.0f);
-          }
         destRecPos.y += 2.00f;
         direction = 3;
         if(currentAnim != "Player/base/Base_Walk" && currentAnim != "Player/base/Base_Attack"){
@@ -190,12 +186,6 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         else if(IsKeyDown(KEY_UP)){
           vert = true;
-          if(isLeft == true){
-            changeRotation1(315.0f);
-          }
-          else if(isRight == true){
-            changeRotation1(45.0f);
-          }
         destRecPos.y += -2.00f;
         direction = 0;
         if(currentAnim != "Player/base/Base_Walk" && currentAnim != "Player/base/Base_Attack"){
@@ -224,9 +214,39 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
     currentAnim = playerAnims.currentAnimationPath();
   //  draw();
   }
+  void player::update(std::vector<std::vector<int>> collisionIDs){
+    mapCollision(collisionIDs);
+    movement();
+    currentAnim = playerAnims.currentAnimationPath();
+  //  draw();
+  }
+  
   void player::draw(){
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
   } 
+  bool player::mapCollision(std::vector<std::vector<int>> collisionIDs){
+    bool isColliding = false;
+  
+    int playerX = destRecPos.x / 32; // player cordinates to tile map cordiantes
+    int playerY = destRecPos.y / 32;
+    
+    if(collisionIDs[playerY][playerX] == 1){ // check the tile cord against the tile map in each direction and move the player back if they are colliding by getting the animation direction
+      isColliding = true;
+      if(direction == 0){
+        destRecPos.y += -2.00f;
+      }
+      else if(direction == 1){
+        destRecPos.x += 2.00f;
+      }
+      else if(direction == 2){
+        destRecPos.x += -2.00f;
+      }
+      else if(direction == 3){
+        destRecPos.y += 2.00f;
+      }
+    }
+    return isColliding;
+  }
   
 };
 
