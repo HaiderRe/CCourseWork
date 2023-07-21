@@ -1,0 +1,1 @@
+My Pause Menu had the same keybind as to close the game as set in RAYLIB, after looking at the function declearations I realisd my mistake and using the SetExitKey() function I changed the key not to be ESC
