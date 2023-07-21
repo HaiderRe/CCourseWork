@@ -20,21 +20,23 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     };
     class game_renderer{
     public:
-    bool gameIsPaused;
+    bool gameIsPaused = false;
     game_renderer(){
         gameIsPaused = false; // Variable to hold whether the game is paused or not
     }                              
     std::vector<textureWrapper> textureDeAlloc;
     bool DeAlloc();
     void pauseMenu(){
-        
+
     }
     void update(){
         if(IsKeyPressed(KEY_ESCAPE)){
             gameIsPaused = !gameIsPaused;
+            
         }
     }
     bool getGameIsPaused(){
+       
         return gameIsPaused;
     }
 }; 

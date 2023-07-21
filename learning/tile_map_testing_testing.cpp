@@ -65,6 +65,7 @@ int main(void)
  xmlFile.set_map_texture();
  xmlFile.set_column();
  //xmlFile.make_tileset_file();
+ SetExitKey(KEY_NULL);
 
   
     // Main game loop
@@ -73,7 +74,8 @@ int main(void)
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
         gameRenderer.update();
-        bool isPaused =  gameRenderer.getGameIsPaused();
+        bool isPaused;
+        isPaused =  gameRenderer.getGameIsPaused();
         if(isPaused == false){
          nPlayer.update(xmlFile.getCollisionTileIDs());
          camera.update();
@@ -89,7 +91,7 @@ int main(void)
         // Draw
         //----------------------------------------------------------------------------------
         std::vector<std::vector<int>> xmlTileIDs = xmlFile.get_tileIDs();
-      
+       
          BeginDrawing();
 
             ClearBackground(RAYWHITE);
@@ -106,8 +108,9 @@ int main(void)
             EndMode2D();
             }
             else{
-               std::string pauseText = "Paused";
-                DrawText(pauseText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+              std::string pauseText = "Paused";
+               DrawText(pauseText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+                
             }
 
         EndDrawing();
