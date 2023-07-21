@@ -1,3 +1,5 @@
+// Seems like a mess, re-do this file later
+/*
 #ifndef enemy_objects_h
 #define enemy_objects_h
 #include <iostream> 
@@ -168,3 +170,4 @@ namespace enemy_objects_h_1{
 
 
 #endif
+*/

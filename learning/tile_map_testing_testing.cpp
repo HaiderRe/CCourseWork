@@ -4,6 +4,19 @@
 // Then have image as same name as tilemap 
 // Then get image divide into sections by tile width and height  
 // And then pray 
+// std::cout << " pass bullshit" << std::endl;
+  //      std::cout << "Size of xmlTileIDs: " << xmlTileIDs.size() << std::endl;
+
+      /*  for(int aB = 0; aB < xmlTileIDs.size(); aB++){
+          for(int aC = 0; aC < xmlTileIDs[0].size(); aC++){
+//            std::cout<< "in" << std::endl;
+            std::cout<< std::to_string(xmlTileIDs[aB][aC]) << std::endl;
+          }
+        }
+        */
+       // Draw the tilemap and tileset
+                // xmlFile.draw_xml_file();
+                 // replace 0 with the index of the tileset you want to draw
 #ifndef main_game
 #define main_game
 #include <iostream> 
@@ -59,14 +72,16 @@ int main(void)
     {
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
-        nPlayer.update(xmlFile.getCollisionTileIDs());
-        camera.update();
+        gameRenderer.update();
+        bool isPaused =  gameRenderer.getGameIsPaused();
+        if(isPaused == false){
+         nPlayer.update(xmlFile.getCollisionTileIDs());
+         camera.update();
+        }
  
-     //  default_map.arr_tiles[oldx*y_size+oldy].is_black = false;
         default_map.arr_tiles[0*y_size+2171].is_black = true;
         
-      //  oldx = x;
-      //  oldy = y; 
+     
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
         //----------------------------------------------------------------------------------
@@ -74,31 +89,26 @@ int main(void)
         // Draw
         //----------------------------------------------------------------------------------
         std::vector<std::vector<int>> xmlTileIDs = xmlFile.get_tileIDs();
-      // std::cout << " pass bullshit" << std::endl;
-  //      std::cout << "Size of xmlTileIDs: " << xmlTileIDs.size() << std::endl;
-
-      /*  for(int aB = 0; aB < xmlTileIDs.size(); aB++){
-          for(int aC = 0; aC < xmlTileIDs[0].size(); aC++){
-//            std::cout<< "in" << std::endl;
-            std::cout<< std::to_string(xmlTileIDs[aB][aC]) << std::endl;
-          }
-        }
-        */
+      
          BeginDrawing();
 
             ClearBackground(RAYWHITE);
             
             DrawFPS(10, 10);  // Draw current FPS
+            if(isPaused == false){
             BeginMode2D(camera.cam);
                 xmlFile.new_draw_tilemap();
                // default_map.draw();
                 nPlayer.draw();
 
-                // Draw the tilemap and tileset
-                // xmlFile.draw_xml_file();
-                 // replace 0 with the index of the tileset you want to draw
+                
 
             EndMode2D();
+            }
+            else{
+               std::string pauseText = "Paused";
+                DrawText(pauseText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+            }
 
         EndDrawing();
         //----------------------------------------------------------------------------------
