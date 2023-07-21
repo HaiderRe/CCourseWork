@@ -74,12 +74,15 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         float yCord;
         int width = 64; // Rect
         int height = 64; // Rect
+        float speedX = 0.00f;
+        float speedY = 0.00f;
         Vector2 destRecPos = {0.0f,0.0f};
         std::string currentAnim;
         int direction = 0; // 0 = up , 1 = left, 2 = right, 3 = down
         playerAnimations playerAnims;
         Texture2D playerSprite;
         Vector2 sourceRecPos; 
+        std::vector<std::vector<int>> collisionIDsMap;
         Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         int health; 
         void draw();
@@ -153,7 +156,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       bool vert = false;
       if(IsKeyDown(KEY_RIGHT) ) {
         isRight = true;
-        destRecPos.x += 2.00f;
+        speedX = 2.00f;
         direction = 2;
         if(vert == false){
             changeRotation1(0.00f);
@@ -168,7 +171,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
             changeRotation1(0.00f);
           }
           isLeft = true;
-        destRecPos.x += -2.00f;
+        speedX = -2.00f;
         direction = 1;
         if(currentAnim != "Player/base/Base_Walk" && currentAnim != "Player/base/Base_Attack"){
           switchAnimation("Player/base/Base_Walk");
@@ -177,7 +180,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         if(IsKeyDown(KEY_DOWN)){
           vert = true;
-        destRecPos.y += 2.00f;
+        speedY = 2.00f;
         direction = 3;
         if(currentAnim != "Player/base/Base_Walk" && currentAnim != "Player/base/Base_Attack"){
           switchAnimation("Player/base/Base_Walk");
@@ -186,7 +189,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         else if(IsKeyDown(KEY_UP)){
           vert = true;
-        destRecPos.y += -2.00f;
+       speedY = -2.00f;
         direction = 0;
         if(currentAnim != "Player/base/Base_Walk" && currentAnim != "Player/base/Base_Attack"){
           switchAnimation("Player/base/Base_Walk");
@@ -204,6 +207,10 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           switchAnimation("Player/base/Base_Idle");
           currentAnim = "Player/base/Base_Idle";
         }
+       mapCollision(collisionIDsMap);
+        
+        destRecPos.x = destRecPos.x + speedX;
+        destRecPos.y = destRecPos.y + speedY;
         playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         // set poisition of the player in the animation manager using set_position
         playerAnims.currentAnimationManager();
@@ -215,7 +222,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
   //  draw();
   }
   void player::update(std::vector<std::vector<int>> collisionIDs){
-    mapCollision(collisionIDs);
+    speedX = 0.00f;
+    speedY = 0.00f;
+    collisionIDsMap = collisionIDs;
     movement();
     currentAnim = playerAnims.currentAnimationPath();
   //  draw();
@@ -230,24 +239,20 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
    // std::clog << "size y of collision map " << collisionIDs[0].size() << std::endl;
     bool isColliding = false;
   
-    int playerX = destRecPos.x / 16; // player cordinates to tile map cordiantes
-    int playerY = destRecPos.y / 16;
+    //int playerX = destRecPos.x / 16; // player cordinates to tile map cordiantes
+    // int playerY = destRecPos.y / 16;
+    int playerX = (destRecPos.x + speedX) / 16; // player cordinates to tile map cordiantes
+    int playerY = (destRecPos.y + speedY) / 16;
     std::clog << "player x " << playerX << " player y " << playerY << std::endl;
     std::clog << "collision vector at player x " << collisionIDs[playerY][playerX] << std::endl;
     // Later Change collision Code as this is garbage
     if(collisionIDs[playerY][playerX] != 0){ // check the tile cord against the tile map in each direction and move the player back if they are colliding by getting the animation direction
       isColliding = true;
-      if(direction == 0){
-        destRecPos.y += -2.00f;
+      if(speedX > 0 || speedX < 0){
+        speedX = 0;
       }
-      else if(direction == 1){
-        destRecPos.x += 2.00f;
-      }
-      else if(direction == 2){
-        destRecPos.x += -2.00f;
-      }
-      else if(direction == 3){
-        destRecPos.y += 2.00f;
+      if(speedY > 0 || speedY < 0){
+        speedY = speedY = 0;
       }
       std::clog << "collision" << std::endl;
     }
