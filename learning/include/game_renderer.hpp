@@ -9,6 +9,7 @@
 #include "raymath.h"
 #include <vector>
 #include "tile_map.hpp"
+#include "mouseHandler.hpp"
 namespace enemy_objects_h_1 {
     class projectile;
 };
@@ -22,6 +23,7 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     public:
     bool gameIsPaused = false;
     std::vector<Texture2D> texturesToBeDeAllocated;
+    mouseHandlerClass mouseHandlerObject;
     int whichPause = -1;  //0 = pause menu, 1 = inventory, 2 = map
     game_renderer(){
         gameIsPaused = false; // Variable to hold whether the game is paused or not
@@ -32,31 +34,68 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         return texturesToBeDeAllocated;
     }
     bool DeAlloc();
-    void menuLogic();
     void pauseMenu(){ //Needs to have buttons to go to options and quit and resume
         Rectangle sourceRect = {10,192,44,64};
         Rectangle destRect = {GetScreenWidth()/2, GetScreenHeight()/2, 264, 384};
         DrawTexturePro(texturesToBeDeAllocated[0], sourceRect, destRect, {132,192}, 0.00f, WHITE);
 
     }
+    void optionLogic(){
+        std::string inventoryText = "Options"; 
+        DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
+    }
     void inventoryMenu(){ //Needs to Have buttons and logic including what invetory items are in the inventory
         std::string inventoryText = "Inventory"; 
-        DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+        DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
     }
     void mapMenu(){ //Needs to have logic to draw the map
         std::string mapText = "Map";
-        DrawText(mapText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+        DrawText(mapText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
+    }
+    int menuLogic(){
+        mouseHandlerObject.update();
+        if(whichPause ==0){
+            std::vector<Rectangle> buttons;
+            Rectangle resumeButton = {GetScreenWidth()/2 - 132, GetScreenHeight()/2 - 128, 264, 64};
+            Rectangle optionsButton = {GetScreenWidth()/2 - 132, GetScreenHeight()/2  - 32, 264, 64};
+            Rectangle exitButton = {GetScreenWidth()/2 - 132, GetScreenHeight()/2 + 64, 264, 64};
+            buttons.push_back(resumeButton);
+            buttons.push_back(optionsButton);
+            buttons.push_back(exitButton);
+            int buttonClicked = mouseHandlerObject.isClicked(buttons);
+            if(buttonClicked == 0){
+                gameIsPaused = false;
+                whichPause = -1;
+            }
+            else if(buttonClicked == 1){
+                whichPause = 3;
+            }
+            else if(buttonClicked == 2){
+                return 1;
+            }
+        }
+        return 0;
     }
     void drawPauseMenu(){
         ClearBackground(BLACK);
-        if(whichPause == 0){
+        if(whichPause == 0){  //0 = pause menu, 1 = inventory, 2 = map, 3 = options
             pauseMenu();
+           /* Rectangle resumeButton = {GetScreenWidth()/2 - 132, GetScreenHeight()/2 - 128, 264, 64};
+            Rectangle optionsButton = {GetScreenWidth()/2 - 132, GetScreenHeight()/2  - 32, 264, 64};
+            Rectangle exitButton = {GetScreenWidth()/2 - 132, GetScreenHeight()/2 + 64, 264, 64};
+            DrawRectangle(resumeButton.x, resumeButton.y, resumeButton.width, resumeButton.height, RED);
+            DrawRectangle(optionsButton.x, optionsButton.y, optionsButton.width, optionsButton.height, RED);
+            DrawRectangle(exitButton.x, exitButton.y, exitButton.width, exitButton.height, RED);
+            */
         }
         else if(whichPause == 1){
             inventoryMenu();
         }
         else if(whichPause == 2){
             mapMenu();
+        }
+        else if(whichPause == 3){
+            optionLogic();
         }
     }
     

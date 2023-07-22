@@ -24,6 +24,15 @@ namespace mouseHandler{
         Vector2 getMousePos(){
             return mousePos;
         }
+        int isClicked(std::vector<Rectangle> buttons){ //returns the index of the button that is clicked 
+            for(int i = 0; i < buttons.size(); i++){
+                if(CheckCollisionPointRec(mousePos, buttons[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        };
     };
-}
 #endif

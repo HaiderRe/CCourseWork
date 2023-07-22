@@ -55,6 +55,8 @@ int main(void)
     game_renderer_h_1::game_renderer gameRenderer;
     player_objects::player nPlayer;
     camera_h::camera_class camera(nPlayer);
+    mouseHandler::mouseHandlerClass mouseHandlerObject;
+    int shouldClose = 0;
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     default_map.set_width_height_of_arr(256,256);
@@ -70,7 +72,7 @@ int main(void)
 
   
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose() && shouldClose != 1)    // Detect window close button or ESC key
     {
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
@@ -81,8 +83,12 @@ int main(void)
          nPlayer.update(xmlFile.getCollisionTileIDs());
          camera.update();
         }
+        else{
+          shouldClose = gameRenderer.menuLogic();
+        }
  
         default_map.arr_tiles[0*y_size+2171].is_black = true;
+        mouseHandlerObject.update();
         
      
         //----------------------------------------------------------------------------------
@@ -110,7 +116,7 @@ int main(void)
             }
             else{
               gameRenderer.drawPauseMenu();
-                
+              
             }
 
         EndDrawing();
