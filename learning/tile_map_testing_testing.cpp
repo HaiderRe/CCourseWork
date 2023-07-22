@@ -30,6 +30,7 @@
 #include "include/xml_parser.hpp"
 #include "include/game_renderer.hpp"
 #include "include/player_objects.hpp"
+#include "include/mouseHandler.hpp"
 
 //#include "include/enemy_objects.hpp"
 #include "include/tile_map.hpp"
@@ -94,7 +95,7 @@ int main(void)
        
          BeginDrawing();
 
-            ClearBackground(RAYWHITE);
+            ClearBackground(WHITE);
             
             DrawFPS(10, 10);  // Draw current FPS
             if(isPaused == false){
@@ -108,8 +109,7 @@ int main(void)
             EndMode2D();
             }
             else{
-              std::string pauseText = "Paused";
-               DrawText(pauseText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, BLACK);
+              gameRenderer.drawPauseMenu();
                 
             }
 
@@ -122,6 +122,7 @@ int main(void)
     delete[] default_map.arr_tiles;
     UnloadTexture(xmlFile.get_map_texture().texture);
     UnloadTexture(nPlayer.playerAnims.animations[0].texture1);
+    UnloadTexture(gameRenderer.getTexturesToBeDeAllocated()[0]);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

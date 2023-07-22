@@ -1,0 +1,25 @@
+The sprites are named: Weapon_Animation_Name_#
+Here is an example: Weapon_Idle_OldSword_1
+
+HOW TO LAYER THE SPRITES
+
+All the sprites that end in 1 should go above the gloves and below the helmet and armor.
+
+All the sprites that end in 2 should go above everything.
+
+The weapons should be layered in this manner:
+
+MOST TOP LAYER---------
+ENDING IN 2
+HELMET
+ARMOR
+ENDING IN 1
+GLOVES
+PANTS
+SHOES
+HAIR
+BODY
+MOST BOTTOM LAYER------
+
+If you have any questions you can reach out to me on my discord channel:
+https://discord.com/invite/jmf4pzv5Fj

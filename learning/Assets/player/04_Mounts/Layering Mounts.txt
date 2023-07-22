@@ -1,0 +1,26 @@
+The sprites are named: Category_Animation_Metal_Piece_#
+Here is an example: Mount_Idle_Copper_Chest_1
+
+HOW TO LAYER THE SPRITES
+
+The number at the end of the name implies the design of armor, for instance... Mount_Idle_Copper_Chest_1 is different than Mount_Idle_Copper_Chest_2.
+
+All the sprites that end in A should go above the helmet.
+
+The Mounts should be layered in this manner:
+
+MOST TOP LAYER---------
+MOUNT ending in A
+ARMOR ending in A
+HELMET
+HAIR
+ARMOR
+GLOVES
+BASE
+MOUNT ending in B
+MOST BOTTOM LAYER------
+
+One important thing to note is that if you are wearing a helmet you should disable the hair layer.
+
+If you have any questions you can reach out to me on my discord channel:
+https://discord.com/invite/jmf4pzv5Fj

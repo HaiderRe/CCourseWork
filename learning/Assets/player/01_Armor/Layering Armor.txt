@@ -1,0 +1,26 @@
+The sprites are named: Weapon_Animation_Metal_Piece_#
+Here is an example: Base_Idle_Copper_Chest_1
+
+HOW TO LAYER THE SPRITES
+
+The number at the end of the name implies the design of armor, for instance... Base_Idle_Copper_Chest_1 is different than Base_Idle_Copper_Chest_2.
+
+All the sprites that end in A should go above the helmet.
+
+The armor should be layered in this manner:
+
+MOST TOP LAYER---------
+ARMOR ending in A
+HELMET
+ARMOR
+GLOVES
+PANTS
+SHOES
+HAIR
+BODY
+MOST BOTTOM LAYER------
+
+One important thing to note is that if you are wearing a helmet you should disable the hair layer.
+
+If you have any questions you can reach out to me on my discord channel:
+https://discord.com/invite/jmf4pzv5Fj
