@@ -30,7 +30,7 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     bool gameIsPaused = false;
     std::vector<Texture2D> texturesToBeDeAllocated;
     mouseHandlerClass mouseHandlerObject;
-    std::vector<inventoryItem> allInventoryItems;
+    std::vector<inventoryItem> allInventoryItems; //Holds all the inventory items in the game, and their amount that the player has 
 
     int whichPause = -1;  //0 = pause menu, 1 = inventory, 2 = map
     void adminGiveAll(){
@@ -54,7 +54,8 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     }
     game_renderer(){
         gameIsPaused = false; // Variable to hold whether the game is paused or not
-        texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/GUI.png"));
+        texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/GUI.png")); // Index is 0
+        texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/Orange_Buttons_Icons.png")); // Index is 1
          addAllInventoryItem();
     }                              
     std::vector<textureWrapper> textureDeAlloc;
@@ -72,20 +73,33 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         std::string inventoryText = "Options"; 
         DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
     }
+    int amountOfInventoryItems(){ // Returns the amount of inventory items that are in the inventory, by checking the amount of each item
+        int total = 0;
+        for(int i = 0; i < allInventoryItems.size(); i++){
+            if(allInventoryItems[i].amount > 0){
+                total++;
+            }
+        }
+        return total;
+    }
     void inventoryMenu(){ //Needs to Have buttons and logic including what invetory items are in the inventory
       //  std::string inventoryText = "Inventory"; 
         //DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
         int xOffset = GetScreenWidth()/16;
         int yOffset = GetScreenHeight()/16;
         int borderThickness = 12;
-        
+        int buttonRight= 192;
+        int buttonRightOffX = 64;
+        int buttonLeft = 224;
+        int buttonLeftOffX = 64; 
+        int amountOfItems = amountOfInventoryItems(); 
+        int pages = amountOfItems / 144; // Items 0 - 143 are on page 0, 
+        // For next time, sort out displaying items based on pages, and then add the ability to scroll through pages using the buttons
         Rectangle Border = {4.8  * xOffset - borderThickness/2 , 2 * yOffset - borderThickness/2, 12 * yOffset + borderThickness, 12 * yOffset + borderThickness};
         DrawRectangle(Border.x, Border.y, Border.width, Border.height, BLACK);
         Color grey = {31, 36, 40, 255};
         for(int i = 0; i <  12; i++){
             for(int j = 0; j < 12; j++){
-                
-
                 Rectangle destRect = {4.8 * xOffset + (i * yOffset), 2 * yOffset + (j * yOffset) , yOffset + 4,  yOffset + 4};
                 // In each rectangle have a smaller rectangle that is a square that fits in the rectangle
                 Rectangle destRect2 = {4.8 * xOffset + (i * yOffset) + 2, 2 * yOffset + (j * yOffset) + 2, yOffset - 4,  yOffset - 4};
@@ -93,6 +107,7 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
                 DrawRectangle(destRect2.x, destRect2.y, destRect2.width, destRect2.height, grey);
             }
         }
+        
         //Add a thick border around the inventory
       //  Rectangle destRect = {2.4 * xOffset, yOffset, 6 * yOffset, 6 * yOffset}; DrawRectangleLines(destRect.x, destRect.y, destRect.width, destRect.height, BLACK);
         
