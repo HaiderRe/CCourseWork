@@ -8,6 +8,7 @@
 #include "rlgl.h"
 #include "raymath.h"
 #include <vector>
+#include <filesystem>
 #include "tile_map.hpp"
 #include "mouseHandler.hpp"
 namespace enemy_objects_h_1 {
@@ -19,15 +20,42 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     Texture2D texture;
     bool isLoaded = true;  // This is what we need to track whether a texture is loaded or not, this prevents unloading an already loaded texture.
     };
+    struct inventoryItem{
+        std::string name;
+        int amount;
+        int id;
+    };
     class game_renderer{
     public:
     bool gameIsPaused = false;
     std::vector<Texture2D> texturesToBeDeAllocated;
     mouseHandlerClass mouseHandlerObject;
+    std::vector<inventoryItem> allInventoryItems;
+
     int whichPause = -1;  //0 = pause menu, 1 = inventory, 2 = map
+    void adminGiveAll(){
+        std::clog << "Giving all items" << std::endl;
+
+    }
+    void addAllInventoryItem(){
+        std::string path = "./Assets/Items"; //Relative path to the items folder
+
+    for (std::filesystem::directory_iterator itr(path); itr != std::filesystem::directory_iterator(); ++itr) {
+        if (itr->is_regular_file()) {
+            
+            inventoryItem item;
+            item.name = itr->path().filename().string();
+            item.amount = 0;
+            item.id = allInventoryItems.size() - 1;
+            allInventoryItems.push_back(item);
+        }
+     }
+     std::clog << "size of allInventoryItems is " << allInventoryItems.size() << std::endl;
+    }
     game_renderer(){
         gameIsPaused = false; // Variable to hold whether the game is paused or not
         texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/GUI.png"));
+         addAllInventoryItem();
     }                              
     std::vector<textureWrapper> textureDeAlloc;
     std::vector<Texture2D> getTexturesToBeDeAllocated(){
@@ -45,8 +73,29 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
     }
     void inventoryMenu(){ //Needs to Have buttons and logic including what invetory items are in the inventory
-        std::string inventoryText = "Inventory"; 
-        DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
+      //  std::string inventoryText = "Inventory"; 
+        //DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
+        int xOffset = GetScreenWidth()/16;
+        int yOffset = GetScreenHeight()/16;
+        int borderThickness = 12;
+        
+        Rectangle Border = {4.8  * xOffset - borderThickness/2 , 2 * yOffset - borderThickness/2, 12 * yOffset + borderThickness, 12 * yOffset + borderThickness};
+        DrawRectangle(Border.x, Border.y, Border.width, Border.height, BLACK);
+        Color grey = {31, 36, 40, 255};
+        for(int i = 0; i <  12; i++){
+            for(int j = 0; j < 12; j++){
+                
+
+                Rectangle destRect = {4.8 * xOffset + (i * yOffset), 2 * yOffset + (j * yOffset) , yOffset + 4,  yOffset + 4};
+                // In each rectangle have a smaller rectangle that is a square that fits in the rectangle
+                Rectangle destRect2 = {4.8 * xOffset + (i * yOffset) + 2, 2 * yOffset + (j * yOffset) + 2, yOffset - 4,  yOffset - 4};
+               // DrawRectangleLines(destRect.x, destRect.y, destRect.width, destRect.height, RED);
+                DrawRectangle(destRect2.x, destRect2.y, destRect2.width, destRect2.height, grey);
+            }
+        }
+        //Add a thick border around the inventory
+      //  Rectangle destRect = {2.4 * xOffset, yOffset, 6 * yOffset, 6 * yOffset}; DrawRectangleLines(destRect.x, destRect.y, destRect.width, destRect.height, BLACK);
+        
     }
     void mapMenu(){ //Needs to have logic to draw the map
         std::string mapText = "Map";
@@ -78,6 +127,8 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     }
     void drawPauseMenu(){
         ClearBackground(BLACK);
+        Color pBlue = {182, 208, 226,255};
+ 
         if(whichPause == 0){  //0 = pause menu, 1 = inventory, 2 = map, 3 = options
             pauseMenu();
            /* Rectangle resumeButton = {GetScreenWidth()/2 - 132, GetScreenHeight()/2 - 128, 264, 64};
@@ -89,12 +140,14 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
             */
         }
         else if(whichPause == 1){
+            ClearBackground(pBlue);
             inventoryMenu();
         }
         else if(whichPause == 2){
             mapMenu();
         }
         else if(whichPause == 3){
+            
             optionLogic();
         }
     }

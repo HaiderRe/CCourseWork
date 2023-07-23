@@ -127,8 +127,13 @@ int main(void)
     //--------------------------------------------------------------------------------------
     delete[] default_map.arr_tiles;
     UnloadTexture(xmlFile.get_map_texture().texture);
-    UnloadTexture(nPlayer.playerAnims.animations[0].texture1);
-    UnloadTexture(gameRenderer.getTexturesToBeDeAllocated()[0]);
+    for(int k = 0; k < nPlayer.playerAnims.animations.size(); k++){
+      UnloadTexture(nPlayer.playerAnims.animations[k].texture1);
+    }
+    // UnloadTexture(nPlayer.playerAnims.animations[0].texture1);
+    for(int j = 0; j < gameRenderer.getTexturesToBeDeAllocated().size(); j++){
+      UnloadTexture(gameRenderer.getTexturesToBeDeAllocated()[j]);
+    }
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

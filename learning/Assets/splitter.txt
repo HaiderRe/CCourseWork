@@ -1,0 +1,28 @@
+from PIL import Image
+import os
+
+# Path to the directory containing the images
+img_dir = 'C:/Users/HaiderTheBot/Documents/GitHub/CCourseWork/learning/Assets/Items'
+# Path to the directory where you want to save the split images
+output_dir = 'C:/Users/HaiderTheBot/Documents/GitHub/CCourseWork/learning/Assets/split'
+
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+# Iterate through every image file in the directory
+for filename in os.listdir(img_dir):
+    if filename.endswith(".png") or filename.endswith(".jpg"):
+        # Open the image file
+        img = Image.open(os.path.join(img_dir, filename))
+        width, height = img.size
+
+        # Iterate through the image in 32x32 chunks
+        for i in range(0, width, 32):
+            for j in range(0, height, 32):
+                # Extract the 32x32 chunk from the image
+                box = (i, j, i+32, j+32)
+                sprite = img.crop(box)
+
+                # Save the sprite with its new filename
+                sprite_filename = filename.rsplit('.', 1)[0] + str(i//32) + str(j//32) + '.png'
+                sprite.save(os.path.join(output_dir, sprite_filename))

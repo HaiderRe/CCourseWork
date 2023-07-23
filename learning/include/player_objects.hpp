@@ -154,7 +154,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       bool isRight = false;
       bool isLeft = false;
       bool vert = false;
-      if(IsKeyDown(KEY_RIGHT) ) {
+      if(IsKeyDown(KEY_D) ) {
         isRight = true;
         speedX = 2.00f;
         direction = 2;
@@ -166,7 +166,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           currentAnim = "Player/base/Base_Walk";
         }
         }
-        else if(IsKeyDown(KEY_LEFT)){
+        else if(IsKeyDown(KEY_A)){
           if(vert == false){
             changeRotation1(0.00f);
           }
@@ -178,7 +178,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           currentAnim = "Player/base/Base_Walk";
         }
         }
-        if(IsKeyDown(KEY_DOWN)){
+        if(IsKeyDown(KEY_S)){
           vert = true;
         speedY = 2.00f;
         direction = 3;
@@ -187,7 +187,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           currentAnim = "Player/base/Base_Walk";
         }
         }
-        else if(IsKeyDown(KEY_UP)){
+        else if(IsKeyDown(KEY_W)){
           vert = true;
        speedY = -2.00f;
         direction = 0;
