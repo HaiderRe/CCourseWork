@@ -55,7 +55,7 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     game_renderer(){
         gameIsPaused = false; // Variable to hold whether the game is paused or not
         texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/GUI.png")); // Index is 0
-        texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/Orange_Buttons_Icons.png")); // Index is 1
+        texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/Orange_Button_Icons.png")); // Index is 1
          addAllInventoryItem();
     }                              
     std::vector<textureWrapper> textureDeAlloc;
@@ -93,7 +93,13 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         int buttonLeft = 224;
         int buttonLeftOffX = 64; 
         int amountOfItems = amountOfInventoryItems(); 
-        int pages = amountOfItems / 144; // Items 0 - 143 are on page 0, 
+        int pages = amountOfItems / 144; // Items 0 - 143 are first on page 0 if the player has all items, meaning that items in the inventory are sorted by id 
+        bool buttonLeftActive = false;
+        bool buttonRightActive = false;
+        int currentPage = 0;
+        if(pages > 0){
+            buttonRightActive = true;
+        }
         // For next time, sort out displaying items based on pages, and then add the ability to scroll through pages using the buttons
         Rectangle Border = {4.8  * xOffset - borderThickness/2 , 2 * yOffset - borderThickness/2, 12 * yOffset + borderThickness, 12 * yOffset + borderThickness};
         DrawRectangle(Border.x, Border.y, Border.width, Border.height, BLACK);
@@ -107,6 +113,24 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
                 DrawRectangle(destRect2.x, destRect2.y, destRect2.width, destRect2.height, grey);
             }
         }
+        //Draw right arrow
+        int cButtonRightX = 0;
+        if(buttonRightActive != true){
+            cButtonRightX = buttonRightOffX;
+        }
+            Rectangle sourceRect = {cButtonRightX, buttonRight, 32, 32};
+            Rectangle destRect = {GetScreenWidth()/2 + 4 * xOffset - 32, GetScreenHeight()/2, 128, 128};
+            DrawTexturePro(texturesToBeDeAllocated[1], sourceRect, destRect, {16,16}, 0.00f, WHITE);
+        //Draw left arrow 
+        int cButtonLeftX = 0;
+        if(buttonLeftActive != true){
+            cButtonLeftX = buttonLeftOffX;
+        }
+            Rectangle sourceRect2 = {cButtonLeftX, buttonLeft, 32, 32}; 
+            Rectangle destRect2 = {GetScreenWidth()/2 - (4 * xOffset + 8), GetScreenHeight()/2, 128, 128};
+            DrawTexturePro(texturesToBeDeAllocated[1], sourceRect2, destRect2, {16,16}, 0.00f, WHITE);
+        
+        
         
         //Add a thick border around the inventory
       //  Rectangle destRect = {2.4 * xOffset, yOffset, 6 * yOffset, 6 * yOffset}; DrawRectangleLines(destRect.x, destRect.y, destRect.width, destRect.height, BLACK);
