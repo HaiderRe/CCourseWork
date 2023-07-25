@@ -31,6 +31,8 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     std::vector<Texture2D> texturesToBeDeAllocated;
     mouseHandlerClass mouseHandlerObject;
     std::vector<inventoryItem> allInventoryItems; //Holds all the inventory items in the game, and their amount that the player has 
+    std::vector<inventoryItem> inventoryItems; //Holds the inventory items that the player has, and their amount
+    std::vector<Texture2D> inventoryTextures; //Holds the textures of the inventory items 
 
     int whichPause = -1;  //0 = pause menu, 1 = inventory, 2 = map
     void adminGiveAll(){
@@ -74,13 +76,30 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
     }
     int amountOfInventoryItems(){ // Returns the amount of inventory items that are in the inventory, by checking the amount of each item
+        inventoryItems.clear(); // Clear the vector so that it can be repopulated as otherwise it will just keep adding to the vector 
+        for(int t = 0; t < inventoryTextures.size(); t++){
+            UnloadTexture(inventoryTextures[t]);
+        }
+        inventoryTextures.clear(); // Clear the vector so that it can be repopulated 
         int total = 0;
         for(int i = 0; i < allInventoryItems.size(); i++){
             if(allInventoryItems[i].amount > 0){
                 total++;
+                inventoryItems.push_back(allInventoryItems[i]);
+                // inventoryTextures.push_back(LoadTexture(("Assets/Items/" + allInventoryItems[i].name).c_str())); // Load the texture of the item
             }
         }
         return total;
+    }
+    int getIndexOfinventoryTextures(std::string name){
+        for(int i = 0; i < inventoryTextures.size(); i++){
+            if(inventoryTextures[i].name == name){ // fix later
+                return i;
+            }
+        }
+        return -1;
+    }
+
     }
     void inventoryMenu(){ //Needs to Have buttons and logic including what invetory items are in the inventory
       //  std::string inventoryText = "Inventory"; 
@@ -107,6 +126,14 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         for(int i = 0; i <  12; i++){
             for(int j = 0; j < 12; j++){
                 Rectangle destRect = {4.8 * xOffset + (i * yOffset), 2 * yOffset + (j * yOffset) , yOffset + 4,  yOffset + 4};
+                if(inventoryItems.size() > (i + (j * 12) )){ // inventory items name is the same as the texture name
+                DrawTexturePro( // using inventoryTextures  fix later
+                 int indexOf = getIndexOfinventoryTextures(std::string inventoryItems[i + (j * 12) + (currentPage * 144)].name);
+                   DrawTexturePro(inventoryTextures, {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
+                   // DrawTexturePro(inventoryItems[], {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
+                    DrawText(std::to_string(inventoryItems[i + (j * 12) + (currentPage * 144)].amount).c_str(), destRect.x + 4, destRect.y + 4, 20, WHITE);
+                }
+               
                 // In each rectangle have a smaller rectangle that is a square that fits in the rectangle
                 Rectangle destRect2 = {4.8 * xOffset + (i * yOffset) + 2, 2 * yOffset + (j * yOffset) + 2, yOffset - 4,  yOffset - 4};
                // DrawRectangleLines(destRect.x, destRect.y, destRect.width, destRect.height, RED);
