@@ -51,7 +51,6 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
 
     for (std::filesystem::directory_iterator itr(path); itr != std::filesystem::directory_iterator(); ++itr) {
         if (itr->is_regular_file()) {
-            
             inventoryItem item;
             item.name = itr->path().filename().string();
             item.amount = 0;
@@ -67,21 +66,28 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/Orange_Button_Icons.png")); // Index is 1
          addAllInventoryItem();
          loadInventoryTextures();
-         adminGiveAll();
+         adminGiveAll(); // Stop Calling This after testing
     }                              
     std::vector<textureWrapper> textureDeAlloc;
     std::vector<Texture2D> getTexturesToBeDeAllocated(){
         return texturesToBeDeAllocated;
     }
-    void loadInventoryTextures(){ //Loads the textures of the inventory items
-        for(int i = 0; i < inventoryItems.size(); i++){
-                specialInvetory item; 
-                item.name = allInventoryItems[i].name;
-                item.texture = LoadTexture(("Assets/Items/" + allInventoryItems[i].name).c_str());
-                inventoryTextures.push_back(item); // Load the texture of the item        
-                texturesToBeDeAllocated.push_back(item.texture); // Add the texture to the textures to be DeAllocated vector
-       }
-    } 
+   void loadInventoryTextures(){ //Loads the textures of the inventory items
+    for(int i = 0; i < allInventoryItems.size(); i++){
+        specialInvetory item; 
+        item.name = allInventoryItems[i].name;
+        std::string filePath = "Assets/Items/" + allInventoryItems[i].name;
+        item.texture = LoadTexture(filePath.c_str());
+        if (item.texture.id <= 0) {
+            std::cerr << "Failed to load texture: " << filePath << std::endl;
+            continue;
+        }
+        inventoryTextures.push_back(item); // Load the texture of the item        
+        texturesToBeDeAllocated.push_back(item.texture); // Add the texture to the textures to be DeAllocated vector
+    }
+}
+ 
+
     bool DeAlloc(); //DeAllocates all the textures that are loaded
     void pauseMenu(){ //Needs to have buttons to go to options and quit and resume
         Rectangle sourceRect = {10,192,44,64};
@@ -141,20 +147,24 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         Rectangle Border = {4.8  * xOffset - borderThickness/2 , 2 * yOffset - borderThickness/2, 12 * yOffset + borderThickness, 12 * yOffset + borderThickness};
         DrawRectangle(Border.x, Border.y, Border.width, Border.height, BLACK);
         Color grey = {31, 36, 40, 255};
-        for(int i = 0; i <  12; i++){
-            for(int j = 0; j < 12; j++){
-                Rectangle destRect = {4.8 * xOffset + (i * yOffset), 2 * yOffset + (j * yOffset) , yOffset + 4,  yOffset + 4};
-                if(inventoryItems.size() > (i + (j * 12) )){ // inventory items name is the same as the texture name
-                 int indexOf = getIndexOfinventoryTextures(inventoryItems[i + (j * 12) + (currentPage * 144)].name);
-                   DrawTexturePro(inventoryTextures[indexOf].texture, {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
-                   // DrawTexturePro(inventoryItems[], {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
-                    DrawText(std::to_string(inventoryItems[i + (j * 12) + (currentPage * 144)].amount).c_str(), destRect.x + 4, destRect.y + 4, 20, WHITE);
-                }
-               
+        std::cout << "inventoryItems size: " << inventoryItems.size() << std::endl;
+       for(int i = 0; i <  12; i++){
+        for(int j = 0; j < 12; j++){
                 // In each rectangle have a smaller rectangle that is a square that fits in the rectangle
                 Rectangle destRect2 = {4.8 * xOffset + (i * yOffset) + 2, 2 * yOffset + (j * yOffset) + 2, yOffset - 4,  yOffset - 4};
                // DrawRectangleLines(destRect.x, destRect.y, destRect.width, destRect.height, RED);
                 DrawRectangle(destRect2.x, destRect2.y, destRect2.width, destRect2.height, grey);
+                if(inventoryItems.size() > (i + (j * 12) )){ 
+                Rectangle destRect = {4.8 * xOffset + (i * yOffset) + 16, 2 * yOffset + (j * yOffset) + 16 , yOffset + 4,  yOffset + 4};
+                int indexOf = getIndexOfinventoryTextures(inventoryItems[i + (j * 12) + (currentPage * 144)].name);
+                if (indexOf < 0) {
+                    std::cerr << "Invalid index for inventoryTextures: " << indexOf << std::endl;
+                    continue;
+                }
+                   DrawTexturePro(inventoryTextures[indexOf].texture, {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
+                   // DrawTexturePro(inventoryItems[], {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
+                    DrawText(std::to_string(inventoryItems[i + (j * 12) + (currentPage * 144)].amount).c_str(), destRect.x + 4, destRect.y + 4, 20, WHITE);
+                }
             }
         }
         //Draw right arrow
