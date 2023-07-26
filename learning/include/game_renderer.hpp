@@ -41,6 +41,9 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     int whichPause = -1;  //0 = pause menu, 1 = inventory, 2 = map
     void adminGiveAll(){
         std::clog << "Giving all items" << std::endl;
+        for(int i = 0; i < allInventoryItems.size(); i++){
+            allInventoryItems[i].amount = 1;
+        }
 
     }
     void addAllInventoryItem(){
@@ -63,12 +66,23 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/GUI.png")); // Index is 0
         texturesToBeDeAllocated.push_back(LoadTexture("Assets/UI/Orange_Button_Icons.png")); // Index is 1
          addAllInventoryItem();
+         loadInventoryTextures();
+         adminGiveAll();
     }                              
     std::vector<textureWrapper> textureDeAlloc;
     std::vector<Texture2D> getTexturesToBeDeAllocated(){
         return texturesToBeDeAllocated;
     }
-    bool DeAlloc();
+    void loadInventoryTextures(){ //Loads the textures of the inventory items
+        for(int i = 0; i < inventoryItems.size(); i++){
+                specialInvetory item; 
+                item.name = allInventoryItems[i].name;
+                item.texture = LoadTexture(("Assets/Items/" + allInventoryItems[i].name).c_str());
+                inventoryTextures.push_back(item); // Load the texture of the item        
+                texturesToBeDeAllocated.push_back(item.texture); // Add the texture to the textures to be DeAllocated vector
+       }
+    } 
+    bool DeAlloc(); //DeAllocates all the textures that are loaded
     void pauseMenu(){ //Needs to have buttons to go to options and quit and resume
         Rectangle sourceRect = {10,192,44,64};
         Rectangle destRect = {GetScreenWidth()/2, GetScreenHeight()/2, 264, 384};
@@ -80,21 +94,17 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         DrawText(inventoryText.c_str(), GetScreenWidth()/2, GetScreenHeight()/2, 20, WHITE);
     }
     int amountOfInventoryItems(){ // Returns the amount of inventory items that are in the inventory, by checking the amount of each item
-    if(false){ // False as we dont have any textures yet
+    if(true){ // False as we dont have any textures yet
         inventoryItems.clear(); // Clear the vector so that it can be repopulated as otherwise it will just keep adding to the vector 
-        for(int t = 0; t < inventoryTextures.size(); t++){
-            UnloadTexture(inventoryTextures[t].texture);
-        }
-        inventoryTextures.clear(); // Clear the vector so that it can be repopulated
     } 
         int total = 0;
         for(int i = 0; i < allInventoryItems.size(); i++){
             if(allInventoryItems[i].amount > 0){
                 total++;
-                if(false){ // False as we dont have any textures yet
-                inventoryItems.push_back(allInventoryItems[i]);
+                if(true){ // False as we dont have any textures yet
+                inventoryItems.push_back(allInventoryItems[i]); // Add the item to the inventoryItems vector
                 }
-                // inventoryTextures.push_back(LoadTexture(("Assets/Items/" + allInventoryItems[i].name).c_str())); // Load the texture of the item
+                
             }
         }
         return total;
@@ -135,8 +145,8 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
             for(int j = 0; j < 12; j++){
                 Rectangle destRect = {4.8 * xOffset + (i * yOffset), 2 * yOffset + (j * yOffset) , yOffset + 4,  yOffset + 4};
                 if(inventoryItems.size() > (i + (j * 12) )){ // inventory items name is the same as the texture name
-                 int indexOf = getIndexOfinventoryTextures(inventoryItems[i + (j * 12) + (currentPage * 144)].name); //This should be Off as we dont have any textures yet
-                   DrawTexturePro(inventoryTextures[indexOf].texture, {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE); // Same with this 
+                 int indexOf = getIndexOfinventoryTextures(inventoryItems[i + (j * 12) + (currentPage * 144)].name);
+                   DrawTexturePro(inventoryTextures[indexOf].texture, {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
                    // DrawTexturePro(inventoryItems[], {0,0,32,32}, destRect, {16,16}, 0.00f, WHITE);
                     DrawText(std::to_string(inventoryItems[i + (j * 12) + (currentPage * 144)].amount).c_str(), destRect.x + 4, destRect.y + 4, 20, WHITE);
                 }

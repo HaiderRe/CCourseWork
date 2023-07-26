@@ -2,7 +2,7 @@ from PIL import Image
 import os
 
 # Path to the directory containing the images
-img_dir = 'C:/Users/HaiderTheBot/Documents/GitHub/CCourseWork/learning/Assets/Items'
+img_dir = 'C:/Users/HaiderTheBot/Documents/GitHub/CCourseWork/learning/Assets/unSplit'
 # Path to the directory where you want to save the split images
 output_dir = 'C:/Users/HaiderTheBot/Documents/GitHub/CCourseWork/learning/Assets/split'
 
