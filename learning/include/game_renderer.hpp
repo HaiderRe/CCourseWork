@@ -44,7 +44,13 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         for(int i = 0; i < allInventoryItems.size(); i++){
             allInventoryItems[i].amount = 1;
         }
-
+    }
+    void giveItem(std::string name, int amount){
+        for(int i = 0; i < allInventoryItems.size(); i++){
+            if(allInventoryItems[i].name == name){
+                allInventoryItems[i].amount += amount;
+            }
+        }
     }
     void addAllInventoryItem(){
         std::string path = "./Assets/Items"; //Relative path to the items folder

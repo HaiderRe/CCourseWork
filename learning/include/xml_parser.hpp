@@ -205,7 +205,7 @@ std::cout << "File path: " << path << std::endl;
      }   
   //   std::cout<< "after datanode check" << std::endl;
   //   system("pause");
-   // std::stringstream stringstream(dataNode->value()); //Create string stream to read from CSV (Comma Seperated Values) formatted tile IDs
+   // std::stringstream stringstream(dataNode->value()); //Create string stream 
    std::string stringstream1 = dataNode->value();
    std::stringstream stringstream(stringstream1);
     std::string temp; //Temporarily store ID while reading
@@ -243,19 +243,19 @@ std::cout << "File path: " << path << std::endl;
         rapidxml::xml_node<>* secondDataNode = secondLayerNode->first_node("data"); // point to data node of the second layer
         if (secondDataNode) { // if the data node of the second layer exists
             tileIDsCollision = std::vector<std::vector<int>>(tilemapHeight, std::vector<int>(tilemapWidth)); // Create a vector of size the tile map's height and width for collision layer.
-            std::string stringstream2 = secondDataNode->value();
-            std::stringstream stringstreamCollision(stringstream2);
-            std::string tempCollision;
+            std::string stringstream2 = secondDataNode->value(); // Get the value of the data node
+            std::stringstream stringstreamCollision(stringstream2); // Create string stream to read from CSV formatted tile IDs
+            std::string tempCollision; //Temporarily store ID while reading
             int current_row_collision = 0;
             while(std::getline(stringstreamCollision, tempCollision) && current_row_collision < tilemapHeight) {
-                std::stringstream stringstreamcurrent_row_collision(tempCollision);
-                int current_column_collision = 0;
+                std::stringstream stringstreamcurrent_row_collision(tempCollision); // Create string stream to read from CSV formatted tile IDs
+                int current_column_collision = 0; 
                 while(std::getline(stringstreamcurrent_row_collision, tempCollision, ',') && current_column_collision < tilemapWidth) {
                     try {
                         tileIDsCollision[current_row_collision][current_column_collision] = std::stoi(tempCollision);
-                    } catch (const std::invalid_argument& e) {
+                    } catch (const std::invalid_argument& e) { //  Catch exceptions
                         std::cerr << "Invalid argument: " << tempCollision << std::endl;
-                    } catch (const std::out_of_range& e) {
+                    } catch (const std::out_of_range& e) { //Catch more exceptions
                         std::cerr << "Out of range: " << tempCollision << std::endl;
                     }
                     ++current_column_collision;

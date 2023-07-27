@@ -19,7 +19,8 @@ namespace mouseHandler{
             mousePos = GetMousePosition();
         }
         void draw(){
-            DrawCircle(mousePos.x, mousePos.y, 5, RED);
+            int width = 5;
+            DrawCircle(mousePos.x + width/2, mousePos.y + width/2, float(width), RED); 
         }
         Vector2 getMousePos(){
             return mousePos;
