@@ -69,6 +69,75 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
     }
   };
     // Path of the animation expects no .png and no Assets/ just the name of the file
+    class fxPlayer{
+      public:
+      std::vector<Texture2D> textures;
+      int currentFrame = 0;
+      int frames = 0; 
+      int frameSpeed = 6;
+      int amount_of_frames = 4;
+      int fWidth = 64; // Width of the source frame
+      int fHeight = 64; // Height of the source frame
+      int sWidth = 64;
+      int sHeight = 64;
+      float rotation = 0.00f;
+      Vector2 position = {0.00f, 0.00f};
+      Rectangle frameRec = {0.00f, 0.00f, 0.00f, 0.00f};
+      Texture2D texture1;
+      std::string path;
+      Rectangle sourceRec = {0.00f, 0.00f, 0.00f, 0.00f};
+      std::string currentAnim;
+      bool isPlaying = false;
+      int cDirection;
+      Vector2 mousePos = {0.00f, 0.00f};
+      fxPlayer(){
+        textures.push_back(LoadTexture(("Assets/player/03_FX/Skill_Cleave_FX.png")));
+        texture1 = textures[0];
+        frameRec.width = fWidth;
+        frameRec.height = fHeight;
+      }
+      void update(std::string cAnim, Vector2 playerPos, int direction){ // Update the animation, cAnim is the current Animation being played, Im thinking of having skills all use the same basic animation of the player and the rest being handled by the fxPlayer 
+        cDirection = direction;
+        position = playerPos;
+        currentAnim = cAnim;
+        mousePos = GetMousePosition();
+      }
+      void drawDecide(){
+        if(currentAnim == "Player/base/Base_Attack1"){
+          drawAOneFrame();
+        }
+      }
+      void drawAOneFrame(){
+        Rectangle destRec = { position.x + 32, position.y + 32, sWidth, sWidth};
+        Vector2 origin = { sWidth/2, sWidth/2 };
+        frameRec.x = cDirection * sWidth;
+        DrawTexturePro(texture1, frameRec, destRec, origin, rotation, WHITE);
+      }
+      void drawA(){
+        if(currentAnim != "Player/base/Base_Attack"){
+          frames = 0;
+          return;
+        }
+        std::cout << "is playing at frame " << frames << std::endl;
+        std::cout << "current frame is " << currentFrame << std::endl;
+        isPlaying = true;
+        frames++;
+        if (frames >= (60/frameSpeed)){
+          frames = 0;
+          currentFrame++;
+          if (currentFrame >= amount_of_frames) currentFrame = 0;
+          frameRec.x = currentFrame * sWidth;
+        }
+        Rectangle destRec = { position.x + 32, position.y + 32, sWidth, sWidth};
+        Vector2 origin = { sWidth/2, sWidth/2 };
+        DrawTexturePro(texture1, frameRec, destRec, origin, rotation, WHITE);
+      }
+      ~fxPlayer(){
+        for(int i = 0; i < textures.size(); i++){
+          UnloadTexture(textures[i]);
+        }
+      }
+    };
     class player{
         public:
         float xCord;
@@ -91,6 +160,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         void update(std::vector<std::vector<int>> collisionIDs);
         void movement();
         bool mapCollision(std::vector<std::vector<int>> collisionIDs);
+        fxPlayer fxPlayerObject;
         player(){
           std::vector<std::string> iPaths; // Idle Paths
           iPaths.push_back("Player/base/Base_Idle");
@@ -115,6 +185,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           iPaths1.push_back("Player/armor/06_fateful/Base_Attack_Fateful_Chest_1A");
           iPaths1.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Attack_EvolSix_1");
           iPaths1.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Attack_EvolSix_2");
+     
           playerAnims.addAnimation("Base_Attack", width, height, iPaths1); // Add the animation to the animation manager
           std::vector<std::string> iPaths2; // Walk Paths
           iPaths2.push_back("Player/base/Base_Walk");
@@ -219,11 +290,13 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         
     }
   void player::update(){
+    fxPlayerObject.update(currentAnim, destRecPos, direction);
     movement();
     currentAnim = playerAnims.currentAnimationPath();
   //  draw();
   }
   void player::update(std::vector<std::vector<int>> collisionIDs){
+    fxPlayerObject.update(currentAnim, destRecPos, direction);
     speedX = 0.00f;
     speedY = 0.00f;
     collisionIDsMap = collisionIDs;
@@ -234,6 +307,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
   
   void player::draw(){
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
+    fxPlayerObject.drawDecide();
   } 
   bool player::mapCollision(std::vector<std::vector<int>> collisionIDs){
    // std::clog<<"We are in the collsiion" << std::endl;
