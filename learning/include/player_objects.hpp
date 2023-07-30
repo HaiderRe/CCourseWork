@@ -10,6 +10,7 @@
 #include "animations.hpp"
 #include <vector>
 #include "json.hpp"
+#include "dialogue.hpp"
 namespace player_objects{
   class playerAnimations{
     public: 
@@ -41,7 +42,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
     }
     anim.amount_of_frames = anim.sWidth / width;
 }
-    void currentAnimationManager(){
+    void currentAnimationManager(){ // This finds the current animation in the animation manager 
       for(int i = 0; i < animations.size(); i++){
         if(animations[i].path == currentAnimation){
           pKey = i;
@@ -91,7 +92,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         void movement();
         bool mapCollision(std::vector<std::vector<int>> collisionIDs);
         player(){
-          std::vector<std::string> iPaths;
+          std::vector<std::string> iPaths; // Idle Paths
           iPaths.push_back("Player/base/Base_Idle");
           iPaths.push_back("Player/hair/Base_Idle_Hair_3");
           iPaths.push_back("Player/armor/06_fateful/Base_Idle_Fateful_Shoes_1");
@@ -102,8 +103,8 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           iPaths.push_back("Player/armor/06_fateful/Base_Idle_Fateful_Chest_1A");
           iPaths.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Idle_EvolSix_1");
           iPaths.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Idle_EvolSix_2");
-          playerAnims.addAnimation("Base_Idle", width, height, iPaths);
-          std::vector<std::string> iPaths1;
+          playerAnims.addAnimation("Base_Idle", width, height, iPaths); // Add the animation to the animation manager 
+          std::vector<std::string> iPaths1; // Attack Paths
           iPaths1.push_back("Player/base/Base_Attack");
           iPaths1.push_back("Player/hair/Base_Attack_Hair_3");
           iPaths1.push_back("Player/armor/06_fateful/Base_Attack_Fateful_Shoes_1");
@@ -114,8 +115,8 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           iPaths1.push_back("Player/armor/06_fateful/Base_Attack_Fateful_Chest_1A");
           iPaths1.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Attack_EvolSix_1");
           iPaths1.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Attack_EvolSix_2");
-          playerAnims.addAnimation("Base_Attack", width, height, iPaths1);
-          std::vector<std::string> iPaths2;
+          playerAnims.addAnimation("Base_Attack", width, height, iPaths1); // Add the animation to the animation manager
+          std::vector<std::string> iPaths2; // Walk Paths
           iPaths2.push_back("Player/base/Base_Walk");
           iPaths2.push_back("Player/hair/Base_Walk_Hair_3");
           iPaths2.push_back("Player/armor/06_fateful/Base_Walk_Fateful_Shoes_1");
@@ -126,9 +127,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           iPaths2.push_back("Player/armor/06_fateful/Base_Walk_Fateful_Chest_1A");
           iPaths2.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Walk_EvolSix_1");
           iPaths2.push_back("Player/weapons/01_Standard Weapon/6th Evolution/Weapon_Walk_EvolSix_2");
-          playerAnims.addAnimation("Base_Walk", width, height,iPaths2);
-          playerAnims.addAnimation("Base_Dead", width, height);
-          playerAnims.switchAnimation("Base_Idle");
+          playerAnims.addAnimation("Base_Walk", width, height,iPaths2); // Add the animation to the animation manager
+          playerAnims.addAnimation("Base_Dead", width, height); // Add the animation to the animation manager
+          playerAnims.switchAnimation("Base_Idle"); // Switch to the idle animation
 
        /*   playerAnims.addAnimation("player2", width, height);
           playerAnims.addAnimation("player3", width, height);
@@ -214,7 +215,8 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         // set poisition of the player in the animation manager using set_position
         playerAnims.currentAnimationManager();
-        playerAnims.animations[playerAnims.pKey].set_position(destRecPos.x, destRecPos.y);
+        playerAnims.animations[playerAnims.pKey].set_position(destRecPos.x, destRecPos.y); // Set the position of the animation manager to the player's position
+        
     }
   void player::update(){
     movement();

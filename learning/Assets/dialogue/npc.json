@@ -1,0 +1,32 @@
+{
+  "people": [
+    {
+      "id": 1,
+      "name": "Alice",
+      "dialogues": [
+        {
+          "id": "1,
+          "text": "Hello, how are you?"
+        },
+        {
+          "id": "2,
+          "text": "That's great to hear!"
+        }
+      ]
+    },
+    {
+      "id": 2",
+      "name": "Bob",
+      "dialogues": [
+        {
+          "id": "1,
+          "text": "I'm fine, thank you."
+        },
+        {
+          "id": 2,
+          "text": "I've been really busy lately."
+        }
+      ]
+    }
+  ]
+}

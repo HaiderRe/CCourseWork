@@ -46,6 +46,7 @@ int main(void)
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
     InitWindow(screenWidth, screenHeight, "Raylib Test");
+    InitAudioDevice(); // For sound
    
     int y_size = default_map.y_size;
     int y = 0;
@@ -134,6 +135,7 @@ int main(void)
     for(int j = 0; j < gameRenderer.getTexturesToBeDeAllocated().size(); j++){
       UnloadTexture(gameRenderer.getTexturesToBeDeAllocated()[j]);
     }
+    CloseAudioDevice(); // Close sound device
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

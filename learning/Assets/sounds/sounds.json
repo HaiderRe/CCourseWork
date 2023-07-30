@@ -1,0 +1,22 @@
+{
+  "sounds": [
+    {
+      "id": 1,
+      "name": "Sound1",
+      "description": "first sound",
+      "path": "sound1.wav"
+    },
+    {
+      "id": 2,
+      "name": "Sound2",
+      "description": "second sound",
+      "path": "sound2.wav"
+    },
+    {
+      "id": 3,
+      "name": "Sound3",
+      "description": "third sound",
+      "path": "sound3.wav"
+    }
+  ]
+}
