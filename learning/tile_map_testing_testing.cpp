@@ -105,6 +105,7 @@ int main(void)
             ClearBackground(WHITE);
             
             DrawFPS(10, 10);  // Draw current FPS
+            nPlayer.drawOffCamera();
             if(isPaused == false){
             BeginMode2D(camera.cam);
                 xmlFile.new_draw_tilemap();
