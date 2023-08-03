@@ -24,7 +24,7 @@ class skill{
       int fHeight = 64; // Height of the source frame
       int sWidth = 64;
       int sHeight = 64;
-      std::string typeOfSkill; // Possible Values: "Square", "Cirlce", "Line", "Buff"
+      std::string typeOfSkill = "NULL"; // Possible Values: "Square", "Cirlce", "Line", "Buff"
       float rotation = 0.00f;
       Vector2 position = {0.00f, 0.00f};
       Rectangle frameRec = {0.00f, 0.00f, 0.00f, 0.00f};
@@ -47,15 +47,10 @@ class skill{
         typeOfSkill = StypeOfSkill;
         skillIcon = LoadTexture(("Assets/player/icons/" + iconPath).c_str());
        }
-     ~skill(){
-        for(int i = 0; i < textures.size(); i++){
-          UnloadTexture(textures[i]);
-        }
-      }
     };
   std::vector<skill> getAllSkills(){
     std::vector<skill> skills; 
-    skills.push_back(skill("Skill_Cleave_FX.png", "Circle","369_BattleAxe.png"));
+    skills.push_back(skill("Skill_Cleave_FX.png", "Square","369_BattleAxe.png"));
     skills.push_back(skill("Skill_AncientSpear_1_FX.png", "Line","65_Light_Grimoire.png"));
     skills.push_back(skill("Skill_BringerOfChaos_FX.png", "Line", "73_Darkness_Grimoire.png"));
     skills.push_back(skill("Skill_CelestialJudgement_FX.png", "Line", "72_Light_Spear.png")); 

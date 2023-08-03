@@ -46,7 +46,7 @@ namespace animations_h {
             height = (float) texture1.height;
             std::cout << "called without wdith height and amount of frames" << std::endl; 
         }
-        animationManager(std::string iPath, std::vector<std::string> iPaths){
+        animationManager(std::string iPath, std::vector<std::string> iPaths){ 
             for(int i = 0; i < iPaths.size(); i++){
                 //std::cout << "the path of the texutre is " << "Assets/" + iPaths[i] + ".png" << std::endl;
                 texturesVector.push_back(LoadTexture(("Assets/" + iPaths[i] + ".png").c_str()));
@@ -89,14 +89,14 @@ namespace animations_h {
               currentFrame++;
              if (currentFrame >= 4){
                 currentFrame = 0;
-                std::cout << "is done  =" << isDone << std::endl;
+             //   std::cout << "is done  =" << isDone << std::endl;
                 if(isInfinte == false){
                     isDone = true;
                 }
               }
               frameRec.x = (float)currentFrame*(float)sWidth;
              }
-          std::cout << "current frame is " << currentFrame << std::endl;
+          // std::cout << "current frame is " << currentFrame << std::endl;
          //    std::cout << "frames is " << frames << std::endl;
          //    std::cout << "frame speed is " << frameSpeed << std::endl;
          //    std::cout << "60/framespeed is " << 60/frameSpeed << std::endl;
@@ -122,8 +122,8 @@ namespace animations_h {
               currentFrame++;
               if (currentFrame >= 4){
                 currentFrame = 0;
-                 std::cout << "is done  =" << isDone << std::endl;
-                 std::cout << "is infinite  =" << isInfinte << std::endl;   
+              //   std::cout << "is done  =" << isDone << std::endl;
+              //  std::cout << "is infinite  =" << isInfinte << std::endl;   
                 if(isInfinte == false){
                     isDone = true;
                 }

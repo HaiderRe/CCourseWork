@@ -12,15 +12,19 @@ namespace mouseHandler{
     class mouseHandlerClass{
         public:
         Vector2 mousePos;   
+        Texture2D mouseTexture;
         mouseHandlerClass(){
             mousePos = {0,0};
+            mouseTexture = LoadTexture("Assets/UI/crosshair005.png");
         }
         void update(){
             mousePos = GetMousePosition();
         }
         void draw(){
             int width = 5;
-            DrawCircle(mousePos.x + width/2, mousePos.y + width/2, float(width), RED); 
+          //  DrawCircle(mousePos.x + width/2, mousePos.y + width/2, float(width), RED); 
+          std::cout << " FUIHduoif " << std::endl;
+            DrawTexture(mouseTexture, mousePos.x, mousePos.y, WHITE);
         }
         Vector2 getMousePos(){
             return mousePos;

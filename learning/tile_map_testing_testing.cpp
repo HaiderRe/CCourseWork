@@ -48,7 +48,6 @@ int main(void)
     SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
     InitWindow(screenWidth, screenHeight, "Raylib Test");
     InitAudioDevice(); // For sound
-   
     int y_size = default_map.y_size;
     int y = 0;
     int x  = 0; 
@@ -71,12 +70,14 @@ int main(void)
  xmlFile.set_column();
  //xmlFile.make_tileset_file();
  SetExitKey(KEY_NULL);
+ SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
 
   
     // Main game loop
     while (!WindowShouldClose() && shouldClose != 1)    // Detect window close button or ESC key
     {
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
+        DisableCursor();
         // Update
         gameRenderer.update();
         gameRenderer.skillUpdate(nPlayer.skillManagerObject.skillSlotsObject.currentSkills, &nPlayer.skillManagerObject.skillSlotsObject.equippedSkills);
@@ -87,6 +88,7 @@ int main(void)
          camera.update();
         }
         else{
+          EnableCursor();
           shouldClose = gameRenderer.menuLogic();
         }
  
@@ -109,7 +111,9 @@ int main(void)
             DrawFPS(10, 10);  // Draw current FPS
             nPlayer.drawOffCamera();
             if(isPaused == false){
-            BeginMode2D(camera.cam);
+              
+  
+              BeginMode2D(camera.cam);
                 xmlFile.new_draw_tilemap();
                // default_map.draw();
                 nPlayer.draw();
@@ -117,6 +121,7 @@ int main(void)
                 
 
             EndMode2D();
+            mouseHandlerObject.draw();
             }
             else{
               if(gameRenderer.whichPause == 4){
@@ -153,6 +158,10 @@ int main(void)
       }
     UnloadTexture(nPlayer.skillManagerObject.skills[l].skillIcon);
     }
+    for(int c = 0; c < nPlayer.fxPlayerObject.textures.size(); c++){
+      UnloadTexture(nPlayer.fxPlayerObject.textures[c]);
+    }
+    UnloadTexture(mouseHandlerObject.mouseTexture);
     CloseAudioDevice(); // Close sound device
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

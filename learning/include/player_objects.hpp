@@ -86,10 +86,18 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       Vector2 position = {0.00f, 0.00f};
       Rectangle frameRec = {0.00f, 0.00f, 0.00f, 0.00f};
       Texture2D texture1;
+      Texture2D currentTexture;
+      std::string currentTypeOfSkill; // Possible Values: "Square", "Cirlce", "Line", "Buff"
       std::string path;
       Rectangle sourceRec = {0.00f, 0.00f, 0.00f, 0.00f};
       std::string currentAnim;
+      int current_amount_of_frames = 0;
+      int currentFrame1 = 0;
+      int frames1 = 0;
+      int frameSpeed1 = 6;
       bool isPlaying = false;
+      bool isDone = false;
+      bool isCastingN = false;
       int cDirection;
       Vector2 mousePos = {0.00f, 0.00f};
       fxPlayer(){
@@ -104,11 +112,71 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         currentAnim = cAnim;
         mousePos = GetMousePosition();
       }
+       void update(std::string cAnim, Vector2 playerPos, int direction, Vector2 mousePos2){ // Update the animation, cAnim is the current Animation being played, Im thinking of having skills all use the same basic animation of the player and the rest being handled by the fxPlayer 
+        cDirection = direction;
+        position = playerPos;
+        currentAnim = cAnim;
+        mousePos = GetMousePosition();
+      }
+      void update(Texture2D skillTexture, Vector2 playerPos, int direction, Vector2 mousePos2, std::string typeOfSkill1){ // Update the animation, cAnim is the current Animation being played, Im thinking of having skills all use the same basic animation of the player and the rest being handled by the fxPlayer 
+        cDirection = direction;
+        position = playerPos;
+        currentTexture = skillTexture;
+        currentTypeOfSkill = typeOfSkill1;
+        mousePos = mousePos2;
+      }
+      float calcRotation(){
+        float x = mousePos.x - position.x;
+        float y = mousePos.y - position.y;
+        float rotation = atan2(y, x); // Use trig to find the rotation
+        return rotation;
+      }
       void drawDecide(){
+        std::clog << " in draw Decided" << std::endl;
+        if(currentTexture.id == 0){
+          std::clog << "current texture is 0" << std::endl;
+          return;
+        }
         if(currentAnim == "Player/base/Base_Attack1"){
           drawAOneFrame();
+          return;
+        }
+        if(isCastingN){
+        drawFx();
         }
       }
+      void drawSquare(){
+        Rectangle destRec = {mousePos.x, mousePos.y, 128, 128};
+        int maxFrames = currentTexture.width / 64;
+        Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+        frames1++;
+        if(frames1 > (60/frameSpeed1)){
+          frames1 = 0;
+          currentFrame1++;
+          if(currentFrame1 >= maxFrames){
+            currentFrame1 = 0;
+          }
+        }
+        DrawTexturePro(currentTexture, frameRec1, destRec, {64, 64}, calcRotation(), WHITE);
+      }
+      void drawCircle(){}
+      void drawLine(){}
+      void drawBuff(){} 
+      void drawFx(){
+        if(currentTypeOfSkill == "Square"){
+          drawSquare();
+        }
+        else if(currentTypeOfSkill == "Circle"){
+          drawCircle();
+        }
+        else if(currentTypeOfSkill == "Line"){
+          drawLine();
+        }
+        else if(currentTypeOfSkill == "Buff"){
+          drawBuff();
+        }
+      }
+
       void drawAOneFrame(){
         Rectangle destRec = { position.x + 32, position.y + 32, sWidth, sWidth};
         Vector2 origin = { sWidth/2, sWidth/2 };
@@ -127,7 +195,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         if (frames >= (60/frameSpeed)){
           frames = 0;
           currentFrame++;
-          if (currentFrame >= amount_of_frames) currentFrame = 0;
+          if (currentFrame >= amount_of_frames){
+            isDone = true;
+          }
           frameRec.x = currentFrame * sWidth;
         }
         Rectangle destRec = { position.x + 32, position.y + 32, sWidth, sWidth};
@@ -135,6 +205,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         DrawTexturePro(texture1, frameRec, destRec, origin, rotation, WHITE);
       }
       ~fxPlayer(){
+        std::clog << "In deconstructor of fxPlayer" << std::endl;
         for(int i = 0; i < textures.size(); i++){
           UnloadTexture(textures[i]);
         }
@@ -177,6 +248,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       skillSlots skillSlotsObject;
       int currentSkill;
       std::string currentSkillName;
+      bool isCasting = false;
+      std::string skillType;
+      fxPlayer fxPlayerObject;
       skillManager(){
         skillSlotsObject.getAllSkills2();
         skillSlotsObject.adminGiveAllSkills();
@@ -189,12 +263,41 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       }
       void draw(){
         skillSlotsObject.draw();
+        fxPlayerObject.drawDecide();
       }
-      void update(){
-        if(IsKeyPressed(KEY_ONE)){
-          currentSkill = 0;
-          currentSkillName = "Skill_Cleave_FX"; // Whatever
+      void update(Vector2 playerPos, int direction){
+        if(fxPlayerObject.isDone == true){
+          fxPlayerObject.isDone = false;
+          fxPlayerObject.isCastingN = false;
+          isCasting = false;
         }
+      if(!isCasting || true){
+        if(IsKeyDown(KEY_ONE)){
+          currentSkill = 0;
+          std::cout << "current skill is " << currentSkill << std::endl;
+        }
+        else if(IsKeyPressed(KEY_TWO)){
+          currentSkill = 1;
+        }
+        else if(IsKeyPressed(KEY_THREE)){
+          currentSkill = 2;
+        }
+        else if(IsKeyPressed(KEY_FOUR)){
+          currentSkill = 3;
+        }
+        if(skillSlotsObject.equippedSkills.size() > currentSkill){
+          std::cout << " in the if statement" << std::endl;
+          currentSkillName = skillSlotsObject.equippedSkills[currentSkill].path;
+          Texture2D skillTexture = skillSlotsObject.equippedSkills[currentSkill].texture1;
+          fxPlayerObject.isCastingN = true;
+          fxPlayerObject.update(skillTexture, playerPos, direction, GetMousePosition(), skillSlotsObject.equippedSkills[currentSkill].typeOfSkill);
+          isCasting = true;
+        }
+        else{
+          currentSkillName = "None";
+          currentSkill = -1;
+        }
+      }
         
       }
     };
@@ -354,13 +457,15 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         
     }
   void player::update(){
-    fxPlayerObject.update(currentAnim, destRecPos, direction);
+ //   fxPlayerObject.update(currentAnim, destRecPos, direction);
+    skillManagerObject.update(destRecPos, direction);
     movement();
     currentAnim = playerAnims.currentAnimationPath();
   //  draw();
   }
   void player::update(std::vector<std::vector<int>> collisionIDs){
-    fxPlayerObject.update(currentAnim, destRecPos, direction);
+ //   fxPlayerObject.update(currentAnim, destRecPos, direction);
+    skillManagerObject.update(destRecPos, direction);
     speedX = 0.00f;
     speedY = 0.00f;
     collisionIDsMap = collisionIDs;
@@ -373,7 +478,8 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
   }
   void player::draw(){
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
-    fxPlayerObject.drawDecide();
+    skillManagerObject.draw();
+   // fxPlayerObject.drawDecide();
   } 
   bool player::mapCollision(std::vector<std::vector<int>> collisionIDs){
    // std::clog<<"We are in the collsiion" << std::endl;
@@ -385,8 +491,8 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
     // int playerY = destRecPos.y / 16;
     int playerX = (destRecPos.x + speedX) / 16; // player cordinates to tile map cordiantes
     int playerY = (destRecPos.y + speedY) / 16;
-    std::clog << "player x " << playerX << " player y " << playerY << std::endl;
-    std::clog << "collision vector at player x " << collisionIDs[playerY][playerX] << std::endl;
+   // / std::clog << "player x " << playerX << " player y " << playerY << std::endl;
+   // / std::clog << "collision vector at player x " << collisionIDs[playerY][playerX] << std::endl;
     // Later Change collision Code as this is garbage
     if(collisionIDs[playerY][playerX] != 0){ // check the tile cord against the tile map in each direction and move the player back if they are colliding by getting the animation direction
       isColliding = true;

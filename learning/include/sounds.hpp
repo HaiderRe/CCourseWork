@@ -47,7 +47,7 @@ namespace sounds_NS{
         void addSound(std::string path){
             soundManagerObject->addSound(sounds(path));
         }
-        void getSoundToAdd(){
+        void getSoundToAdd(){ // Call this first 
                 std::ifstream filestream("Assets/sounds/sounds.json");
                 std::stringstream buffer;
                 buffer << filestream.rdbuf();
