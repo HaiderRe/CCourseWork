@@ -11,6 +11,8 @@
 #include <filesystem>
 #include "tile_map.hpp"
 #include "mouseHandler.hpp"
+#include "skillDec.hpp"
+using namespace skills_NS;
 namespace enemy_objects_h_1 {
     class projectile;
 };
@@ -37,7 +39,9 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
     std::vector<inventoryItem> allInventoryItems; //Holds all the inventory items in the game, and their amount that the player has 
     std::vector<inventoryItem> inventoryItems; //Holds the inventory items that the player has, and their amount
     std::vector<specialInvetory> inventoryTextures; //Holds the textures of the inventory items 
-
+    std::vector<skill> currentlyOwnedSkills;  // Holds the skills that the player has
+    std::vector<skill>* equippedSkills; // Holds the skills that the player has equipped
+    int skillMenuIndex = 0;
     int whichPause = -1;  //0 = pause menu, 1 = inventory, 2 = map
     void adminGiveAll(){
         std::clog << "Giving all items" << std::endl;
@@ -224,8 +228,62 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         }
         return 0;
     }
+    void skillUpdate(std::vector<skill> skills1, std::vector<skill>* skills2){
+        currentlyOwnedSkills = skills1;
+        equippedSkills = skills2;
+    }
+
+    
+    void skillMenu(){
+        Color grey = {128,128,128, 255};
+        Color highlightColor = {0, 123, 255, 100};
+        Vector2 mousePos = GetMousePosition();
+        for(int i = 0; i < currentlyOwnedSkills.size(); i++){
+            // Draw the backround Rectangle for colour
+            DrawRectangle((GetScreenWidth()/2 + (i * 64) - 32)- (currentlyOwnedSkills.size() * 32), GetScreenHeight()/2 - 32, 64, 64,grey);
+            // Draw the skill icon
+            DrawTexturePro(currentlyOwnedSkills[i].skillIcon, {0,0,32,32}, {float(GetScreenWidth()/2 + (i * 64) - (currentlyOwnedSkills.size() * 32)), float(GetScreenHeight()/2), 64, 64}, {32,32}, 0.00f, WHITE);
+             // Draw Outlines
+            DrawRectangleLines(float(GetScreenWidth()/2 + (i * 64) - 32) - (currentlyOwnedSkills.size() * 32), float(GetScreenHeight()/2 - 32), 64, 64, BLACK);
+            // Draw Text for Number on the bottom right of skill 
+            DrawText(std::to_string(i + 1).c_str(), float(GetScreenWidth()/2 + (i * 64) - 32) - (currentlyOwnedSkills.size() * 32) + 48, float(GetScreenHeight()/2 - 32) + 48, 20, WHITE);
+            //Draw text where the skill slots 
+            if(i < 4){
+            DrawText(std::to_string(i + 1).c_str(), float(GetScreenWidth()/2 - 128) + (i * 64) , float(GetScreenHeight() - 64), 20, WHITE);
+            }
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(mousePos, {float(GetScreenWidth()/2 + (i * 64) - 32) - (currentlyOwnedSkills.size() * 32), float(GetScreenHeight()/2 - 32), 64, 64})){
+                std::cout << "size of equippedSkills is " << equippedSkills->size() << std::endl;
+                if(equippedSkills->size() > 3){
+                    equippedSkills->erase(equippedSkills->begin() + skillMenuIndex); // removes first element of the vector
+                    equippedSkills->insert(equippedSkills->begin() + skillMenuIndex,currentlyOwnedSkills[i]); // inserts the skill into the vector
+                    skillMenuIndex++; // increments the skillMenuIndex
+                    if(skillMenuIndex > 3){
+                        skillMenuIndex = 0;
+                    }
+                }
+                else{
+                    equippedSkills->push_back(currentlyOwnedSkills[i]);
+                }
+                
+            }
+        }
+        if(equippedSkills->size() > 3){ //adds highlight to the currently selected skill
+        Rectangle destRec = { 0, 0, 64, 64};
+        destRec.x = (GetScreenWidth()/2 - 128) + (skillMenuIndex * 64);
+        destRec.y = GetScreenHeight() - 64;
+        DrawRectangle(destRec.x, destRec.y, destRec.width, destRec.height, highlightColor); 
+        }
+        
+       
+    }
     void drawPauseMenu(){
-        ClearBackground(BLACK);
+        if(whichPause == -1){
+            return;
+        }
+        if(whichPause != 4){
+          ClearBackground(BLACK);
+        }
+        
         Color pBlue = {182, 208, 226,255};
  
         if(whichPause == 0){  //0 = pause menu, 1 = inventory, 2 = map, 3 = options
@@ -245,9 +303,11 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
         else if(whichPause == 2){
             mapMenu();
         }
-        else if(whichPause == 3){
-            
+        else if(whichPause == 3){  
             optionLogic();
+        }
+        else if(whichPause == 4){
+            skillMenu();
         }
     }
     
@@ -274,6 +334,15 @@ namespace game_renderer_h_1{ //One of the functions of this namespace is to be g
             gameIsPaused = !gameIsPaused;
             if(gameIsPaused == true){
                 whichPause = 2;
+            }
+            else{
+                whichPause = -1;
+            }
+        }
+        if(IsKeyPressed(KEY_L)){
+            gameIsPaused = !gameIsPaused;
+            if(gameIsPaused == true){
+                whichPause = 4;
             }
             else{
                 whichPause = -1;

@@ -45,6 +45,7 @@ int main(void)
    tilemap default_map; 
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
+    SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
     InitWindow(screenWidth, screenHeight, "Raylib Test");
     InitAudioDevice(); // For sound
    
@@ -78,6 +79,7 @@ int main(void)
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         // Update
         gameRenderer.update();
+        gameRenderer.skillUpdate(nPlayer.skillManagerObject.skillSlotsObject.currentSkills, &nPlayer.skillManagerObject.skillSlotsObject.equippedSkills);
         bool isPaused;
         isPaused =  gameRenderer.getGameIsPaused();
         if(isPaused == false){
@@ -117,6 +119,15 @@ int main(void)
             EndMode2D();
             }
             else{
+              if(gameRenderer.whichPause == 4){
+                BeginMode2D(camera.cam);
+                // Apply custom shader to screen using custom code no get shader but using pixel transformations
+                
+                xmlFile.new_draw_tilemap();
+                nPlayer.draw();
+
+                EndMode2D();
+              }
               gameRenderer.drawPauseMenu();
               
             }
@@ -135,6 +146,12 @@ int main(void)
     // UnloadTexture(nPlayer.playerAnims.animations[0].texture1);
     for(int j = 0; j < gameRenderer.getTexturesToBeDeAllocated().size(); j++){
       UnloadTexture(gameRenderer.getTexturesToBeDeAllocated()[j]);
+    }
+    for(int l = 0; l < nPlayer.skillManagerObject.skills.size(); l++){
+      for(int p = 0; p < nPlayer.skillManagerObject.skills[l].textures.size(); p++){
+      UnloadTexture(nPlayer.skillManagerObject.skills[l].textures[p]);
+      }
+    UnloadTexture(nPlayer.skillManagerObject.skills[l].skillIcon);
     }
     CloseAudioDevice(); // Close sound device
     CloseWindow();        // Close window and OpenGL context

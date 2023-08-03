@@ -11,6 +11,8 @@
 #include <vector>
 #include "json.hpp"
 #include "dialogue.hpp"
+#include "skillDec.hpp"
+using namespace skills_NS;
 namespace player_objects{
   class playerAnimations{
     public: 
@@ -138,78 +140,34 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
       }
     };
-    class skill{
-      public: 
-      std::vector<Texture2D> textures;
-      int currentFrame = 0;
-      int frames = 0;
-      int frameSpeed = 6;
-      int amount_of_frames = 4;
-      int fWidth = 64; // Width of the source frame
-      int fHeight = 64; // Height of the source frame
-      int sWidth = 64;
-      int sHeight = 64;
-      std::string typeOfSkill; // Possible Values: "Square", "Cirlce", "Line", "Buff"
-      float rotation = 0.00f;
-      Vector2 position = {0.00f, 0.00f};
-      Rectangle frameRec = {0.00f, 0.00f, 0.00f, 0.00f};
-      Texture2D texture1;
-      std::string path;
-      Rectangle sourceRec = {0.00f, 0.00f, 0.00f, 0.00f};
-      Texture2D skillIcon;
-      skill(std::string path, std::string StypeOfSkill){
-        textures.push_back(LoadTexture(("Assets/player/03_FX/" + path).c_str()));
-        texture1 = textures[0];
-        frameRec.width = fWidth;
-        frameRec.height = fHeight;
-        typeOfSkill = StypeOfSkill;
-       }
-       skill(std::string path , std::string StypeOfSkill, std::string iconPath){
-        textures.push_back(LoadTexture(("Assets/player/03_FX/" + path).c_str()));
-        texture1 = textures[0];
-        frameRec.width = fWidth;
-        frameRec.height = fHeight;
-        typeOfSkill = StypeOfSkill;
-        skillIcon = LoadTexture(("Assets/player/icons/" + iconPath).c_str());
-       }
-     ~skill(){
-        for(int i = 0; i < textures.size(); i++){
-          UnloadTexture(textures[i]);
-        }
-      }
-    };
-  std::vector<skill> getAllSkills(){
-    std::vector<skill> skills; 
-    skills.push_back(skill("Skill_Cleave_FX.png", "Circle","369_BattleAxe.png"));
-    skills.push_back(skill("Skill_AncientSpear_1_FX.png", "Line","65_Light_Grimoire.png"));
-    skills.push_back(skill("Skill_BringerOfChaos_FX.png", "Line", "73_Darkness_Grimoire.png"));
-    skills.push_back(skill("Skill_CelestialJudgement_FX.png", "Line", "72_Light_Spear.png")); 
-    skills.push_back(skill("Skill_CutTheSky_FX.png", "Circle", "386_Lightning_Battleaxe.png"));
-    skills.push_back(skill("Skill_GroundStomp_FX.png", "Line", "37_Earth_III.png"));
-    skills.push_back(skill("Skill_MagmaReaction_FX.png", "Line", "01_Fire_Grimoire.png"));
-    skills.push_back(skill("Skill_SoulFeast_FX.png", "Line", "73_Darkness_Grimoire.png"));
-    skills.push_back(skill("Skill_Zayvris_FX.png", "Line", "25_Cloud_Grimoire.png"));
-    skills.push_back(skill("Skill_Whirlwind_FX.png", "Line", "462_Air_Tornado.png"));
-    return skills;    
-  }
+    
   class skillSlots{
       public:
       std::vector<skill> skills;
       std::vector<skill> currentSkills;
+      std::vector<skill> equippedSkills;
       void addSkill(std::string path, std::string typeOfSkill){
         skills.push_back(skill(path, typeOfSkill));
       }
       void getAllSkills2(){
         skills = getAllSkills();
       }
+      void adminGiveAllSkills(){
+        currentSkills = skills;
+      }
       void draw(){
         std::cout<< " in draw function for skillSlots" << std::endl;
         Rectangle destRec = { 0, 0, 64, 64};
+        Rectangle FrameRec = {0, 0 , 32, 32};
         Color grey = {31, 36, 40, 255};
         for(int i = 0; i < 4; i++){
           destRec.x = (GetScreenWidth()/2 - 128) + (i * 64);
           destRec.y = GetScreenHeight() - 64;
-          DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, grey); // HI
+          DrawRectangle(destRec.x, destRec.y, destRec.width, destRec.height, grey); 
+          DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, WHITE); 
+          if(equippedSkills.size() > i){
+            DrawTexturePro(equippedSkills[i].skillIcon, FrameRec, destRec, {0,0}, 0.00f, WHITE);
+          }
         }
       }
     };
@@ -221,6 +179,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       std::string currentSkillName;
       skillManager(){
         skillSlotsObject.getAllSkills2();
+        skillSlotsObject.adminGiveAllSkills();
       }
       void addSkill(std::string path, std::string typeOfSkill){
         skills.push_back(skill(path, typeOfSkill));
@@ -270,7 +229,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           std::vector<std::string> iPaths; // Idle Paths
           iPaths.push_back("Player/base/Base_Idle");
           iPaths.push_back("Player/hair/Base_Idle_Hair_3");
-          iPaths.push_back("Player/armor/06_fateful/Base_Idle_Fateful_Shoes_1");
+          iPaths.push_back("Player/armor/06_fateful/Base_Idle_Fateful_Shoes_1"); 
           iPaths.push_back("Player/armor/06_fateful/Base_Idle_Fateful_Pants_1");
           iPaths.push_back("Player/armor/06_fateful/Base_Idle_Fateful_Gloves_1");
           iPaths.push_back("Player/armor/06_fateful/Base_Idle_Fateful_Chest_1");
@@ -380,7 +339,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         if(isRight == false && isLeft == false){
           changeRotation1(0.00f);
         }
-        if(isRight == false && isLeft == false && vert == false && currentAnim != "Player/base/Base_Attack"){
+        if(isRight == false && isLeft == false && vert == false && currentAnim != "Player/base/Base_Attack" && currentAnim != "Player/base/Base_Idle"){
           switchAnimation("Player/base/Base_Idle");
           currentAnim = "Player/base/Base_Idle";
         }
