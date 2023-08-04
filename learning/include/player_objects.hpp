@@ -99,7 +99,11 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       bool isDone = false;
       bool isCastingN = false;
       int cDirection;
+      int extraFrames1 = 0;
+      Camera2D camera1;
       Vector2 mousePos = {0.00f, 0.00f};
+      Vector2 FMousePos = {0.00f, 0.00f};
+      Vector2 intialCamOffset = {0.00f, 0.00f};
       fxPlayer(){
         textures.push_back(LoadTexture(("Assets/player/03_FX/Skill_Cleave_FX.png")));
         texture1 = textures[0];
@@ -118,53 +122,133 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         currentAnim = cAnim;
         mousePos = GetMousePosition();
       }
-      void update(Texture2D skillTexture, Vector2 playerPos, int direction, Vector2 mousePos2, std::string typeOfSkill1){ // Update the animation, cAnim is the current Animation being played, Im thinking of having skills all use the same basic animation of the player and the rest being handled by the fxPlayer 
+      void update(Texture2D skillTexture, Vector2 playerPos, int direction, Vector2 mousePos2, std::string typeOfSkill1, bool isCastingN1){ // Update the animation, cAnim is the current Animation being played, Im thinking of having skills all use the same basic animation of the player and the rest being handled by the fxPlayer 
         cDirection = direction;
         position = playerPos;
         currentTexture = skillTexture;
         currentTypeOfSkill = typeOfSkill1;
         mousePos = mousePos2;
+        isCastingN = isCastingN1;
       }
       float calcRotation(){
-        float x = mousePos.x - position.x;
-        float y = mousePos.y - position.y;
+        float x = FMousePos.x - position.x;
+        float y = FMousePos.y - position.y;
         float rotation = atan2(y, x); // Use trig to find the rotation
         return rotation;
       }
-      void drawDecide(){
-        std::clog << " in draw Decided" << std::endl;
+      float calcRotation(Camera2D camera){
+       Vector2 mousePosWorld = GetScreenToWorld2D(FMousePos, camera);
+       Vector2 positionWorld = GetScreenToWorld2D(position, camera); 
+      float x = mousePosWorld.x - positionWorld.x;
+      float y = mousePosWorld.y - positionWorld.y;
+      float rotation = atan2(y, x); // Use trig to find the rotation
+      return rotation;
+      }
+      void GetCollisionBetweenEnemies(Rectangle aRect){
+        return; 
+      }
+      void hitBoxDrawSquare(){
+       Rectangle hitBox =  {FMousePos.x, FMousePos.y, 128, 128};
+       GetCollisionBetweenEnemies(hitBox);
+      }
+      void hitBoxDrawCircle(){
+
+      }
+      void hitBoxDrawLine(){
+
+      }
+      void hitBoxDrawBuff(){
+
+      }
+      void hitBoxDecide(){
+        if(isCastingN == false){
+          return;
+        }
+        if(currentTypeOfSkill == "Square"){
+          hitBoxDrawSquare();
+        }
+        else if(currentTypeOfSkill == "Circle"){
+          hitBoxDrawCircle();
+        }
+        else if(currentTypeOfSkill == "Line"){
+          hitBoxDrawLine();
+        }
+        else if(currentTypeOfSkill == "Buff"){
+          hitBoxDrawBuff();
+        }
+      }
+
+      void drawDecide(Camera2D aCamera){
+        camera1 = aCamera;
+        int extraFrames = extraFrames1;
+        std::clog << " in draw Decided"  + std::to_string(isCastingN) << std::endl;
         if(currentTexture.id == 0){
           std::clog << "current texture is 0" << std::endl;
           return;
         }
         if(currentAnim == "Player/base/Base_Attack1"){
           drawAOneFrame();
+          std::clog << "DrawAoneFrame" << std::endl;
           return;
         }
-        if(isCastingN){
-        drawFx();
+        if(isCastingN && isDone == false){ // 
+          std::clog << " is casting" << std::endl;
+         drawFx(extraFrames);
         }
       }
-      void drawSquare(){
-        Rectangle destRec = {mousePos.x, mousePos.y, 128, 128};
+
+      void drawSquare(int extraFrames){
+        if(FMousePos.x == 0 && FMousePos.y == 0){
+          FMousePos = GetMousePosition();
+          intialCamOffset = camera1.offset;
+        }
+        std::cout << " in draw square" << std::endl;
+        Rectangle destRec = {FMousePos.x, FMousePos.y, 128, 128};
         int maxFrames = currentTexture.width / 64;
         Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
         frames1++;
         if(frames1 > (60/frameSpeed1)){
           frames1 = 0;
           currentFrame1++;
-          if(currentFrame1 >= maxFrames){
+          if(currentFrame1 >= maxFrames + extraFrames){
             currentFrame1 = 0;
+            isDone = true;
+            FMousePos = {0.00f, 0.00f};
           }
         }
-        DrawTexturePro(currentTexture, frameRec1, destRec, {64, 64}, calcRotation(), WHITE);
+        DrawTexturePro(currentTexture, frameRec1, destRec, {64, 64},  calcRotation() * (180.0f/PI), RED);
       }
+     void SdrawSquare(int extraFrames){
+    if(FMousePos.x == 0 && FMousePos.y == 0){
+       FMousePos = GetScreenToWorld2D(GetMousePosition(), camera1);
+   }
+   int width = 32;
+   Rectangle destRec = {FMousePos.x + width/2, FMousePos.y + width/2, width, width};
+
+   int maxFrames = currentTexture.width / 64;
+   Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+
+   frames1++;
+   if(frames1 > (60/frameSpeed1)){
+       frames1 = 0;
+       currentFrame1++;
+       if(currentFrame1 >= maxFrames + extraFrames){
+           currentFrame1 = 0;
+           isDone = true;
+           FMousePos = {0.0f, 0.0f};
+       }
+   }
+
+   DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
+}
+
       void drawCircle(){}
       void drawLine(){}
       void drawBuff(){} 
-      void drawFx(){
+      void drawFx(int extraFrames){
+        std::cout << " in draw fx " + currentTypeOfSkill << std::endl;
         if(currentTypeOfSkill == "Square"){
-          drawSquare();
+          SdrawSquare(extraFrames);
         }
         else if(currentTypeOfSkill == "Circle"){
           drawCircle();
@@ -261,20 +345,24 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       void getCurrentSkillSlots(){
         // Fill code later 
       }
-      void draw(){
+      void normalDraw(){
         skillSlotsObject.draw();
-        fxPlayerObject.drawDecide();
+      }
+      void draw(Camera2D camera100){
+        fxPlayerObject.drawDecide(camera100);
       }
       void update(Vector2 playerPos, int direction){
-        if(fxPlayerObject.isDone == true){
+      if(fxPlayerObject.isDone == true){
           fxPlayerObject.isDone = false;
           fxPlayerObject.isCastingN = false;
           isCasting = false;
+          currentSkill = -1;
+          fxPlayerObject.extraFrames1 = 0;
         }
-      if(!isCasting || true){
-        if(IsKeyDown(KEY_ONE)){
+      if(!isCasting){
+        if(IsKeyPressed(KEY_ONE)){
           currentSkill = 0;
-          std::cout << "current skill is " << currentSkill << std::endl;
+          fxPlayerObject.extraFrames1 = 1; // Theortical testing for upgradable skills
         }
         else if(IsKeyPressed(KEY_TWO)){
           currentSkill = 1;
@@ -285,13 +373,14 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         else if(IsKeyPressed(KEY_FOUR)){
           currentSkill = 3;
         }
-        if(skillSlotsObject.equippedSkills.size() > currentSkill){
+        if(skillSlotsObject.equippedSkills.size() > currentSkill && currentSkill != -1){
           std::cout << " in the if statement" << std::endl;
           currentSkillName = skillSlotsObject.equippedSkills[currentSkill].path;
-          Texture2D skillTexture = skillSlotsObject.equippedSkills[currentSkill].texture1;
+         Texture2D skillTexture = skillSlotsObject.equippedSkills[currentSkill].textures[0];
           fxPlayerObject.isCastingN = true;
-          fxPlayerObject.update(skillTexture, playerPos, direction, GetMousePosition(), skillSlotsObject.equippedSkills[currentSkill].typeOfSkill);
+          
           isCasting = true;
+          fxPlayerObject.update(skillTexture, playerPos, direction, GetMousePosition(), skillSlotsObject.equippedSkills[currentSkill].typeOfSkill, isCasting);
         }
         else{
           currentSkillName = "None";
@@ -320,6 +409,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         std::vector<std::vector<int>> collisionIDsMap;
         Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         int health; 
+        Camera2D camera1;
         void draw();
         void update();
         void update(std::vector<std::vector<int>> collisionIDs);
@@ -474,11 +564,11 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
   //  draw();
   }
   void player::drawOffCamera(){
-    skillManagerObject.draw();
+   skillManagerObject.normalDraw();
   }
   void player::draw(){
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
-    skillManagerObject.draw();
+    skillManagerObject.draw(camera1);
    // fxPlayerObject.drawDecide();
   } 
   bool player::mapCollision(std::vector<std::vector<int>> collisionIDs){

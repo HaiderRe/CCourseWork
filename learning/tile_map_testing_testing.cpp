@@ -116,6 +116,7 @@ int main(void)
               BeginMode2D(camera.cam);
                 xmlFile.new_draw_tilemap();
                // default_map.draw();
+                nPlayer.camera1 = camera.cam;
                 nPlayer.draw();
 
                 

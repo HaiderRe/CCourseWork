@@ -47,7 +47,7 @@ class skill{
         typeOfSkill = StypeOfSkill;
         skillIcon = LoadTexture(("Assets/player/icons/" + iconPath).c_str());
        }
-    };
+    }; 
   std::vector<skill> getAllSkills(){
     std::vector<skill> skills; 
     skills.push_back(skill("Skill_Cleave_FX.png", "Square","369_BattleAxe.png"));
