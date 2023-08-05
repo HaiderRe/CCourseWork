@@ -100,10 +100,14 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       bool isCastingN = false;
       int cDirection;
       int extraFrames1 = 0;
+      int lineChunks = 0;
+      Vector2 currentPos;
+      float progressStep;
       Camera2D camera1;
       Vector2 mousePos = {0.00f, 0.00f};
       Vector2 FMousePos = {0.00f, 0.00f};
       Vector2 intialCamOffset = {0.00f, 0.00f};
+      Vector2 FPlayerPos = {0.00f, 0.00f};
       fxPlayer(){
         textures.push_back(LoadTexture(("Assets/player/03_FX/Skill_Cleave_FX.png")));
         texture1 = textures[0];
@@ -196,6 +200,50 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
          drawFx(extraFrames);
         }
       }
+    void SDrawLine(int extraFrames){
+    if(FMousePos.x == 0 && FMousePos.y == 0){
+      Vector2 tempVector = GetMousePosition();
+        tempVector.x += 16;
+       tempVector.y += 16;
+        FMousePos = GetScreenToWorld2D(tempVector, camera1);
+        FPlayerPos.x = position.x + 32;
+        FPlayerPos.y = position.y + 32;  // Store the initial player position when starting the animation.
+    }  
+
+    int width = 32;
+    int maxFrames = currentTexture.width / 64;
+    Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+
+    frames1++;
+    if(frames1 > (60/frameSpeed1)){
+        frames1 = 0;
+        currentFrame1++;
+        if(currentFrame1 >= maxFrames + extraFrames){
+            currentFrame1 = 0;
+            isDone = true;
+            FMousePos = {0.00f, 0.00f};
+        }
+    }
+
+    // Calculate the progress between 0 (beginning) and 1 (end).
+    float progress = 1;
+    if(maxFrames + extraFrames - 1 == 0){
+      progress = 1;
+    }
+    else{
+      progress = (float)currentFrame1 / (float)(maxFrames + extraFrames - 1);
+    }
+// Intrpolate between the player's position and the mouse's position based on the progress.
+Vector2 interpolatedPos = {
+    FPlayerPos.x + progress * (FMousePos.x - FPlayerPos.x),
+    FPlayerPos.y + progress * (FMousePos.y - FPlayerPos.y)
+};
+
+
+    Rectangle destRec = {interpolatedPos.x , interpolatedPos.y , width, width};
+
+    DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
+}
 
       void drawSquare(int extraFrames){
         if(FMousePos.x == 0 && FMousePos.y == 0){
@@ -217,6 +265,26 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           }
         }
         DrawTexturePro(currentTexture, frameRec1, destRec, {64, 64},  calcRotation() * (180.0f/PI), RED);
+      }
+      void drawLine(int extraFrames){
+        if(FMousePos.x == 0 && FMousePos.y == 0){
+       FMousePos = GetScreenToWorld2D(GetMousePosition(), camera1);
+        }  
+        int width = 32;
+        Rectangle destRec = {FMousePos.x + width/2, FMousePos.y + width/2, width, width};
+        int maxFrames = currentTexture.width / 64;
+        Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+        frames1++;
+        if(frames1 > (60/frameSpeed1)){
+          frames1 = 0;
+          currentFrame1++;
+          if(currentFrame1 >= maxFrames + extraFrames){
+            currentFrame1 = 0;
+            isDone = true;
+            FMousePos = {0.00f, 0.00f};
+          }
+        }
+        DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
       }
      void SdrawSquare(int extraFrames){
     if(FMousePos.x == 0 && FMousePos.y == 0){
@@ -241,6 +309,89 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
 
    DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
 }
+void ChunkSDrawLine(int extraFrames){
+    if(FMousePos.x == 0 && FMousePos.y == 0){
+      Vector2 tempVector = GetMousePosition();
+      tempVector.x += 16;
+      tempVector.y += 16;
+        FMousePos = GetScreenToWorld2D(tempVector, camera1);
+        FPlayerPos.x = position.x + 32;
+        FPlayerPos.y = position.y + 32;  
+    }  
+
+    int width = 32;
+    int maxFrames = currentTexture.width / 64;
+    Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+
+    frames1++;
+    if(frames1 > (60/frameSpeed1)){
+        frames1 = 0;
+        currentFrame1++;
+        if(currentFrame1 >= maxFrames + extraFrames){
+            currentFrame1 = 0;
+            isDone = true;
+            FMousePos = {0.00f, 0.00f};
+        }
+    }
+
+    float progress = 1;
+    if(maxFrames + extraFrames - 1 == 0){
+      progress = 1;
+    }
+    else{
+      progress = (float)currentFrame1 / (float)(maxFrames + extraFrames - 1);
+    }
+    // Doesn't even work properly, we don't really need this for chunk-based animations however, when I was writing code for Lerp based animation this code
+    // Caused it to be chunky/choppy so I'm just re-using it here.
+// Intrpolate between the player's position and the mouse's position based on the progress, is what it should do but it doesn't
+Vector2 interpolatedPos = {
+    FPlayerPos.x + progress * (FMousePos.x - FPlayerPos.x),
+    FPlayerPos.y + progress * (FMousePos.y - FPlayerPos.y)
+};
+
+
+    Rectangle destRec = {interpolatedPos.x , interpolatedPos.y , width, width};
+
+    DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
+}
+void LerpSDrawLine(int extraFrames){
+  int maxFrames = currentTexture.width / 64;
+    if(FMousePos.x == 0 && FMousePos.y == 0){
+      Vector2 tempVector = GetMousePosition();
+      tempVector.x += 16;
+      tempVector.y += 16;
+      FMousePos = GetScreenToWorld2D(tempVector, camera1);
+      FPlayerPos.x = position.x + 32;
+      FPlayerPos.y = position.y + 32;  
+      currentPos = FPlayerPos; 
+
+      
+      // Determine the step size for each fram
+      progressStep = 1.0f / ((60/frameSpeed1) * (maxFrames + extraFrames)); 
+    }
+    int width = 32;
+    Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+
+    frames1++;
+    if(frames1 > (60/frameSpeed1)){
+      frames1 = 0;
+      currentFrame1++;
+      if(currentFrame1 >= maxFrames + extraFrames){
+        currentFrame1 = 0;
+        isDone = true;
+        FMousePos = {0.00f, 0.00f};
+      }
+    }
+
+    // Increment currentPos 
+    currentPos.x += progressStep * (FMousePos.x - FPlayerPos.x);
+    currentPos.y += progressStep * (FMousePos.y - FPlayerPos.y);
+
+    Rectangle destRec = {currentPos.x, currentPos.y, width, width};
+
+    DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)}, calcRotation(camera1) * (180.0f/PI), WHITE);
+}
+
 
       void drawCircle(){}
       void drawLine(){}
@@ -251,12 +402,14 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           SdrawSquare(extraFrames);
         }
         else if(currentTypeOfSkill == "Circle"){
+          return;
           drawCircle();
         }
         else if(currentTypeOfSkill == "Line"){
-          drawLine();
+          LerpSDrawLine(extraFrames);
         }
         else if(currentTypeOfSkill == "Buff"){
+          return;
           drawBuff();
         }
       }
