@@ -55,8 +55,8 @@ class skill{
     skills.push_back(skill("Skill_BringerOfChaos_FX.png", "Line", "73_Darkness_Grimoire.png"));
     skills.push_back(skill("Skill_CelestialJudgement_FX.png", "Line", "72_Light_Spear.png")); 
     skills.push_back(skill("Skill_CutTheSky_FX.png", "Circle", "386_Lightning_Battleaxe.png"));
-    skills.push_back(skill("Skill_GroundStomp_FX.png", "Line", "37_Earth_III.png"));
-    skills.push_back(skill("Skill_MagmaReaction_FX.png", "Line", "01_Fire_Grimoire.png"));
+    skills.push_back(skill("Skill_GroundStomp_FX.png", "LineChunk", "37_Earth_III.png"));
+    skills.push_back(skill("Skill_MagmaReaction_FX.png", "LineChunk", "01_Fire_Grimoire.png"));
     skills.push_back(skill("Skill_SoulFeast_FX.png", "Line", "73_Darkness_Grimoire.png"));
     skills.push_back(skill("Skill_Zayvris_FX.png", "Line", "25_Cloud_Grimoire.png"));
     skills.push_back(skill("Skill_Whirlwind_FX.png", "Line", "462_Air_Tornado.png"));

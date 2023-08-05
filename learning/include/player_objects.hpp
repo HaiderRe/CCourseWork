@@ -87,7 +87,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       Rectangle frameRec = {0.00f, 0.00f, 0.00f, 0.00f};
       Texture2D texture1;
       Texture2D currentTexture;
-      std::string currentTypeOfSkill; // Possible Values: "Square", "Cirlce", "Line", "Buff"
+      std::string currentTypeOfSkill; // Possible Values: "Square", "Cirlce", "Line", "Buff",  "LineChunk"
       std::string path;
       Rectangle sourceRec = {0.00f, 0.00f, 0.00f, 0.00f};
       std::string currentAnim;
@@ -309,51 +309,58 @@ Vector2 interpolatedPos = {
 
    DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
 }
-void ChunkSDrawLine(int extraFrames){
+void DrawLineChunk(int extraFrames){
+    int AmountOfChunks = 12; // Amount of Chunks
+    static std::vector<Vector2> chunkPositions(AmountOfChunks); // Retain values 
+     static std::vector<int> chunkFrames(AmountOfChunks, 0); // Static retains the values 
+    
     if(FMousePos.x == 0 && FMousePos.y == 0){
-      Vector2 tempVector = GetMousePosition();
-      tempVector.x += 16;
-      tempVector.y += 16;
+        Vector2 tempVector = GetMousePosition();
+        tempVector.x += 16;
+        tempVector.y += 16;
         FMousePos = GetScreenToWorld2D(tempVector, camera1);
         FPlayerPos.x = position.x + 32;
         FPlayerPos.y = position.y + 32;  
+        
+        // Initialize the chunk positions 
+        for(int i = 0; i < AmountOfChunks; ++i){
+            float progress = (float)i / (AmountOfChunks - 1);
+            chunkPositions[i] = {
+                FPlayerPos.x + progress * (FMousePos.x - FPlayerPos.x),
+                FPlayerPos.y + progress * (FMousePos.y - FPlayerPos.y)
+            };
+        }
     }  
 
     int width = 32;
     int maxFrames = currentTexture.width / 64;
-    Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+    
+    for(int i = 0; i < AmountOfChunks; ++i){
+        Rectangle frameRec1 = {64 * chunkFrames[i], 0, 64, 64};
 
-    frames1++;
-    if(frames1 > (60/frameSpeed1)){
-        frames1 = 0;
-        currentFrame1++;
-        if(currentFrame1 >= maxFrames + extraFrames){
-            currentFrame1 = 0;
-            isDone = true;
-            FMousePos = {0.00f, 0.00f};
+        frames1++;
+        if(frames1 > (60/frameSpeed1)){
+            frames1 = 0;
+            chunkFrames[i]++;
+            if(chunkFrames[i] >= maxFrames + extraFrames){
+                chunkFrames[i] = 0;
+                isDone = true;
+                FMousePos = {0.00f, 0.00f};
+            }
         }
+
+        Rectangle destRec = {chunkPositions[i].x , chunkPositions[i].y , width, width};
+
+        DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), WHITE);
     }
-
-    float progress = 1;
-    if(maxFrames + extraFrames - 1 == 0){
-      progress = 1;
+    if(isDone){
+      for(int i = 0; i < AmountOfChunks; ++i){
+        chunkFrames[i] = 0;
+        chunkPositions[i] = {0.00f, 0.00f};
+      }
     }
-    else{
-      progress = (float)currentFrame1 / (float)(maxFrames + extraFrames - 1);
-    }
-    // Doesn't even work properly, we don't really need this for chunk-based animations however, when I was writing code for Lerp based animation this code
-    // Caused it to be chunky/choppy so I'm just re-using it here.
-// Intrpolate between the player's position and the mouse's position based on the progress, is what it should do but it doesn't
-Vector2 interpolatedPos = {
-    FPlayerPos.x + progress * (FMousePos.x - FPlayerPos.x),
-    FPlayerPos.y + progress * (FMousePos.y - FPlayerPos.y)
-};
-
-
-    Rectangle destRec = {interpolatedPos.x , interpolatedPos.y , width, width};
-
-    DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
 }
+
 void LerpSDrawLine(int extraFrames){
   int maxFrames = currentTexture.width / 64;
     if(FMousePos.x == 0 && FMousePos.y == 0){
@@ -402,6 +409,7 @@ void LerpSDrawLine(int extraFrames){
           SdrawSquare(extraFrames);
         }
         else if(currentTypeOfSkill == "Circle"){
+          isDone = true;
           return;
           drawCircle();
         }
@@ -412,6 +420,8 @@ void LerpSDrawLine(int extraFrames){
           return;
           drawBuff();
         }
+        else if(currentTypeOfSkill == "LineChunk")
+        DrawLineChunk(extraFrames);
       }
 
       void drawAOneFrame(){
@@ -737,6 +747,9 @@ void LerpSDrawLine(int extraFrames){
    // / std::clog << "player x " << playerX << " player y " << playerY << std::endl;
    // / std::clog << "collision vector at player x " << collisionIDs[playerY][playerX] << std::endl;
     // Later Change collision Code as this is garbage
+    if(playerX < 0 || playerY < 0 || playerY >= collisionIDs.size() || playerX >= collisionIDs[0].size()){
+    return false;
+    }
     if(collisionIDs[playerY][playerX] != 0){ // check the tile cord against the tile map in each direction and move the player back if they are colliding by getting the animation direction
       isColliding = true;
       if(speedX > 0 || speedX < 0){
