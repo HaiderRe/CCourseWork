@@ -310,7 +310,7 @@ Vector2 interpolatedPos = {
    DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)},  calcRotation(camera1) * (180.0f/PI), RED);
 }
 void DrawLineChunk(int extraFrames){
-    int AmountOfChunks = 12; // Amount of Chunks
+    int AmountOfChunks = 5; // Amount of Chunks
     static std::vector<Vector2> chunkPositions(AmountOfChunks); // Retain values 
      static std::vector<int> chunkFrames(AmountOfChunks, 0); // Static retains the values 
     
