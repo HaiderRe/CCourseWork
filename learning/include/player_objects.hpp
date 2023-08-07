@@ -474,7 +474,7 @@ void LerpSDrawLine(int extraFrames){
         currentSkills = skills;
       }
       void draw(){
-        std::cout<< " in draw function for skillSlots" << std::endl;
+       // std::cout<< " in draw function for skillSlots" << std::endl;
         Rectangle destRec = { 0, 0, 64, 64};
         Rectangle FrameRec = {0, 0 , 32, 32};
         Color grey = {31, 36, 40, 255};

@@ -31,6 +31,7 @@
 #include "include/game_renderer.hpp"
 #include "include/player_objects.hpp"
 #include "include/mouseHandler.hpp"
+#include "include/enemyObjects.hpp"
 
 //#include "include/enemy_objects.hpp"
 #include "include/tile_map.hpp"
@@ -62,6 +63,9 @@ int main(void)
     //--------------------------------------------------------------------------------------
     default_map.set_width_height_of_arr(256,256);
     default_map.set_width_height(32, 32);
+    enemyObjects_NS::enemyManager theEnemyManager;
+    theEnemyManager.spawnEnemy(Vector2{100,100});
+    theEnemyManager.enemies[0].thePlayer = &nPlayer;
 
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
@@ -71,11 +75,12 @@ int main(void)
  //xmlFile.make_tileset_file();
  SetExitKey(KEY_NULL);
  SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
-
-  
+Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
     // Main game loop
     while (!WindowShouldClose() && shouldClose != 1)    // Detect window close button or ESC key
     {
+      
+
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         DisableCursor();
         // Update
@@ -85,6 +90,7 @@ int main(void)
         isPaused =  gameRenderer.getGameIsPaused();
         if(isPaused == false){
          nPlayer.update(xmlFile.getCollisionTileIDs());
+         theEnemyManager.update();
          camera.update();
         }
         else{
@@ -109,32 +115,34 @@ int main(void)
             ClearBackground(WHITE);
             
             DrawFPS(10, 10);  // Draw current FPS
-            nPlayer.drawOffCamera();
+            
             if(isPaused == false){
-              
-  
+             
               BeginMode2D(camera.cam);
                 xmlFile.new_draw_tilemap();
                // default_map.draw();
                 nPlayer.camera1 = camera.cam;
                 nPlayer.draw();
+                theEnemyManager.draw();
+           // DrawTextureRec(aTexture, {0,0,144,144}, {100,100}, WHITE);
 
                 
 
             EndMode2D();
+            nPlayer.drawOffCamera();
             mouseHandlerObject.draw();
+            
             }
             else{
               if(gameRenderer.whichPause == 4){
                 BeginMode2D(camera.cam);
-                // Apply custom shader to screen using custom code no get shader but using pixel transformations
-                
                 xmlFile.new_draw_tilemap();
                 nPlayer.draw();
 
                 EndMode2D();
               }
               gameRenderer.drawPauseMenu();
+              nPlayer.drawOffCamera();
               
             }
 
@@ -162,11 +170,19 @@ int main(void)
     for(int c = 0; c < nPlayer.fxPlayerObject.textures.size(); c++){
       UnloadTexture(nPlayer.fxPlayerObject.textures[c]);
     }
+    theEnemyManager.deLoadTextures();
+    for(int d = 0; d < theEnemyManager.enemies.size(); d++){
+    UnloadTexture(theEnemyManager.enemies[d].enemyFrameUtility.texture);  
+    UnloadTexture(theEnemyManager.enemies[d].enemyProjectile.projectiles[0].projectileTexture);
+      }
+   
+   
     UnloadTexture(mouseHandlerObject.mouseTexture);
+    UnloadTexture(aTexture);
     CloseAudioDevice(); // Close sound device
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
-
+    
     return 0;
 }
 #endif

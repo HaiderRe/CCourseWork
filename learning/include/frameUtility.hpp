@@ -14,7 +14,7 @@ namespace frameUtility_NS{
         public: 
         int framesCounter = 0;
         int currentFrame = 0;
-        Rectangle frameRec = {0.0f, 0.0f, 32, 32};
+        Rectangle frameRec = {0.0f, 0.0f, 144, 144};
         Rectangle destRec = {0.0f, 0.0f, 32, 32};
         Texture2D texture;
         int maxFrames = 4;
@@ -52,7 +52,9 @@ namespace frameUtility_NS{
                 }
                 frameRec.x = frameWidth * currentFrame;
             }
-            DrawTexturePro(texture, frameRec, destRec, {destRec.x/2,destRec.y/2}, 0, WHITE);
+            std::clog << "In draw of frameutiltiy all values are " << frameRec.x << " " << frameRec.y << " " << frameRec.width << " " << frameRec.height << " " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;
+            DrawTexturePro(texture, frameRec, destRec, {0,0}, 0, WHITE);
+        
         }
         void frameUtilityDestroy(){
             UnloadTexture(texture);

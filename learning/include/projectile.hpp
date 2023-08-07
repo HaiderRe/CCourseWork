@@ -13,10 +13,10 @@
 namespace projectile_NS{
     class basicProjectile{
         public:
-        float speedX;
-        float speedY;
-        Vector2 pos;
-        Rectangle frameRec = {0.0f, 0.0f, 24, 24};
+        float speedX = 1.00f;
+        float speedY = 1.00f;
+        Vector2 pos = {0,0};
+        Rectangle frameRec = {0.0f, 0.0f, 64, 64};
         Rectangle destRec = {pos.x, pos.y, 24, 24};
         int currentFrame = 0;
         int framesCounter = 0;
@@ -33,34 +33,48 @@ namespace projectile_NS{
     };
      class circleProjectile : public basicProjectile{
             public:
-            player_objects::player thePlayer;
+            player_objects::player *thePlayer;
+            int intialXSpeed = 0;
+            int intialYSpeed = 0;
+            bool intialSpeedSet = false;
             circleProjectile(Vector2 aPos, float IspeedX, float IspeedY): basicProjectile(aPos, IspeedX, IspeedY) {
                 projectileTexture = LoadTexture("assets/proj/fireball1/FireBall_2_64x64.png");
             }
             circleProjectile(){
             }
-            
+            void trackingMovement(){
+                
+            }
             void movement(){
                 //Move towards player
                 if(pos.x < 0 || pos.x > 4000 || pos.y < 0 || pos.y > 4000){
                     isAlive = false;
+                    std::clog << "NOT ALIVE NOT ALIVE NOT ALIVE" << std::endl;
                     return;
+                } 
+                if(intialSpeedSet){
+                 if(pos.x < thePlayer->destRecPos.x){
+                    intialXSpeed = speedX;
                 }
-                if(pos.x < thePlayer.destRecPos.x){
-                    pos.x += speedX;
+                if(pos.x > thePlayer->destRecPos.x){
+                    intialXSpeed = -speedX;
                 }
-                if(pos.x > thePlayer.destRecPos.x){
-                    pos.x -= speedX;
+                if(pos.y < thePlayer->destRecPos.y){
+                    intialYSpeed = speedY;
                 }
-                if(pos.y < thePlayer.destRecPos.y){
-                    pos.y += speedY;
+                if(pos.y > thePlayer->destRecPos.y){
+                    intialYSpeed = -speedY;
                 }
-                if(pos.y > thePlayer.destRecPos.y){
-                    pos.y -= speedY;
-                }
-                destRec = {pos.x, pos.y, 24, 24};
+                intialSpeedSet = true;
             }
-            void draw(){
+            pos.x = pos.x + intialXSpeed;
+            pos.y = pos.y + intialYSpeed;
+            destRec = {pos.x, pos.y, 32, 32};
+            }
+            void update(){
+                movement();
+            }
+            void draw(){;
                 framesCounter++;
                 int maxFrames = projectileTexture.width / 64;
                 if (framesCounter >= (60/30))
@@ -89,6 +103,7 @@ namespace projectile_NS{
             if(amountOfAliveProjectiles1 < amountOfProjectiles){
                 for(int i = 0; i < amountOfProjectiles - amountOfAliveProjectiles1; i++){
                     projectiles.push_back(circleProjectile(aPos, IspeedX, IspeedY));
+
                 }
                 amountOfAliveProjectiles = amountOfAliveProjectiles1 - amountOfProjectiles;
             }
@@ -106,7 +121,7 @@ namespace projectile_NS{
         void update(){
             for(int i = 0; i < projectiles.size(); i++){
                 projectiles[i].movement();
-                if(!projectiles[i].isAlive){
+                if(projectiles[i].isAlive == false){
                     amountOfAliveProjectiles--; 
                     UnloadTexture(projectiles[i].projectileTexture);
                     projectiles.erase(projectiles.begin() + i);
