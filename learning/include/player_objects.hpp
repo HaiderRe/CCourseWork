@@ -185,9 +185,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       void drawDecide(Camera2D aCamera){
         camera1 = aCamera;
         int extraFrames = extraFrames1;
-        std::clog << " in draw Decided"  + std::to_string(isCastingN) << std::endl;
+      //  std::clog << " in draw Decided"  + std::to_string(isCastingN) << std::endl;
         if(currentTexture.id == 0){
-          std::clog << "current texture is 0" << std::endl;
+          // std::clog << "current texture is 0" << std::endl;
           return;
         }
         if(currentAnim == "Player/base/Base_Attack1"){
@@ -196,7 +196,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
           return;
         }
         if(isCastingN && isDone == false){ // 
-          std::clog << " is casting" << std::endl;
+         // std::clog << " is casting" << std::endl;
          drawFx(extraFrames);
         }
       }
@@ -707,7 +707,7 @@ void LerpSDrawLine(int extraFrames){
         // set poisition of the player in the animation manager using set_position
         playerAnims.currentAnimationManager();
         playerAnims.animations[playerAnims.pKey].set_position(destRecPos.x, destRecPos.y); // Set the position of the animation manager to the player's position
-        
+        std::clog << "Actual player pos = " << destRecPos.x << " " << destRecPos.y << std::endl;
     }
   void player::update(){
  //   fxPlayerObject.update(currentAnim, destRecPos, direction);

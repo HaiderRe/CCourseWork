@@ -40,9 +40,7 @@ namespace enemyObjects_NS{
         void shootLogic(){
 
             if(enemyProjectile.projectiles.size() < 1){
-                enemyProjectile.addXProjectile(destRecPos, 3, 3, 1);
-                enemyProjectile.projectiles[0].speedX = 2.00f;
-                enemyProjectile.projectiles[0].speedY = 2.00f;
+                enemyProjectile.addXProjectile(destRecPos, 6.00f, 6.00f, 1);
             }
              for(int i = 0; i < enemyProjectile.projectiles.size(); i++){
                 enemyProjectile.projectiles[i].thePlayer = thePlayer;
@@ -50,27 +48,27 @@ namespace enemyObjects_NS{
             enemyProjectile.update();
         }
         void shouldShoot();
-        
         void movement(){
             //Move towards player
             if(destRecPos.x < 0 || destRecPos.x > 4000 || destRecPos.y < 0 || destRecPos.y > 4000){
                 health = 0;
                 return;
             }
-            std::clog << "player position is " << thePlayer->destRecPos.x << " " << thePlayer->destRecPos.y << std::endl;
-            if(destRecPos.x < thePlayer->destRecPos.x){
+            std::clog << "player's pos including offset = " << thePlayer->destRecPos.x + (thePlayer->width/2) << " " << thePlayer->destRecPos.y + (thePlayer->height/2) << std::endl;
+            std::clog << "enemy's pos including offset = " << destRecPos.x + dWidth/2 << " " << destRecPos.y + dHeight/2 << std::endl;
+            if(destRecPos.x + dWidth/2 < thePlayer->destRecPos.x + (thePlayer->width/2)){
                 destRecPos.x += speedX;
                 direction = 2;
             }
-            if(destRecPos.x > thePlayer->destRecPos.x){
+            if(destRecPos.x + dWidth/2> thePlayer->destRecPos.x + (thePlayer->width/2) ){
                 destRecPos.x -= speedX;
                 direction = 1;
             }
-            if(destRecPos.y < thePlayer->destRecPos.y){
+            if(destRecPos.y + dWidth/2 < thePlayer->destRecPos.y + (thePlayer->height/2)){
                 destRecPos.y += speedY;
                 direction = 0;
             }
-            if(destRecPos.y > thePlayer->destRecPos.y){
+            if(destRecPos.y + dWidth/2> thePlayer->destRecPos.y + (thePlayer->height/2)){
                 destRecPos.y -= speedY;
                 direction = 3;
             }
@@ -79,7 +77,7 @@ namespace enemyObjects_NS{
         }
         void draw(){
             enemyFrameUtility.draw();
-            std::clog << "Drawing enemy " << std::endl;
+          //  std::clog << "Drawing enemy " << std::endl;
             enemyProjectile.draw();
         }
         void update(){

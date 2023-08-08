@@ -23,7 +23,8 @@ namespace frameUtility_NS{
         int frameHeight = 144;
         int destWidth = 64; // Normally the same as destHeight
         int destHeight = 64;
-        int direction = 0; // Used to determine which way the enemy is facing (0 = up, 1 = left, 2 = right, 3 = down)
+        float rotation = 0.0f;
+        int direction = 0; // Used to determine which way the enemy is facing (0 = up, 1 = left, 2 = right, 3 = down) (if none 0 is used)
         frameUtility(Texture2D aTexture, int aFramesPerSecond, int aFrameWidth, int aFrameHeight, int aDestWidth, int aDestHeight, int aDirection){
             texture = aTexture;
             framesPerSecond = aFramesPerSecond;
@@ -33,6 +34,7 @@ namespace frameUtility_NS{
             destHeight = aDestHeight;
             maxFrames = texture.width / frameWidth;
             direction = aDirection;
+            frameRec = {0.0f, 0.0f, float(frameWidth), float(frameHeight)};
         }
         frameUtility(Texture2D aTexture){
             texture = aTexture;
@@ -52,9 +54,19 @@ namespace frameUtility_NS{
                 }
                 frameRec.x = frameWidth * currentFrame;
             }
-            std::clog << "In draw of frameutiltiy all values are " << frameRec.x << " " << frameRec.y << " " << frameRec.width << " " << frameRec.height << " " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;
-            DrawTexturePro(texture, frameRec, destRec, {0,0}, 0, WHITE);
+            if(frameWidth == 144){
+               std::clog << "all values of dest rec are  " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl; 
+            }
+            DrawTexturePro(texture, frameRec, destRec, {destRec.x/2, destRec.y/2}, rotation, WHITE);
         
+        }
+        void frameUtilityUpdateValues(int destRecx, int destRecy, int destWidth1, int destHeight1){
+            destRec.x = float(destRecx);
+            destRec.y = float(destRecy);
+            destRec = {destRec.x, destRec.y, float(destWidth1), float(destHeight1)};
+        }
+        void frameUtilityUpdateValues(Rectangle aDestRec){
+            destRec = aDestRec;
         }
         void frameUtilityDestroy(){
             UnloadTexture(texture);

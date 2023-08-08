@@ -23,7 +23,7 @@ namespace mouseHandler{
         void draw(){
             int width = 5;
           //  DrawCircle(mousePos.x + width/2, mousePos.y + width/2, float(width), RED); 
-          std::cout << " FUIHduoif " << std::endl;
+         // std::cout << " FUIHduoif " << std::endl;
             DrawTexture(mouseTexture, mousePos.x, mousePos.y, WHITE);
         }
         Vector2 getMousePos(){
