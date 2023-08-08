@@ -16,6 +16,7 @@ namespace frameUtility_NS{
         int currentFrame = 0;
         Rectangle frameRec = {0.0f, 0.0f, 144, 144};
         Rectangle destRec = {0.0f, 0.0f, 32, 32};
+        Vector2 testingVector = {0.00f, 0.00f};
         Texture2D texture;
         int maxFrames = 4;
         int framesPerSecond = 6;
@@ -54,10 +55,21 @@ namespace frameUtility_NS{
                 }
                 frameRec.x = frameWidth * currentFrame;
             }
+            Vector2 origin = {frameRec.width * 0.5f, frameRec.height * 0.5f};
             if(frameWidth == 144){
-               std::clog << "all values of dest rec are  " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl; 
+             //  std::clog << "all values of dest rec are  " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl; 
+             //  DrawCircle(destRec.x, destRec.y, 5, BLUE); //  
+                destRec.x = destRec.x + (origin.x) - (destWidth/4); // No clue why we need special code for 144pixel textures but we do
+                destRec.y = destRec.y + (origin.y) - (destHeight/4); // Additionally both statements offset make the texture the midpoint of the
+                                                                      // World position + half the width + half the height of the texture
             }
-            DrawTexturePro(texture, frameRec, destRec, {destRec.x/2, destRec.y/2}, rotation, WHITE);
+               else{ 
+              //  DrawRectangle(destRec.x, destRec.y, destRec.width, destRec.height, BLUE);
+                destRec.x = destRec.x + origin.x;
+                destRec.y = destRec.y + origin.y;
+               }
+
+            DrawTexturePro(texture, frameRec, destRec, origin, rotation, WHITE);
         
         }
         void frameUtilityUpdateValues(int destRecx, int destRecy, int destWidth1, int destHeight1){
@@ -67,6 +79,7 @@ namespace frameUtility_NS{
         }
         void frameUtilityUpdateValues(Rectangle aDestRec){
             destRec = aDestRec;
+            
         }
         void frameUtilityDestroy(){
             UnloadTexture(texture);
