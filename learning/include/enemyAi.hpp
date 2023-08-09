@@ -21,21 +21,23 @@ namespace enemyAi_NS {
     Vector2 seekingForce = {0.00f, 0.00f};
     Vector2 seperationForce = {0.00f, 0.00f};
     std::vector<Rectangle> enemiesRects;
-    simpleEnemyMovement(Vector2 *aPos, Vector2 *aPlayerPos, std::vector<Rectangle>){ // a prefix for arg 
+    std::vector<std::vector<int>> collisionIDs;
+    simpleEnemyMovement(Vector2 *aPos, Vector2 *aPlayerPos, std::vector<Rectangle>, std::vector<std::vector<int>> aCollisionIDs){ // a prefix for arg 
       currentPos = aPos;
       playerPos = aPlayerPos;
-      
+      collisionIDs = aCollisionIDs;
     }
     void update(std::vector<Rectangle> aEnemiesRects){
       enemiesRects = aEnemiesRects;
     }
+    
    void circlingMovement() {
     float maxSpeed = 2.0f; // 
     float seekWeight = 1.0f; // 
     float separationWeight = 2.0f; //  
     float circlingWeight = 3.0f; //
-    float separationDistance = 10.0f; // 
-    float circlingDistance = 30.0f; //
+    float separationDistance = 4.0f; // 
+    float circlingDistance = 8.0f; //
 
     // Seek behavior
     seekingForce = Vector2Scale(Vector2Normalize(Vector2Subtract(*playerPos, *currentPos)), maxSpeed);
@@ -59,9 +61,17 @@ namespace enemyAi_NS {
         desiredVelocity = Vector2Add(desiredVelocity, Vector2Scale(circlingForce, circlingWeight));
     }
 
-  
+    
     currentVelocity = desiredVelocity;  // Apply the force to the enemy
-    *currentPos = Vector2Add(*currentPos, currentVelocity); // Update the position
+    Vector2 nextPosition = Vector2Add(*currentPos, currentVelocity); // Calculate the next position
+    int xIndex = (int)nextPosition.x / 16; // Calculate the tile index
+    int yIndex = (int)nextPosition.y / 16;
+    if(collisionIDs[yIndex]{xIndex} == 0){
+      *currentPos = Vector2Add(*currentPos, currentVelocity); // Update the position
+    }
+    else{
+      currentVelocity = {0.00f, 0.00f};
+    }
 }
 
 

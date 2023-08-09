@@ -29,17 +29,19 @@ namespace enemyObjects_NS{
         player_objects::player *thePlayer; // Add player else where
         std::vector<Rectangle> *otherEnemyRects; 
         frameUtility_NS::frameUtility enemyFrameUtility;
+        std::vector<std::vector<int>> collisionIDs;
         basicEnemy(Vector2 spawnPointPos){
             destRecPos = spawnPointPos;
             destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility = frameUtility_NS::frameUtility(enemyTexture, 6, 144, 144, 64, 64, direction);
         }
-        basicEnemy(Vector2 spawnPointPos, std::string texturePath){
+        basicEnemy(Vector2 spawnPointPos, std::string texturePath, std::vector<std::vector<int>> aCollisionIDs){
             destRecPos = spawnPointPos;
             destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             UnloadTexture(enemyTexture);
             enemyTexture = LoadTexture(("Assets/enemy/" + texturePath).c_str());
             enemyFrameUtility = frameUtility_NS::frameUtility(enemyTexture, 6, 144, 144, 64, 64, direction);
+            collisionIDs = aCollisionIDs;
         }
         basicEnemy(){
             std::clog << "In basicEnemy constructor" << std::endl;
@@ -89,14 +91,15 @@ namespace enemyObjects_NS{
     };
     class slimeEnemy : public basicEnemy{
         public:
-        slimeEnemy(Vector2 aPos, std::string path): basicEnemy(aPos, path) {
+        slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
          }
+         
          
     };
     class shootingEnemy : public basicEnemy{
         public:
         projectile_NS::projectileManager enemyProjectile;
-        shootingEnemy(Vector2 aPos, std::string path): basicEnemy(aPos, path) {
+        shootingEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
          }
          void shootLogic(){
             if(enemyProjectile.projectiles.size() < 1){
