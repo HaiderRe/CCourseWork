@@ -23,6 +23,8 @@ namespace projectile_NS{
         int framesCounter = 0;
         int framesSpeed = 8;
         bool isAlive = true;
+        float dx = 0.00f;
+        float dy = 0.00f;
         Texture2D projectileTexture;
         basicProjectile(Vector2 aPos, float IspeedX, float IspeedY){
             pos = aPos;
@@ -58,24 +60,14 @@ namespace projectile_NS{
                     return;
                 } 
                 if(!intialSpeedSet){
-                 if(pos.x <= thePlayer->destRecPos.x){
-                    intialXSpeed = speedX;
-                }
-                if(pos.x >= thePlayer->destRecPos.x){
-                    intialXSpeed = -speedX;
-                }
-                if(pos.y <= thePlayer->destRecPos.y){
-                    intialYSpeed = speedY;
-                }
-                if(pos.y >= thePlayer->destRecPos.y){
-                    intialYSpeed = -speedY;
-                }
-                intialRotation = atan2(pos.y - thePlayer->destRecPos.y, pos.x - thePlayer->destRecPos.x) * 180 / PI;
-                projectileFrameUtility.rotation = intialRotation;
+                 dx = thePlayer->destRecPos.x + thePlayer->width/2 - pos.x;
+                 dy = thePlayer->destRecPos.y + thePlayer->width/2 - pos.y;
                 intialSpeedSet = true;
-            }
-            pos.x = pos.x + intialXSpeed;
-            pos.y = pos.y + intialYSpeed; 
+                 }
+            float angle = atan2(dy, dx);
+            projectileFrameUtility.rotation = angle;
+            pos.x += speedX * cos(angle);
+            pos.y += speedY * sin(angle);
            // std::clog << "intial speeds are " << intialXSpeed << " " << intialYSpeed << std::endl;
             destRec = {pos.x, pos.y, 32, 32};
             }

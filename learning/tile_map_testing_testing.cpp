@@ -173,10 +173,8 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
     theEnemyManager.deLoadTextures();
     for(int d = 0; d < theEnemyManager.enemies.size(); d++){
     UnloadTexture(theEnemyManager.enemies[d].enemyFrameUtility.texture);  
-    UnloadTexture(theEnemyManager.enemies[d].enemyProjectile.projectiles[0].projectileTexture);
-      }
-   
-   
+    }
+    theEnemyManager.deLoadProjectiles();
     UnloadTexture(mouseHandlerObject.mouseTexture);
     UnloadTexture(aTexture);
     CloseAudioDevice(); // Close sound device

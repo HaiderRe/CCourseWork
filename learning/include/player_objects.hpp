@@ -12,6 +12,7 @@
 #include "json.hpp"
 #include "dialogue.hpp"
 #include "skillDec.hpp"
+#include "enemyAi.hpp"
 using namespace skills_NS;
 namespace player_objects{
   class playerAnimations{
