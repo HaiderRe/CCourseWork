@@ -12,6 +12,7 @@
 #include "player_objects.hpp"
 #include "projectile.hpp"
 #include "frameUtility.hpp"
+#include "enemyAi.hpp"
 #include <memory>
 namespace enemyObjects_NS{
     class basicEnemy{
@@ -27,7 +28,7 @@ namespace enemyObjects_NS{
         Rectangle destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
         Texture2D enemyTexture = LoadTexture("Assets/enemy/blueSlime.png");
         player_objects::player *thePlayer; // Add player else where
-        std::vector<Rectangle> *otherEnemyRects; 
+        std::vector<Rectangle> otherEnemyRects; 
         frameUtility_NS::frameUtility enemyFrameUtility;
         std::vector<std::vector<int>> collisionIDs;
         basicEnemy(Vector2 spawnPointPos){
@@ -91,9 +92,17 @@ namespace enemyObjects_NS{
     };
     class slimeEnemy : public basicEnemy{
         public:
+        enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
         slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
+            slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos, &thePlayer->destRecPos, otherEnemyRects, aCollisionIDs);
          }
-         
+         void movement(){
+            //Will Update in the future
+         }
+         void update(){
+            enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
+            enemyFrameUtility.direction = direction;
+         }
          
     };
     class shootingEnemy : public basicEnemy{
@@ -127,6 +136,9 @@ namespace enemyObjects_NS{
         }
         void spawnEnemy(Vector2 spawnPointPos){
             enemies.push_back(basicEnemy(spawnPointPos));
+        }
+        void spawnSlimeEnemy(Vector2 spawnPointPos, std::string path, std::vector<std::vector<int>> aCollisionIDs){
+           smartPtrEnemies.push_back(std::make_unique<slimeEnemy>(spawnPointPos, "blueSlime.png", aCollisionIDs));
         }
         void draw(){
             for(int i = 0; i < enemies.size(); i++){
@@ -172,9 +184,38 @@ namespace enemyObjects_NS{
             }
             */
         }
+        void sUpdate(){
+            std::vector<Rectangle> enemiesRects;
+            for(int i = enemies.size() - 1; i >= 0; i--){ // since killEnemy() resizes vector
+                enemies[i].update();
+                enemiesRects.push_back(enemies[i].destRec);
+                if(enemies[i].health <= 0){
+                    killEnemy(i); 
+                    --i; // since killEnemy resizes vector
+                }
+            } 
+            for(int j = smartPtrEnemies.size() - 1 ; j >= 0; j--){
+                smartPtrEnemies[j]->update();
+                enemiesRects.push_back(smartPtrEnemies[j]->destRec);
+                if(smartPtrEnemies[j]->health <= 0){
+                    killEnemySPtr(j);
+                    --j; // since killEnemy resizes vector
+                }
+            }
+            for(int k = 0; k < enemies.size(); k++){
+                enemies[k].otherEnemyRects = enemiesRects;
+            }
+            for(int l = 0; l < smartPtrEnemies.size(); l++){
+                smartPtrEnemies[l]->otherEnemyRects = enemiesRects;
+            }
+        }
         void killEnemy(int index){
             UnloadTexture(enemies[index].enemyTexture);
             enemies.erase(enemies.begin() + index);
+        }
+        void killEnemySPtr(int index){
+            UnloadTexture(smartPtrEnemies[index]->enemyTexture);
+            smartPtrEnemies.erase(smartPtrEnemies.begin() + index);
         }
         void killEnemy(Vector2 enemyPos){
             for(int i = 0; i < enemies.size(); i++){

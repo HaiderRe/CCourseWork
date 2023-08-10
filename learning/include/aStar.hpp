@@ -10,14 +10,21 @@ std::vector<Node> path = Cordinate::aStar(start, end);
 #ifndef CORDINATE_H // Code from https://dev.to/jansonsa/a-star-a-path-finding-c-4a4h
 #define CORDINATE_H
 #pragma once
+#include <iostream> 
+#include <string>
+#include <cmath>
+#include <vector>
 #include <stack>
 #include <vector>
 #include <array>
+#include "raymath.h"
+#include <cfloat>
+#include <memory>
 #define X_MAX 64
 #define X_STEP 16
 #define Y_MAX 64
 #define Y_STEP 16
-
+using namespace std;
 struct Node
 {
 	int y;
@@ -38,13 +45,15 @@ inline bool operator < (const Node& lhs, const Node& rhs)
 class Cordinate {
 
 public:
-	std::vector<std::vector<int>> collisionIDs;
-
+	static std::vector<std::vector<int>> collisionIDs;
+	Cordinate(std::vector<std::vector<int>> aCollisionIDs) {
+		collisionIDs = aCollisionIDs;
+	}
 	static bool isValid(int x, int y) { // code changed
     if (x < 0 || y < 0 || x >= (X_MAX / X_STEP) || y >= (Y_MAX / Y_STEP)) {
         return false;
     }
-    if ((*collisionMatrix)[y][x] != 0) {
+    if (collisionIDs[y][x] != 0) {
         return false; // if it's not 0, it's an obstacle
     }
     return true;
@@ -92,7 +101,7 @@ public:
 			return usablePath;
 		}
 		catch(const exception& e){
-			cout << e.what() << endl;
+			std::cout << e.what() << std::endl;
 		}
 	}
 
