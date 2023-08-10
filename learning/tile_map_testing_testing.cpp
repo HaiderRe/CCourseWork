@@ -32,7 +32,7 @@
 #include "include/player_objects.hpp"
 #include "include/mouseHandler.hpp"
 #include "include/enemyObjects.hpp"
-
+//#include "include/aStar.hpp"
 //#include "include/enemy_objects.hpp"
 #include "include/tile_map.hpp"
 //------------------------------------------------------------------------------------
@@ -64,8 +64,8 @@ int main(void)
     default_map.set_width_height_of_arr(256,256);
     default_map.set_width_height(32, 32);
     enemyObjects_NS::enemyManager theEnemyManager;
-    theEnemyManager.spawnEnemy(Vector2{100,100});
-    theEnemyManager.enemies[0].thePlayer = &nPlayer;
+    //theEnemyManager.spawnEnemy(Vector2{100,100});
+  //  theEnemyManager.enemies[0].thePlayer = &nPlayer;
 
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
@@ -76,7 +76,11 @@ int main(void)
  SetExitKey(KEY_NULL);
  SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
 Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
-    // Main game loop
+  theEnemyManager.spawnSlimeEnemy(Vector2{100,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
+   theEnemyManager.smartPtrEnemies[0]->thePlayer = &nPlayer;
+    
+
+// Main game loop
     while (!WindowShouldClose() && shouldClose != 1)    // Detect window close button or ESC key
     {
       
@@ -90,7 +94,8 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
         isPaused =  gameRenderer.getGameIsPaused();
         if(isPaused == false){
          nPlayer.update(xmlFile.getCollisionTileIDs());
-         theEnemyManager.update();
+      //   theEnemyManager.update();
+       theEnemyManager.sUpdate();
          camera.update();
         }
         else{
@@ -123,7 +128,7 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
                // default_map.draw();
                 nPlayer.camera1 = camera.cam;
                 nPlayer.draw();
-                theEnemyManager.draw();
+                theEnemyManager.sDraw();
            // DrawTextureRec(aTexture, {0,0,144,144}, {100,100}, WHITE);
 
                 

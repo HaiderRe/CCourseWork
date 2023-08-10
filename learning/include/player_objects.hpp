@@ -12,7 +12,6 @@
 #include "json.hpp"
 #include "dialogue.hpp"
 #include "skillDec.hpp"
-#include "enemyAi.hpp"
 using namespace skills_NS;
 namespace player_objects{
   class playerAnimations{
@@ -708,7 +707,7 @@ void LerpSDrawLine(int extraFrames){
         // set poisition of the player in the animation manager using set_position
         playerAnims.currentAnimationManager();
         playerAnims.animations[playerAnims.pKey].set_position(destRecPos.x, destRecPos.y); // Set the position of the animation manager to the player's position
-        std::clog << "Actual player pos = " << destRecPos.x << " " << destRecPos.y << std::endl;
+       // std::clog << "Actual player pos = " << destRecPos.x << " " << destRecPos.y << std::endl;
     }
   void player::update(){
  //   fxPlayerObject.update(currentAnim, destRecPos, direction);
@@ -720,6 +719,7 @@ void LerpSDrawLine(int extraFrames){
   void player::update(std::vector<std::vector<int>> collisionIDs){
  //   fxPlayerObject.update(currentAnim, destRecPos, direction);
     skillManagerObject.update(destRecPos, direction);
+    std::clog << "actual player pos memory address " << &destRecPos << std::endl;
     speedX = 0.00f;
     speedY = 0.00f;
     collisionIDsMap = collisionIDs;

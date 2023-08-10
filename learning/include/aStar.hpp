@@ -13,7 +13,6 @@ std::vector<Node> path = Cordinate::aStar(start, end);
 #include <iostream> 
 #include <string>
 #include <cmath>
-#include <vector>
 #include <stack>
 #include <vector>
 #include <array>
@@ -45,11 +44,11 @@ inline bool operator < (const Node& lhs, const Node& rhs)
 class Cordinate {
 
 public:
-	static std::vector<std::vector<int>> collisionIDs;
+	std::vector<std::vector<int>> collisionIDs;
 	Cordinate(std::vector<std::vector<int>> aCollisionIDs) {
 		collisionIDs = aCollisionIDs;
 	}
-	static bool isValid(int x, int y) { // code changed
+	 bool isValid(int x, int y) { // code changed
     if (x < 0 || y < 0 || x >= (X_MAX / X_STEP) || y >= (Y_MAX / Y_STEP)) {
         return false;
     }
@@ -59,20 +58,20 @@ public:
     return true;
 }
 
-	static bool isDestination(int x, int y, Node dest) {
+	 bool isDestination(int x, int y, Node dest) {
 		if (x == dest.x && y == dest.y) {
 			return true;
 		}
 		return false;
 	}
 
-	static double calculateH(int x, int y, Node dest) {
+	 double calculateH(int x, int y, Node dest) {
 		double H = (sqrt((x - dest.x)*(x - dest.x)
 			+ (y - dest.y)*(y - dest.y)));
 		return H;
 	}
 
-	static vector<Node> makePath(array<array<Node, (Y_MAX / Y_STEP)>, (X_MAX / X_STEP)> map, Node dest) {
+	 vector<Node> makePath(array<array<Node, (Y_MAX / Y_STEP)>, (X_MAX / X_STEP)> map, Node dest) {
 		try {
 			cout << "Found a path" << endl;
 			int x = dest.x;
@@ -106,7 +105,7 @@ public:
 	}
 
 
-	static vector<Node> aStar(Node player, Node dest) {
+	 vector<Node> aStar(Node player, Node dest) {
 		vector<Node> empty;
 		if (isValid(dest.x, dest.y) == false) {
 			cout << "Destination is an obstacle" << endl;

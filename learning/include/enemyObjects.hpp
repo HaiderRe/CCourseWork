@@ -51,7 +51,7 @@ namespace enemyObjects_NS{
         void deload(){
             std::clog << "In basicEnemy deload" << std::endl;
         }
-        void movement(){
+        virtual void movement(){
             //Move towards player
             if(destRecPos.x < 0 || destRecPos.x > 4000 || destRecPos.y < 0 || destRecPos.y > 4000){
                 health = 0;
@@ -78,12 +78,12 @@ namespace enemyObjects_NS{
             destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
            
         }
-        void draw(){
+        virtual void draw(){
             enemyFrameUtility.draw();
           //  std::clog << "Drawing enemy " << std::endl;
            // enemyProjectile.draw();
         }
-        void update(){
+        virtual void update(){
             movement();
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility.direction = direction;
@@ -96,12 +96,14 @@ namespace enemyObjects_NS{
         slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
             slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos, &thePlayer->destRecPos, otherEnemyRects, aCollisionIDs);
          }
-         void movement(){
-            //Will Update in the future
+         void movement() override{
+            slimeEnemyMovement.circlingMovement();
          }
-         void update(){
+         void update() override{ // overriding update() from basicEnemy
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility.direction = direction;
+            slimeEnemyMovement.update(otherEnemyRects);
+            movement();
          }
          
     };
@@ -148,6 +150,21 @@ namespace enemyObjects_NS{
                 enemies[i].draw();
             }
         }
+        void sDraw(){
+            for(int i = 0; i < enemies.size(); i++){
+                if(enemies[i].health == 199990){
+                    killEnemy(i);
+                }
+                enemies[i].draw();
+            }
+            for(int j = 0; j < smartPtrEnemies.size(); j++){
+                if(smartPtrEnemies[j]->health == 199990){
+                    killEnemySPtr(j);
+                }
+                smartPtrEnemies[j]->draw();
+                
+            }
+        }
         void deLoadTextures(){
             for(int i = 0; i < enemies.size(); i++){
                 UnloadTexture(enemies[i].enemyTexture);
@@ -158,6 +175,7 @@ namespace enemyObjects_NS{
                      enemy->deload();
             } 
         }
+
         void update(){
             std::vector<Rectangle> enemiesRects;
             for(int i = enemies.size() - 1; i >= 0; i--){ // since killEnemy() resizes vector
