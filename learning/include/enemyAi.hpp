@@ -81,7 +81,7 @@ namespace enemyAi_NS {
     std::clog << "currentPos or playerPos is nullptr" << std::endl;
     return;
     }
-    std::clog << playerPos << std::endl;
+    std::clog << playerPos << std::endl; // FOUND OUT PLAYERPOS POINTER IS POINTING TO GARBAGE!!!!!
     return;
     float maxSpeed = 2.0f; // 
     float seekWeight = 1.0f; // 
