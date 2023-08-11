@@ -719,7 +719,6 @@ void LerpSDrawLine(int extraFrames){
   void player::update(std::vector<std::vector<int>> collisionIDs){
  //   fxPlayerObject.update(currentAnim, destRecPos, direction);
     skillManagerObject.update(destRecPos, direction);
-    std::clog << "actual player pos memory address " << &destRecPos << std::endl;
     speedX = 0.00f;
     speedY = 0.00f;
     collisionIDsMap = collisionIDs;

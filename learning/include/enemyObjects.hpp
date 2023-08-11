@@ -94,7 +94,7 @@ namespace enemyObjects_NS{
         public:
         enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
         slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
-            slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos, &thePlayer->destRecPos, otherEnemyRects, aCollisionIDs);
+            slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs);
          }
          void movement() override{
             slimeEnemyMovement.circlingMovement();
@@ -102,7 +102,7 @@ namespace enemyObjects_NS{
          void update() override{ // overriding update() from basicEnemy
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility.direction = direction;
-            slimeEnemyMovement.update(otherEnemyRects);
+            slimeEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
             movement();
          }
          

@@ -9,7 +9,7 @@
 #include "raymath.h"
 #include <memory> 
 #include "frameUtility.hpp"  
-//#include "aStar.hpp"
+#include "aStar.hpp"
 namespace enemyAi_NS {
   // TODO:
   // Need  to make both current pos and player pos not pointers and then pass in both in update and then return current pos
@@ -17,7 +17,7 @@ namespace enemyAi_NS {
     public:
     Vector2 pos = {0.00f, 0.00f};
     Vector2 *currentPos = nullptr; 
-    Vector2 *playerPos = nullptr;
+    Vector2 playerPos = {0.00f,0.00f};
     Vector2 currentVelocity = {0.00f, 0.00f};
     Vector2 desiredVelocity = {0.00f, 0.00f};
     Vector2 defaultVelocity = {3.00f, 3.00f};
@@ -25,33 +25,41 @@ namespace enemyAi_NS {
     Vector2 seperationForce = {0.00f, 0.00f};
     std::vector<Rectangle> enemiesRects;
     std::vector<std::vector<int>> collisionIDs;
-  //  std::vector<Node> path;
+    std::vector<Node> path;
     Vector2 nextPosition = {0.00f, 0.00f};
     int currentPathIndex = 0;
     bool isTakingAlternatePath = false;
-    simpleEnemyMovement(Vector2 *aPos, Vector2 *aPlayerPos, std::vector<Rectangle> someRects, std::vector<std::vector<int>> aCollisionIDs){ // a prefix for arg 
+    bool shouldTakeAlternatePath = false;
+    simpleEnemyMovement(Vector2 *aPos, std::vector<Rectangle> someRects, std::vector<std::vector<int>> aCollisionIDs){ // a prefix for arg 
       currentPos = aPos;
-      playerPos = aPlayerPos;
       collisionIDs = aCollisionIDs;
       enemiesRects = someRects;
     }
     simpleEnemyMovement(){};
-    void update(std::vector<Rectangle> aEnemiesRects){
+    void update(std::vector<Rectangle> aEnemiesRects, Vector2 aPlayerPos){
+      std::clog << "current pos = " << currentPos->x << ", " << currentPos->y << std::endl;
       enemiesRects = aEnemiesRects;
+      playerPos = aPlayerPos; 
     }
-    /*
+    
     Vector2 aStarAlternativeMovement(Vector2 aNextPos){ // Takes in the next position the enemy is going to move to and returns the next position
+
      if(isTakingAlternatePath == false){
+      std::clog << "unique id" << std::endl;
        Node start = {(int)currentPos->x / 16, (int)currentPos->y / 16, 0, 0, 0, 0, 0};
         Node end = {(int)aNextPos.x / 16, (int)aNextPos.y / 16, 0, 0, 0, 0, 0};
-        path = Cordinate::aStar(start, end);
+        Cordinate cordinate(collisionIDs);
+        path = cordinate.aStar(start, end);
+        for (int i = 0; i < path.size(); i++) {
+          std::clog << "path[" << i << "] = " << path[i].x << ", " << path[i].y << std::endl;
+        }
        if(path.size() > 0){
          isTakingAlternatePath = true;
        }
        return Vector2{-1, -1};
      }
      else{
-      if(currentPathIndex >= path.size()){
+      if(currentPathIndex >= path.size()){  
         isTakingAlternatePath = false;
         currentPathIndex = 0;
         return Vector2{-2, -2};
@@ -65,7 +73,7 @@ namespace enemyAi_NS {
         if(currentPathIndex >= path.size()){
           isTakingAlternatePath = false;
           currentPathIndex = 0;
-          return Vector2{-1, -1};
+          return Vector2{-3, -3}; // 
         }
         return aStarAlternativeMovement(aNextPos);
       }
@@ -75,24 +83,27 @@ namespace enemyAi_NS {
       return nextPathVector;
      }
    }
-   */
+   
    void circlingMovement() {
-    if (currentPos == nullptr || playerPos == nullptr) {
-    std::clog << "currentPos or playerPos is nullptr" << std::endl;
+        desiredVelocity = {0.0f, 0.0f};
+       // currentVelocity = {0.0f, 0.0f};
+       nextPosition = {0.00f, 0.00f};
+    if (currentPos == nullptr ) {
+    std::clog << "currentPos is nullptr" << std::endl;
+    std::clog << "currentPos = " << currentPos << std::endl;
     return;
     }
-    std::clog << playerPos << std::endl; // FOUND OUT PLAYERPOS POINTER IS POINTING TO GARBAGE!!!!!
-    return;
+
     float maxSpeed = 2.0f; // 
     float seekWeight = 1.0f; // 
     float separationWeight = 2.0f; //  
     float circlingWeight = 3.0f; //
-    float separationDistance = 32.0f; // 
-    float circlingDistance = 32.0f; //
-
+    float separationDistance = 1.0f; // 
+    float circlingDistance = 1.0f; //
+    float stopThreshold = 5.0f;
     // Seek behavior
-    if(!isTakingAlternatePath){
-    seekingForce = Vector2Scale(Vector2Normalize(Vector2Subtract(*playerPos, *currentPos)), maxSpeed);
+    if(!isTakingAlternatePath && !shouldTakeAlternatePath){
+    seekingForce = Vector2Scale(Vector2Normalize(Vector2Subtract(playerPos, *currentPos)), maxSpeed);
     desiredVelocity = Vector2Add(desiredVelocity, Vector2Scale(seekingForce, seekWeight));
 
     // Separation behavior
@@ -106,40 +117,50 @@ namespace enemyAi_NS {
     desiredVelocity = Vector2Add(desiredVelocity, Vector2Scale(seperationForce, separationWeight));
 
     // Circling behavior 
-    if (Vector2Distance(*currentPos, *playerPos) < circlingDistance) {
-        Vector2 toPlayer = Vector2Normalize(Vector2Subtract(*playerPos, *currentPos));
+    if (Vector2Distance(*currentPos, playerPos) < circlingDistance) {
+        Vector2 toPlayer = Vector2Normalize(Vector2Subtract(playerPos, *currentPos));
         Vector2 perpendicular = { -toPlayer.y, toPlayer.x }; // 90-degree rotation
         Vector2 circlingForce = Vector2Scale(perpendicular, maxSpeed);
         desiredVelocity = Vector2Add(desiredVelocity, Vector2Scale(circlingForce, circlingWeight));
     }
 
-    
-    currentVelocity = desiredVelocity;  // Apply the force to the enemy
+   
+  if (Vector2Distance(*currentPos, playerPos) < stopThreshold) {
+      desiredVelocity = {0.0f, 0.0f};
+   }
+    currentVelocity = (Vector2Add(currentVelocity,(Vector2Subtract(desiredVelocity, currentVelocity))));  // Apply the force to the enemy
     nextPosition = Vector2Add(*currentPos, currentVelocity); // Calculate the next position
     int xIndex = (int)nextPosition.x / 16; // Calculate the tile index
     int yIndex = (int)nextPosition.y / 16;
-    if(yIndex < collisionIDs.size() && xIndex < collisionIDs[yIndex].size() && collisionIDs[yIndex][xIndex] == 0){
+    std::clog << "xIndex = " << xIndex << std::endl;
+    std::clog << collisionIDs[yIndex][xIndex] << std::endl;
+    if((yIndex < 0 || yIndex > 64 || xIndex < 0 || xIndex > 64)){
+     *currentPos = Vector2Add(*currentPos, currentVelocity);
+     return;
+    }
+    if(collisionIDs[yIndex][xIndex] == 0){
     *currentPos = Vector2Add(*currentPos, currentVelocity); // Update position
     }
     else{
       currentVelocity = {0.00f, 0.00f};
-      isTakingAlternatePath = true;
+      shouldTakeAlternatePath = true;
      }
     }
     else{
       // Next position being passed in may be an obstacle so the function will never work as it will try to put the enemy into an obstacle which it can't do
       // As we only enter this if statement when there is an obstacle
       // Could instead pass in player position
-  //    nextPosition = aStarAlternativeMovement(*playerPos); 
-    nextPosition = Vector2{1, -1};
-      if(nextPosition.x != -2 && nextPosition.y != -2){
-        *currentPos = nextPosition;
+      shouldTakeAlternatePath = false;
+      nextPosition = aStarAlternativeMovement(playerPos); 
+      if(nextPosition.x == -2 && nextPosition.y == -2){
         std::clog << "next position return was -2, so END" << std::endl;
+        isTakingAlternatePath = false;
       }
       if(nextPosition.x == -1 && nextPosition.y == -1){
         std::clog << "next position return was -1, so BAD" << std::endl;
       }
       // Fun maths :)
+      std::clog << "inside alt path" << std::endl;
       Vector2 direction = Vector2Subtract(nextPosition, *currentPos); // Calc Direction to next Pos
       Vector2 normalizedDirection = Vector2Normalize(direction); // Normalize Direction (values between 0 and 1)
       Vector2 movement = Vector2Scale(normalizedDirection, Vector2Length(defaultVelocity)); // Scale the direction by the default speed so it moves at the speed 

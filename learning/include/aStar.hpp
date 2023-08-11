@@ -19,8 +19,8 @@ std::vector<Node> path = Cordinate::aStar(start, end);
 #include "raymath.h"
 #include <cfloat>
 #include <memory>
-#define X_MAX 64
-#define X_STEP 16
+#define X_MAX 64 
+#define X_STEP 16 
 #define Y_MAX 64
 #define Y_STEP 16
 using namespace std;
@@ -48,12 +48,18 @@ public:
 	Cordinate(std::vector<std::vector<int>> aCollisionIDs) {
 		collisionIDs = aCollisionIDs;
 	}
-	 bool isValid(int x, int y) { // code changed
+	bool isValid(int x, int y, Node* dest = nullptr) {
     if (x < 0 || y < 0 || x >= (X_MAX / X_STEP) || y >= (Y_MAX / Y_STEP)) {
+		std::clog << "Out of bounds at " << x << ", " << y << std::endl;
         return false;
     }
     if (collisionIDs[y][x] != 0) {
-        return false; // if it's not 0, it's an obstacle
+        // Check if current x, y is not the destination before treating it as an obstacle.
+        if (!dest || (x != dest->x || y != dest->y)) {
+			std::clog << "Collision at " << x << ", " << y << std::endl;
+
+            return false; // if it's not 0, it's an obstacle
+        }
     }
     return true;
 }
@@ -79,17 +85,17 @@ public:
 			stack<Node> path;
 			vector<Node> usablePath;
 
-			while (!(map[x][y].parentX == x && map[x][y].parentY == y)
-				&& map[x][y].x != -1 && map[x][y].y != -1) 
+			while (!(map[y][x].parentX == x && map[y][x].parentY == y)
+    			   && map[y][x].x != -1 && map[y][x].y != -1) 
 			{
-				path.push(map[x][y]);
-				int tempX = map[x][y].parentX;
-				int tempY = map[x][y].parentY;
+				path.push(map[y][x]);
+int tempX = map[y][x].parentX;
+int tempY = map[y][x].parentY;
 				x = tempX;
 				y = tempY;
 				
 			}
-			path.push(map[x][y]);
+path.push(map[y][x]);
 
 			while (!path.empty()) {
 				Node top = path.top();
@@ -107,7 +113,7 @@ public:
 
 	 vector<Node> aStar(Node player, Node dest) {
 		vector<Node> empty;
-		if (isValid(dest.x, dest.y) == false) {
+		if (isValid(dest.x, dest.y, &dest) == false) {
 			cout << "Destination is an obstacle" << endl;
 			return empty;
 			//Destination is invalid
@@ -124,26 +130,26 @@ public:
 		array<array < Node, (Y_MAX / Y_STEP)>, (X_MAX / X_STEP)> allMap;
 		for (int x = 0; x < (X_MAX / X_STEP); x++) {
 			for (int y = 0; y < (Y_MAX / Y_STEP); y++) {
-				allMap[x][y].fCost = FLT_MAX;
-				allMap[x][y].gCost = FLT_MAX;
-				allMap[x][y].hCost = FLT_MAX;
-				allMap[x][y].parentX = -1;
-				allMap[x][y].parentY = -1;
-				allMap[x][y].x = x;
-				allMap[x][y].y = y;
+				allMap[y][x].fCost = FLT_MAX;
+allMap[y][x].gCost = FLT_MAX;
+allMap[y][x].hCost = FLT_MAX;
+allMap[y][x].parentX = -1;
+allMap[y][x].parentY = -1;
+allMap[y][x].x = x;
+allMap[y][x].y = y;
 
-				closedList[x][y] = false;
+closedList[y][x] = false;
 			}
 		}
 
 		//Initialize our starting list
 		int x = player.x;
 		int y = player.y;
-		allMap[x][y].fCost = 0.0;
-		allMap[x][y].gCost = 0.0;
-		allMap[x][y].hCost = 0.0;
-		allMap[x][y].parentX = x;
-		allMap[x][y].parentY = y;
+		allMap[y][x].fCost = 0.0;
+allMap[y][x].gCost = 0.0;
+allMap[y][x].hCost = 0.0;
+allMap[y][x].parentX = x;
+allMap[y][x].parentY = y;
 
 		vector<Node> openList;	
 		openList.emplace_back(allMap[x][y]);
@@ -173,13 +179,13 @@ public:
 
 			x = node.x;
 			y = node.y;
-			closedList[x][y] = true;
+closedList[y][x] = true;
 
 			//For each neighbour starting from North-West to South-East
 			for (int newX = -1; newX <= 1; newX++) {
 				for (int newY = -1; newY <= 1; newY++) {
 					double gNew, hNew, fNew;
-					if (isValid(x + newX, y + newY)) {
+					if (isValid(x + newX, y + newY,&dest)) {
 						if (isDestination(x + newX, y + newY, dest))
 						{
 							//Destination found - make path
@@ -188,22 +194,22 @@ public:
 							destinationFound = true;
 							return makePath(allMap, dest);
 						}
-						else if (closedList[x + newX][y + newY] == false)
+else if (closedList[y + newY][x + newX] == false)
 						{
 							gNew = node.gCost + 1.0;
 							hNew = calculateH(x + newX, y + newY, dest);
 							fNew = gNew + hNew;
 							// Check if this path is better than the one already present
-							if (allMap[x + newX][y + newY].fCost == FLT_MAX ||
-								allMap[x + newX][y + newY].fCost > fNew)
+							if (allMap[y + newY][x + newX].fCost == FLT_MAX ||
+   								 allMap[y + newY][x + newX].fCost > fNew)
 							{
 								// Update the details of this neighbour node
-								allMap[x + newX][y + newY].fCost = fNew;
-								allMap[x + newX][y + newY].gCost = gNew;
-								allMap[x + newX][y + newY].hCost = hNew;
-								allMap[x + newX][y + newY].parentX = x;
-								allMap[x + newX][y + newY].parentY = y;
-								openList.emplace_back(allMap[x + newX][y + newY]);
+								allMap[y + newY][x + newX].fCost = fNew;
+allMap[y + newY][x + newX].gCost = gNew;
+allMap[y + newY][x + newX].hCost = hNew;
+allMap[y + newY][x + newX].parentX = x;
+allMap[y + newY][x + newX].parentY = y;
+								openList.emplace_back(allMap[y + newY][x + newX]);
 							}
 						}
 					}
