@@ -9,7 +9,8 @@
 #include "raymath.h"
 #include <memory> 
 #include "frameUtility.hpp"  
-#include "aStar.hpp"
+#include "AStar.hpp"
+//#include "aStar.hpp"
 namespace enemyAi_NS {
   // TODO:
   // Need  to make both current pos and player pos not pointers and then pass in both in update and then return current pos
@@ -25,7 +26,7 @@ namespace enemyAi_NS {
     Vector2 seperationForce = {0.00f, 0.00f};
     std::vector<Rectangle> enemiesRects;
     std::vector<std::vector<int>> collisionIDs;
-    std::vector<Node> path;
+    //std::vector<Node> path;
     Vector2 nextPosition = {0.00f, 0.00f};
     int currentPathIndex = 0;
     bool isTakingAlternatePath = false;
@@ -42,7 +43,7 @@ namespace enemyAi_NS {
       playerPos = aPlayerPos; 
     }
     
-    Vector2 aStarAlternativeMovement(Vector2 aNextPos){ // Takes in the next position the enemy is going to move to and returns the next position
+   /* Vector2 aStarAlternativeMovement(Vector2 aNextPos){ // Takes in the next position the enemy is going to move to and returns the next position
 
      if(isTakingAlternatePath == false){
       std::clog << "unique id" << std::endl;
@@ -83,7 +84,7 @@ namespace enemyAi_NS {
       return nextPathVector;
      }
    }
-   
+   */
    void circlingMovement() {
         desiredVelocity = {0.0f, 0.0f};
        // currentVelocity = {0.0f, 0.0f};
@@ -130,15 +131,22 @@ namespace enemyAi_NS {
    }
     currentVelocity = (Vector2Add(currentVelocity,(Vector2Subtract(desiredVelocity, currentVelocity))));  // Apply the force to the enemy
     nextPosition = Vector2Add(*currentPos, currentVelocity); // Calculate the next position
-    int xIndex = (int)nextPosition.x / 16; // Calculate the tile index
-    int yIndex = (int)nextPosition.y / 16;
-    std::clog << "xIndex = " << xIndex << std::endl;
-    std::clog << collisionIDs[yIndex][xIndex] << std::endl;
-    if((yIndex < 0 || yIndex > 64 || xIndex < 0 || xIndex > 64)){
+    int nextPositionXIndex = (int)nextPosition.x;
+    nextPositionXIndex = (nextPositionXIndex - 32) /16;
+    int nextPositionYIndex = (int)nextPosition.y;
+    nextPositionYIndex = (nextPositionYIndex - 32) /16;
+   // int xIndex = (int)nextPosition.x  / 16; // Calculate the tile index
+  //  int yIndex = (int)nextPosition.y / 16;
+    std::clog << "xIndex = " << nextPositionXIndex << std::endl;
+    std::clog << collisionIDs[nextPositionYIndex][nextPositionXIndex] << std::endl;
+    if(nextPositionXIndex < 0 || nextPositionXIndex > 64 || nextPositionYIndex < 0 || nextPositionYIndex > 64){
+      return;
+    }
+    if((nextPositionYIndex <= 0 || nextPositionYIndex > 64 || nextPositionXIndex <= 0 || nextPositionXIndex > 64)){
      *currentPos = Vector2Add(*currentPos, currentVelocity);
      return;
     }
-    if(collisionIDs[yIndex][xIndex] == 0){
+    if(collisionIDs[nextPositionYIndex][nextPositionXIndex] == 0){
     *currentPos = Vector2Add(*currentPos, currentVelocity); // Update position
     }
     else{
@@ -151,7 +159,9 @@ namespace enemyAi_NS {
       // As we only enter this if statement when there is an obstacle
       // Could instead pass in player position
       shouldTakeAlternatePath = false;
-      nextPosition = aStarAlternativeMovement(playerPos); 
+      nextPosition = playerPos;
+
+      //nextPosition = aStarAlternativeMovement(playerPos); 
       if(nextPosition.x == -2 && nextPosition.y == -2){
         std::clog << "next position return was -2, so END" << std::endl;
         isTakingAlternatePath = false;
