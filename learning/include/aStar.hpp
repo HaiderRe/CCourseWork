@@ -1,65 +1,72 @@
-#pragma once
+/*
+    Copyright (c) 2015, Damian Barczynski <daan.net@wp.eu>
+    Following tool is licensed under the terms and conditions of the ISC license.
+    For more information visit https://opensource.org/licenses/ISC.
+*/
+#ifndef __ASTAR_HPP_8F637DB91972F6C878D41D63F7E7214F__
+#define __ASTAR_HPP_8F637DB91972F6C878D41D63F7E7214F__
 
-#include <queue>
 #include <vector>
 #include <functional>
-#include "Vec2i.hpp"
-#include <string>
-#include <cmath> 
+#include <set>
 
-namespace pf
+namespace AStar
 {
-	using uint = unsigned int;
-	using HeuristicFunction = std::function<uint(const Vec2i&, const Vec2i&, int)>;
+    struct Vec2i
+    {
+        int x, y;
 
-	struct Node
-	{
-		Node() : pos(0, 0), parent(-1, -1), f(0), g(0), h(0) {}
-		Node(const Vec2i& pos, uint f) : pos(pos), parent(-1, 1), f(f), g(0), h(0) {}
-		Node(const Vec2i& pos, const Vec2i& parent, uint f, uint g, uint h) : pos(pos), parent(parent), f(f), g(g), h(h) {}
+        bool operator == (const Vec2i& coordinates_);
+    };
 
-		Vec2i pos;
-		Vec2i parent;
-		uint f;
-		uint g;
-		uint h;
-	};
+    using uint = unsigned int;
+    using HeuristicFunction = std::function<uint(Vec2i, Vec2i)>;
+    using CoordinateList = std::vector<Vec2i>;
 
-	// Reverse std::priority_queue to get the smallest element on top
-	inline bool operator< (const Node& a, const Node& b) { return a.f < b.f; }
+    struct Node
+    {
+        uint G, H;
+        Vec2i coordinates;
+        Node *parent;
 
-	class AStar
-	{
-	public:
-		AStar();
+        Node(Vec2i coord_, Node *parent_ = nullptr);
+        uint getScore();
+    };
 
-		std::vector<Vec2i> findPath(const Vec2i& startPos, const Vec2i& targetPos, HeuristicFunction heuristicFunc, int weight = 1);
-		void loadMap(const std::string& fileName);
-		void setDiagonalMovement(bool enable);
+    using NodeSet = std::vector<Node*>;
 
-	private:
-		std::vector<Vec2i> buildPath() const;
-		bool isValid(const Vec2i& pos) const;
-		bool isBlocked(int index) const;
-		int convertTo1D(const Vec2i& pos) const;
+    class Generator
+    {
+        bool detectCollision(Vec2i coordinates_);
+        Node* findNodeOnList(NodeSet& nodes_, Vec2i coordinates_);
+        void releaseNodes(NodeSet& nodes_);
 
-		int m_weight;
-		int m_size;
-		uint m_nrOfDirections;
-		Vec2i m_dimensions;
-		Vec2i m_startPos;
-		Vec2i m_targetPos;
-		std::priority_queue<Node> m_openList;
-		std::vector<bool> m_closedList;
-		std::vector<Node> m_cameFrom;
-		std::vector<int> m_grid;
-		std::vector<Vec2i> m_directions;
-		HeuristicFunction m_heuristic;
-	};
+    public:
+        Generator();
+        void setWorldSize(Vec2i worldSize_);
+        void setDiagonalMovement(bool enable_);
+        void setHeuristic(HeuristicFunction heuristic_);
+        CoordinateList findPath(Vec2i source_, Vec2i target_);
+        void addCollision(Vec2i coordinates_);
+        void removeCollision(Vec2i coordinates_);
+        void clearCollisions();
 
-	namespace heuristic
-	{
-		uint manhattan(const Vec2i& v1, const Vec2i& v2, int weight);
-		uint euclidean(const Vec2i& v1, const Vec2i& v2, int weight);
-	}
+    private:
+        HeuristicFunction heuristic;
+        CoordinateList direction, walls;
+        Vec2i worldSize;
+        uint directions;
+    };
+
+    class Heuristic
+    {
+        static Vec2i getDelta(Vec2i source_, Vec2i target_);
+
+    public:
+        static uint manhattan(Vec2i source_, Vec2i target_);
+        static uint euclidean(Vec2i source_, Vec2i target_);
+        static uint octagonal(Vec2i source_, Vec2i target_);
+    };
 }
+
+#endif // __ASTAR_HPP_8F637DB91972F6C878D41D63F7E7214F__

@@ -9,7 +9,7 @@
 #include "raymath.h"
 #include <memory> 
 #include "frameUtility.hpp"  
-#include "AStar.hpp"
+#include "pathfinder.hpp"
 //#include "aStar.hpp"
 namespace enemyAi_NS {
   // TODO:
@@ -26,7 +26,11 @@ namespace enemyAi_NS {
     Vector2 seperationForce = {0.00f, 0.00f};
     std::vector<Rectangle> enemiesRects;
     std::vector<std::vector<int>> collisionIDs;
+    std::vector<Vector2> path;
+   
     //std::vector<Node> path;
+  
+ 
     Vector2 nextPosition = {0.00f, 0.00f};
     int currentPathIndex = 0;
     bool isTakingAlternatePath = false;
@@ -43,23 +47,27 @@ namespace enemyAi_NS {
       playerPos = aPlayerPos; 
     }
     
-   /* Vector2 aStarAlternativeMovement(Vector2 aNextPos){ // Takes in the next position the enemy is going to move to and returns the next position
+   Vector2 aStarAlternativeMovement(Vector2 aNextPos){ // Takes in the next position the enemy is going to move to and returns the next position
 
      if(isTakingAlternatePath == false){
       std::clog << "unique id" << std::endl;
-       Node start = {(int)currentPos->x / 16, (int)currentPos->y / 16, 0, 0, 0, 0, 0};
-        Node end = {(int)aNextPos.x / 16, (int)aNextPos.y / 16, 0, 0, 0, 0, 0};
-        Cordinate cordinate(collisionIDs);
-        path = cordinate.aStar(start, end);
-        for (int i = 0; i < path.size(); i++) {
-          std::clog << "path[" << i << "] = " << path[i].x << ", " << path[i].y << std::endl;
-        }
+       Vector2 start = {(currentPos->x - 32) / 16, (currentPos->y - 32)/ 16 };
+        Vector2 endPos = {(aNextPos.x - 32 )/ 16, (aNextPos.y - 32) / 16};
+        std::clog << "before load map" << std::endl;
+        finder = pathfinder_NS::pathFinder(collisionIDs, start, endPos);
+        std::clog << "after load map" << std::endl;
+        std::clog << "before path" << std::endl;
+        finder.pathFind();
+        std::clog << "after path" << std::endl;
+        std::reverse(finder.path.begin(), finder.path.end()); 
+        path = finder.path;
+
+       std::clog << "path size = " << path.size() << std::endl;
        if(path.size() > 0){
          isTakingAlternatePath = true;
        }
-       return Vector2{-1, -1};
+       
      }
-     else{
       if(currentPathIndex >= path.size()){  
         isTakingAlternatePath = false;
         currentPathIndex = 0;
@@ -83,8 +91,8 @@ namespace enemyAi_NS {
       }
       return nextPathVector;
      }
-   }
-   */
+   
+   
    void circlingMovement() {
         desiredVelocity = {0.0f, 0.0f};
        // currentVelocity = {0.0f, 0.0f};
@@ -137,13 +145,13 @@ namespace enemyAi_NS {
     nextPositionYIndex = (nextPositionYIndex - 32) /16;
    // int xIndex = (int)nextPosition.x  / 16; // Calculate the tile index
   //  int yIndex = (int)nextPosition.y / 16;
-    std::clog << "xIndex = " << nextPositionXIndex << std::endl;
     std::clog << collisionIDs[nextPositionYIndex][nextPositionXIndex] << std::endl;
     if(nextPositionXIndex < 0 || nextPositionXIndex > 64 || nextPositionYIndex < 0 || nextPositionYIndex > 64){
       return;
     }
     if((nextPositionYIndex <= 0 || nextPositionYIndex > 64 || nextPositionXIndex <= 0 || nextPositionXIndex > 64)){
      *currentPos = Vector2Add(*currentPos, currentVelocity);
+     std::clog << "out of bounds " << std::endl;
      return;
     }
     if(collisionIDs[nextPositionYIndex][nextPositionXIndex] == 0){
@@ -161,7 +169,7 @@ namespace enemyAi_NS {
       shouldTakeAlternatePath = false;
       nextPosition = playerPos;
 
-      //nextPosition = aStarAlternativeMovement(playerPos); 
+      nextPosition = aStarAlternativeMovement(playerPos); 
       if(nextPosition.x == -2 && nextPosition.y == -2){
         std::clog << "next position return was -2, so END" << std::endl;
         isTakingAlternatePath = false;
@@ -170,15 +178,17 @@ namespace enemyAi_NS {
         std::clog << "next position return was -1, so BAD" << std::endl;
       }
       // Fun maths :)
-      std::clog << "inside alt path" << std::endl;
-      Vector2 direction = Vector2Subtract(nextPosition, *currentPos); // Calc Direction to next Pos
+
+      *currentPos = nextPosition;
+    /*  Vector2 direction = Vector2Subtract(nextPosition, *currentPos); // Calc Direction to next Pos
       Vector2 normalizedDirection = Vector2Normalize(direction); // Normalize Direction (values between 0 and 1)
       Vector2 movement = Vector2Scale(normalizedDirection, Vector2Length(defaultVelocity)); // Scale the direction by the default speed so it moves at the speed 
       *currentPos = Vector2Add(*currentPos, movement); // Update Pos
       // Check if we overshot position
     if(Vector2Distance(*currentPos, nextPosition) < 1.0f){  
         *currentPos = nextPosition;
-    }  
+    } 
+    */ 
    }
 
    }
