@@ -77,7 +77,9 @@ int main(void)
  SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
 Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
   theEnemyManager.spawnSlimeEnemy(Vector2{100,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
+  theEnemyManager.spawnSlimeEnemy(Vector2{200,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
    theEnemyManager.smartPtrEnemies[0]->thePlayer = &nPlayer;
+    theEnemyManager.smartPtrEnemies[1]->thePlayer = &nPlayer;
     
 
 // Main game loop
@@ -180,6 +182,11 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
     UnloadTexture(theEnemyManager.enemies[d].enemyFrameUtility.texture);  
     }
     theEnemyManager.deLoadProjectiles();
+    for(int i = 0; i < theEnemyManager.smartPtrEnemies.size(); i++){
+      for(int j = 0; j < theEnemyManager.smartPtrEnemies.size(); j++){
+        UnloadTexture(theEnemyManager.smartPtrEnemies[i]->enemyFrameUtility.texture);
+      }
+    }
     UnloadTexture(mouseHandlerObject.mouseTexture);
     UnloadTexture(aTexture);
     CloseAudioDevice(); // Close sound device

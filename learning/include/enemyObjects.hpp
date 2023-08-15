@@ -80,6 +80,9 @@ namespace enemyObjects_NS{
         }
         virtual void draw(){
             enemyFrameUtility.draw();
+            DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
+            DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
+            
           //  std::clog << "Drawing enemy " << std::endl;
            // enemyProjectile.draw();
         }
@@ -100,6 +103,7 @@ namespace enemyObjects_NS{
             slimeEnemyMovement.circlingMovement();
          }
          void update() override{ // overriding update() from basicEnemy
+         
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility.direction = direction;
             slimeEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
@@ -204,9 +208,9 @@ namespace enemyObjects_NS{
         }
         void sUpdate(){
             std::vector<Rectangle> enemiesRects;
-            for(int i = enemies.size() - 1; i >= 0; i--){ // since killEnemy() resizes vector
+            for(int i = enemies.size() - 1; i >= 0; i--){ // since killEnemy() resizes vector 
                 enemies[i].update();
-                enemiesRects.push_back(enemies[i].destRec);
+                enemiesRects.push_back(Rectangle{enemies[i].destRecPos.x, enemies[i].destRecPos.y, float(enemies[i].dWidth), float(enemies[i].dHeight)}); 
                 if(enemies[i].health <= 0){
                     killEnemy(i); 
                     --i; // since killEnemy resizes vector
@@ -214,17 +218,39 @@ namespace enemyObjects_NS{
             } 
             for(int j = smartPtrEnemies.size() - 1 ; j >= 0; j--){
                 smartPtrEnemies[j]->update();
-                enemiesRects.push_back(smartPtrEnemies[j]->destRec);
+                enemiesRects.push_back(Rectangle{smartPtrEnemies[j]->destRecPos.x, smartPtrEnemies[j]->destRecPos.y, float(smartPtrEnemies[j]->dWidth), float(smartPtrEnemies[j]->dHeight)});
                 if(smartPtrEnemies[j]->health <= 0){
                     killEnemySPtr(j);
                     --j; // since killEnemy resizes vector
                 }
             }
-            for(int k = 0; k < enemies.size(); k++){
-                enemies[k].otherEnemyRects = enemiesRects;
+         //   std::clog << "enemiesRects.size() = " << enemiesRects.size() << std::endl; 
+            for(int k = enemies.size() - 1;  k >= 0; k--){
+                std::vector<Rectangle> tempRects = enemiesRects;
+                tempRects.erase(tempRects.begin() + k);   // Found error; logic error is somewhere here, tempRects has the same value as the currentEnemies position
+                enemies[k].otherEnemyRects = tempRects;
             }
-            for(int l = 0; l < smartPtrEnemies.size(); l++){
-                smartPtrEnemies[l]->otherEnemyRects = enemiesRects;
+            //testing output 
+          //  for(int p = 0; p < enemies.size(); p++){ 
+             //   std::clog << "enemies Rect" << p << " = ";
+             //   std::clog << enemiesRects[p].x << " " << enemiesRects[p].y << std::endl;
+          //  }
+            for(int l = smartPtrEnemies.size() - 1;  l >= 0; l--){
+                std::vector<Rectangle> tempRects = enemiesRects;
+                for(int t = tempRects.size() - 1; t >= 0; t--){
+                if(tempRects[t].x == smartPtrEnemies[l]->destRecPos.x && tempRects[t].y == smartPtrEnemies[l]->destRecPos.y){
+                 //   std::clog << "erasing values of tempRects = " <<tempRects[t].x << tempRects[t].y  << std::endl;
+                    tempRects.erase(tempRects.begin() + t);
+                    }
+                }
+                smartPtrEnemies[l]->otherEnemyRects = tempRects;
+                for(int m = 0; m < tempRects.size(); m++){
+               // std::clog << "tempRects Rect" << l << " = "; 
+              //  std::clog << tempRects[m].x << " " << tempRects[m].y << std::endl;
+                }
+               // std::clog << "smarPtrEnemies Rect" << l << " = ";
+               // std::clog << smartPtrEnemies[l]->destRecPos.x << " " << smartPtrEnemies[l]->destRecPos.y << std::endl;
+              //  std::clog << "endl" << std::endl;
             }
         }
         void killEnemy(int index){
