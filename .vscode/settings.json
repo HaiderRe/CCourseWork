@@ -76,7 +76,11 @@
         "deque": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "mutex": "cpp",
+        "random": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }

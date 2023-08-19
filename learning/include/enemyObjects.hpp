@@ -13,6 +13,7 @@
 #include "projectile.hpp"
 #include "frameUtility.hpp"
 #include "enemyAi.hpp"
+#include "enemyAiNew.hpp"
 #include <memory>
 namespace enemyObjects_NS{
     class basicEnemy{
@@ -95,9 +96,10 @@ namespace enemyObjects_NS{
     };
     class slimeEnemy : public basicEnemy{
         public:
-        enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
-        slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
-            slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs);
+       // enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
+       enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
+             slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
+                slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs);
          }
          void movement() override{
             slimeEnemyMovement.circlingMovement();
@@ -108,6 +110,12 @@ namespace enemyObjects_NS{
             enemyFrameUtility.direction = direction;
             slimeEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
             movement();
+         }
+         void draw() override{
+            enemyFrameUtility.draw();
+          //  DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
+        //    DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
+            slimeEnemyMovement.testingDrawDebug();
          }
          
     };

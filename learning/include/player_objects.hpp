@@ -756,9 +756,9 @@ void LerpSDrawLine(int extraFrames){
         speedX = 0;
       }
       if(speedY > 0 || speedY < 0){
-        speedY = speedY = 0;
+        speedY = 0;
       }
-      std::clog << "collision" << std::endl;
+    //  std::clog << "collision" << std::endl;
     }
     return isColliding;
   }
