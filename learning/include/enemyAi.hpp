@@ -37,10 +37,10 @@ namespace enemyAi_NS {
     Vector2 stopOffsetCircle = {0.00f, 0.00f};
     Vector2 circlingOffsetCircle = {0.00f, 0.00f}; 
     Vector2 circleOffset = {0.00f, 0.00f};
-    Vector2 seekOffset = {0.00f, 0.00f}; // equation for the circle and then input the x to get the Y.
+    Vector2 seekOffset = {0.00f, 0.00f}; // trig 
     bool shouldSeperate = false;
     bool validOffset = false;
-    
+    std::string* currentState; //idle, attack, move, dead, hurt (?)
     //std::vector<Node> path;
   void NewchooseCirclePoint() {
     // Center of the circles
@@ -201,10 +201,20 @@ namespace enemyAi_NS {
    }
 
    void circlingMovement() {
+    if(*currentState == "attack" || *currentState == "dead"){
+      return;
+    }
+    if(playerPos.x < -1){
+      *currentState = "idle";
+      std::clog << "player Out Of Bounds " << std::endl;
+      return;
+    }
+    *currentState = "move";
     if (!currentPos) {
         std::clog << "currentPos is nullptr" << std::endl;
         return;
     }
+    
     if(validOffset == false){
         NewchooseCirclePoint();    
         validOffset = true;
@@ -302,13 +312,8 @@ namespace enemyAi_NS {
         }
         currentVelocity = Vector2Add(currentVelocity, Vector2Subtract(desiredVelocity, currentVelocity));
         nextPosition = Vector2Add(*currentPos, currentVelocity);
-
         int nextPositionXIndex = toGridIndex(nextPosition.x);
         int nextPositionYIndex = toGridIndex(nextPosition.y);
-        std::clog << "forces on enemy = " << std::endl;
-        std::clog << "seekingForce = " << seekingForce.x << " " << seekingForce.y << std::endl;
-        std::clog << "seperationForce = " << seperationForce.x << " " << seperationForce.y << std::endl;
-        std::clog << "circlingForce = " << circlingForce.x << " " << circlingForce.y << std::endl;
         // Boundary and collision check
         if (nextPositionXIndex >= 0 && nextPositionXIndex < 64 && 
             nextPositionYIndex >= 0 && nextPositionYIndex < 64) {
@@ -381,12 +386,24 @@ if (xCollides && yCollides) {
 }
 if (!xCollides && !yCollides){
     *currentPos = Vector2Add(*currentPos, currentVelocity);
-} else {
+} 
+else {
     if (xCollides) {
+        if(currentPos->y  < playerPos.y){
+          currentVelocity.y += abs(currentVelocity.x);
+        }
+        else{
+          currentVelocity.y += -1 * abs(currentVelocity.x);
+        }
         currentVelocity.x = 0;
     }
     if (yCollides) {
-        currentVelocity.y = 0;
+       if(currentPos->x < playerPos.x){
+          currentVelocity.x += abs(currentVelocity.y);
+        }
+        else{
+          currentVelocity.x += -1 * abs(currentVelocity.y);
+        }        currentVelocity.y = 0;
     }
     *currentPos = Vector2Add(*currentPos, currentVelocity);
 }

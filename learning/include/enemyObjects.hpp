@@ -14,6 +14,7 @@
 #include "frameUtility.hpp"
 #include "enemyAi.hpp"
 #include "enemyAiNew.hpp"
+#include "slimeAttack.hpp"
 #include <memory>
 namespace enemyObjects_NS{
     class basicEnemy{
@@ -97,19 +98,37 @@ namespace enemyObjects_NS{
     class slimeEnemy : public basicEnemy{
         public:
        // enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
+       std::string stateMachineMemAcc = "idle";
+       std::string* stateMachine; // idle, attack, move, death, hurt(?),
        enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
+       slimeAttack_NS::Attack slimeAttack;
              slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
                 slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs);
+                stateMachine = &stateMachineMemAcc;
+                slimeEnemyMovement.currentState = stateMachine;
+
          }
          void movement() override{
             slimeEnemyMovement.circlingMovement();
+         }
+         void directionCalc(){
+            if(destRecPos.x < thePlayer->destRecPos.x + 32){
+                direction = 2;
+            }
+            else{
+                direction = 1;
+            }
+            if(destRecPos.y < thePlayer->destRecPos.y - 32 && destRecPos.y + 32 < destRecPos.y - 32 ) // cjamge cjpde
          }
          void update() override{ // overriding update() from basicEnemy
          
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility.direction = direction;
             slimeEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
+            slimeAttack.currentState = stateMachine;
+            slimeAttack.update(thePlayer->destRecPos, {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)}, direction );
             movement();
+            directionCalc();
          }
          void draw() override{
             enemyFrameUtility.draw();
