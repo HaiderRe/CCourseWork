@@ -28,6 +28,7 @@ namespace animations_h {
         std::vector<std::string> paths;
         bool hasVector = false;
         Rectangle frameRec = {0.0f, 0.0f, (float)width, (float)height};
+        Color playerColor1 = WHITE;
         Texture2D texture1;
         std::vector<Texture2D> texturesVector;
         animationManager(std::string iPath,  int iWidth, int iHeight, int iAmount_of_times){
@@ -56,6 +57,9 @@ namespace animations_h {
             paths = iPaths;
             frameRec = {0.0f, 0.0f, (float)width/amount_of_frames, (float)height};
         }
+        void setColor(Color aColor){
+            playerColor1 = aColor;
+        }
         void draw(float x, float y){
             // Test draw the whole texture  
          //   DrawTexture(texture1, 0.00f, 0.00f, WHITE);
@@ -69,7 +73,7 @@ namespace animations_h {
         
          Rectangle destRec = { position.x, position.y, sWidth, sHeight};
          Vector2 origin = { width/2, height/2 };
-         DrawTexturePro(texture1, frameRec, destRec, origin, rotation, WHITE);
+         DrawTexturePro(texture1, frameRec, destRec, origin, rotation, playerColor1);
         }
         
         void draw(float x, float y, int direction){
@@ -104,7 +108,7 @@ namespace animations_h {
          Rectangle frameRec1 = {frameRec.x, frameRec.y, 64, 64}; 
          Vector2 origin = {  frameRec1.width/2, frameRec1.height/2};
       //   DrawTexture(texture1, 0.00f, 0.00f, WHITE);
-         DrawTexturePro(texture1, frameRec1, destRec, origin, 0.00f, WHITE);
+         DrawTexturePro(texture1, frameRec1, destRec, origin, 0.00f, playerColor1);
      //    std::cout << "the frame rec is " << frameRec1.x << " " << frameRec1.y << " " << frameRec1.width << " " << frameRec1.height << std::endl;
      //    std::cout << "the dest rec is " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;
       //   std::cout << "the origin is " << origin.x << " " << origin.y << std::endl;
@@ -134,7 +138,7 @@ namespace animations_h {
          Rectangle frameRec1 = {frameRec.x, frameRec.y, 64, 64}; 
          Vector2 origin = {  frameRec1.width/2, frameRec1.height/2};
          for(int i = 0; i < paths.size(); i++){
-             DrawTexturePro(texturesVector[i], frameRec1, destRec, origin, rotation, WHITE);
+             DrawTexturePro(texturesVector[i], frameRec1, destRec, origin, rotation, playerColor1);
          }
         }
         void set_position(float x, float y){

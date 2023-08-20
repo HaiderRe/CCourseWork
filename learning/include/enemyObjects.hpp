@@ -94,6 +94,7 @@ namespace enemyObjects_NS{
             enemyFrameUtility.direction = direction;
            // shootLogic();
         }
+        virtual void unloadTexture(){}
     };
     class slimeEnemy : public basicEnemy{
         public:
@@ -106,6 +107,8 @@ namespace enemyObjects_NS{
                 slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs);
                 stateMachine = &stateMachineMemAcc;
                 slimeEnemyMovement.currentState = stateMachine;
+                slimeAttack = slimeAttack_NS::Attack(&destRecPos);
+                slimeAttack.currentState = stateMachine;
 
          }
          void movement() override{
@@ -118,20 +121,43 @@ namespace enemyObjects_NS{
             else{
                 direction = 1;
             }
-            if(destRecPos.y < thePlayer->destRecPos.y - 32 && destRecPos.y + 32 < destRecPos.y - 32 ) // cjamge cjpde
+            if(*stateMachine == "attack"){
+                return;
+            }
+            if( destRecPos.y + 32 < thePlayer->destRecPos.y + 32 ) // cjamge cjpde
+            {
+                direction = 0;
+            }
+            else if(destRecPos.y - 32 > thePlayer->destRecPos.y + 32){
+                direction = 3;
+            }
+         }
+         void checkAttackHit(){
+            if(slimeAttack.hitPlayer == true){
+                thePlayer->takeDamage(1.00f);
+                slimeAttack.hitPlayer = false;
+            }
          }
          void update() override{ // overriding update() from basicEnemy
          
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility.direction = direction;
             slimeEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
-            slimeAttack.currentState = stateMachine;
-            slimeAttack.update(thePlayer->destRecPos, {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)}, direction );
-            movement();
+             movement();
+            slimeAttack.update(thePlayer->destRecPos, {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)}, direction);
             directionCalc();
+            checkAttackHit();
+         }
+         void unloadTexture() override{
+             UnloadTexture(slimeAttack.attackTexture);
          }
          void draw() override{
+            if(*stateMachine == "attack"){
+                slimeAttack.drawAttack();
+            }
+            else{
             enemyFrameUtility.draw();
+            }
           //  DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
         //    DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
             slimeEnemyMovement.testingDrawDebug();

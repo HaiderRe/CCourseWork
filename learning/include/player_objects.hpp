@@ -18,6 +18,7 @@ namespace player_objects{
     public: 
     std::vector<animations_h::animationManager> animations;
     std::string currentAnimation = "Base_Attack";
+    Color playerColor = WHITE;
     int pKey = 0;
     void addAnimation(std::string path, int width, int height, int amount_of_frames){
       animations.push_back(animations_h::animationManager(path, width, height, amount_of_frames));
@@ -68,6 +69,12 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
     }
     void changeRotation(float rotation){
       animations[pKey].rotation = rotation;
+    }
+    void changeColor(Color aColor){
+      animations[pKey].playerColor1 = aColor;
+      for(int i = 0; i < animations.size(), i++;){
+        animations[i].setColor(aColor);
+      }
     }
   };
     // Path of the animation expects no .png and no Assets/ just the name of the file
@@ -553,10 +560,11 @@ void LerpSDrawLine(int extraFrames){
         
       }
     };
-    
+  
     class player{
         public:
         skillManager skillManagerObject;
+        int colorCountDown = -1;
         float xCord;
         float yCord;
         int width = 64; // Rect
@@ -566,18 +574,21 @@ void LerpSDrawLine(int extraFrames){
         Vector2 destRecPos = {0.0f,0.0f};
         std::string currentAnim;
         int direction = 0; // 0 = up , 1 = left, 2 = right, 3 = down
+        Color playerColor = WHITE;
         playerAnimations playerAnims;
         Texture2D playerSprite;
         Vector2 sourceRecPos; 
         std::vector<std::vector<int>> collisionIDsMap;
         Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
-        int health; 
+        float health = 5.00f; 
         Camera2D camera1;
         void draw();
         void update();
         void update(std::vector<std::vector<int>> collisionIDs);
         void movement();
         void drawOffCamera();
+        void takeDamage();
+        void takeDamage(float damagePoints);
         bool mapCollision(std::vector<std::vector<int>> collisionIDs);
         fxPlayer fxPlayerObject;
         player(){
@@ -640,8 +651,22 @@ void LerpSDrawLine(int extraFrames){
         void changeRotation1(float rotation){
           playerAnims.changeRotation(rotation);
         }
+        void changeColor(Color aColor){
+          playerAnims.playerColor = aColor;
+          playerAnims.changeColor(aColor);
+        }
         // void stateManager();    
     };
+    void player::takeDamage(){
+      health = health - 1;
+      playerColor = RED;
+      colorCountDown = 60;
+    }
+    void player::takeDamage(float damagePoints){
+      health = health - damagePoints;
+      playerColor = RED;
+      colorCountDown = 60;
+    }
     void player::movement(){
       bool isRight = false;
       bool isLeft = false;
@@ -728,10 +753,21 @@ void LerpSDrawLine(int extraFrames){
   }
   void player::drawOffCamera(){
    skillManagerObject.normalDraw();
+   
   }
   void player::draw(){
+    changeColor(playerColor);
+    if(colorCountDown > -1){
+      colorCountDown = colorCountDown - 1;
+      if(colorCountDown < 0){
+        playerColor = WHITE;
+        colorCountDown = -1;
+      }
+    }
+    
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
     skillManagerObject.draw(camera1);
+    //playerColor = WHITE;
    // fxPlayerObject.drawDecide();
   } 
   bool player::mapCollision(std::vector<std::vector<int>> collisionIDs){

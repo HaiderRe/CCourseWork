@@ -202,6 +202,7 @@ namespace enemyAi_NS {
 
    void circlingMovement() {
     if(*currentState == "attack" || *currentState == "dead"){
+      std::clog << "currentState is " << *currentState << std::endl;
       return;
     }
     if(playerPos.x < -1){
@@ -283,12 +284,14 @@ namespace enemyAi_NS {
              circlingForce = Vector2Scale(perpendicular, maxSpeed);
             desiredVelocity = Vector2Add(desiredVelocity, Vector2Scale(circlingForce, circlingWeight));
             isStopping = true;
+            
         }
       
         // Stopping close to the player
         if (Vector2Distance(*currentPos, Vector2Add(playerPos ,Vector2{32,32 })) <= stopThreshold) {
             desiredVelocity = {0.0f, 0.0f};
             isStopping = true;
+            *currentState = "attack";
         }
         float tolerance = 1.0f;
         if (Vector2Distance(*currentPos, Vector2Add(playerPos ,Vector2{32,32 })) <= stopThreshold + tolerance) {

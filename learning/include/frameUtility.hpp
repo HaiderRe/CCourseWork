@@ -12,6 +12,7 @@
 namespace frameUtility_NS{
     class frameUtility{
         public: 
+        int stayFrame = -1;
         int framesCounter = 0;
         int currentFrame = 0;
         Rectangle frameRec = {0.0f, 0.0f, 144, 144};
@@ -25,6 +26,7 @@ namespace frameUtility_NS{
         int destWidth = 64; // Normally the same as destHeight
         int destHeight = 64;
         float rotation = 0.0f;
+        Color color = WHITE;
         int direction = 0; // Used to determine which way the enemy is facing (0 = up, 1 = left, 2 = right, 3 = down) (if none 0 is used)
         frameUtility(Texture2D aTexture, int aFramesPerSecond, int aFrameWidth, int aFrameHeight, int aDestWidth, int aDestHeight, int aDirection){
             texture = aTexture;
@@ -68,8 +70,10 @@ namespace frameUtility_NS{
                 destRec.x = destRec.x + origin.x; // Top left corner of the texture is the destrec position
                 destRec.y = destRec.y + origin.y;
                }
-
-            DrawTexturePro(texture, frameRec, destRec, origin, rotation, WHITE);
+            if(stayFrame > -1){
+                frameRec.x = frameWidth * stayFrame;
+            }
+            DrawTexturePro(texture, frameRec, destRec, origin, rotation, color);
         
         }
         void frameUtilityUpdateValues(int destRecx, int destRecy, int destWidth1, int destHeight1){

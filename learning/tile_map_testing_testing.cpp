@@ -183,7 +183,8 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
     }
     theEnemyManager.deLoadProjectiles();
     for(int i = 0; i < theEnemyManager.smartPtrEnemies.size(); i++){
-      for(int j = 0; j < theEnemyManager.smartPtrEnemies.size(); j++){
+      theEnemyManager.smartPtrEnemies[i]->unloadTexture();
+      for(int j = 0; j < theEnemyManager.smartPtrEnemies.size(); j++){ // 0 clue why there is two loops
         UnloadTexture(theEnemyManager.smartPtrEnemies[i]->enemyFrameUtility.texture);
       }
     }
