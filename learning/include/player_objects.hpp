@@ -155,38 +155,55 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       float rotation = atan2(y, x); // Use trig to find the rotation
       return rotation;
       }
-      void GetCollisionBetweenEnemies(Rectangle aRect){
+      int GetCollisionBetweenEnemies(Rectangle aRect){
         return; 
       }
-      void hitBoxDrawSquare(){
+      int hitBoxDrawSquare(Rectangle aEnemyRect){
        Rectangle hitBox =  {FMousePos.x, FMousePos.y, 128, 128};
-       GetCollisionBetweenEnemies(hitBox);
+       if(CheckCollisionRecs(hitBox, aEnemyRect)){
+        return 1;
       }
-      void hitBoxDrawCircle(){
+      else{
+        return 0;
+      }
+      return 0;
+      }
+      int hitBoxDrawCircle(Rectangle aEnemyRect){
 
       }
-      void hitBoxDrawLine(){
+      int hitBoxDrawLine(Rectangle aEnemyRect){ // 
+      Rectangle destRec = {currentPos.x, currentPos.y, 32, 32}; //Projectile Dest Rect
+      
+      if(CheckCollisionRecs(destRec, aEnemyRect)){
+        return 1;
+      }
+      else{
+        return 0;
+      }
+      return 0;
+      }
+      int hitBoxDrawBuff(Rectangle aEnemyRect){
 
       }
-      void hitBoxDrawBuff(){
-
-      }
-      void hitBoxDecide(){
+      //Enemies Call this function with their rectangle
+      int hitBoxDecide(Rectangle aEnemyRect){ 
+        int hit = 0;
         if(isCastingN == false){
           return;
         }
         if(currentTypeOfSkill == "Square"){
-          hitBoxDrawSquare();
+         hit = hitBoxDrawSquare(aEnemyRect);
         }
         else if(currentTypeOfSkill == "Circle"){
-          hitBoxDrawCircle();
+       hit =  hitBoxDrawCircle(aEnemyRect);
         }
-        else if(currentTypeOfSkill == "Line"){
-          hitBoxDrawLine();
+        else if(currentTypeOfSkill == "Line" ){
+         hit = hitBoxDrawLine(aEnemyRect);
         }
         else if(currentTypeOfSkill == "Buff"){
-          hitBoxDrawBuff();
+          hit = hitBoxDrawBuff(aEnemyRect);
         }
+        return hit;
       }
 
       void drawDecide(Camera2D aCamera){
