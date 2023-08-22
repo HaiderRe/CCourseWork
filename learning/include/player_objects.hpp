@@ -108,8 +108,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       int cDirection;
       int extraFrames1 = 0;
       int lineChunks = 0;
-      Vector2 currentPos;
-      float progressStep;
+      Vector2 currentPos = {0.00f, 0.00f};
+      Vector2 lerpCurrentPos = {0.00f, 0.00f};
+       float progressStep;
       Camera2D camera1;
       Vector2 mousePos = {0.00f, 0.00f};
       Vector2 FMousePos = {0.00f, 0.00f};
@@ -156,7 +157,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       return rotation;
       }
       int GetCollisionBetweenEnemies(Rectangle aRect){
-        return; 
+        return 0; 
       }
       int hitBoxDrawSquare(Rectangle aEnemyRect){
        Rectangle hitBox =  {FMousePos.x, FMousePos.y, 128, 128};
@@ -169,10 +170,10 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       return 0;
       }
       int hitBoxDrawCircle(Rectangle aEnemyRect){
-
+        return 0;
       }
       int hitBoxDrawLine(Rectangle aEnemyRect){ // 
-      Rectangle destRec = {currentPos.x, currentPos.y, 32, 32}; //Projectile Dest Rect
+      Rectangle destRec = {lerpCurrentPos.x, lerpCurrentPos.y, 32, 32}; //Projectile Dest Rect
       
       if(CheckCollisionRecs(destRec, aEnemyRect)){
         return 1;
@@ -182,14 +183,38 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       }
       return 0;
       }
+      void hitBoxDrawLineDraw(){
+        Rectangle destRec = {currentPos.x, currentPos.y, 32, 32};
+        DrawRectangleLines(lerpCurrentPos.x, lerpCurrentPos.y, destRec.width, destRec.y, GREEN);
+      }
       int hitBoxDrawBuff(Rectangle aEnemyRect){
-
+        return 0;
+      }
+      int hitBoxDrawLineChunk(Rectangle aEnemyRect){
+        int AmountOfChunks = 5; // Amount of Chunks
+    static std::vector<Vector2> chunkPositions(AmountOfChunks); // Retain values 
+     static std::vector<int> chunkFrames(AmountOfChunks, 0); // Static retains the values 
+        // Initialize the chunk positions 
+        for(int i = 0; i < AmountOfChunks; ++i){
+            float progress = (float)i / (AmountOfChunks - 1);
+            chunkPositions[i] = {
+                FPlayerPos.x + progress * (FMousePos.x - FPlayerPos.x),
+                FPlayerPos.y + progress * (FMousePos.y - FPlayerPos.y)
+            };
+        } 
+        for(int j = 0; j< AmountOfChunks; j++){
+          Rectangle destRec = {chunkPositions[j].x, chunkPositions[j].y, 32, 32};
+          if(CheckCollisionRecs(destRec, aEnemyRect)){
+            return 1;
+          }
+        }
+        return 0;
       }
       //Enemies Call this function with their rectangle
       int hitBoxDecide(Rectangle aEnemyRect){ 
         int hit = 0;
         if(isCastingN == false){
-          return;
+          return 0;
         }
         if(currentTypeOfSkill == "Square"){
          hit = hitBoxDrawSquare(aEnemyRect);
@@ -202,6 +227,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         }
         else if(currentTypeOfSkill == "Buff"){
           hit = hitBoxDrawBuff(aEnemyRect);
+        }
+        else if(currentTypeOfSkill == "LineChunk"){
+          hit = hitBoxDrawLineChunk(aEnemyRect);
         }
         return hit;
       }
@@ -386,6 +414,7 @@ void DrawLineChunk(int extraFrames){
 }
 
 void LerpSDrawLine(int extraFrames){
+  std::clog << "curentPos Before = " + std::to_string(currentPos.x) + " " + std::to_string(currentPos.y) << std::endl;
   int maxFrames = currentTexture.width / 64;
     if(FMousePos.x == 0 && FMousePos.y == 0){
       Vector2 tempVector = GetMousePosition();
@@ -395,7 +424,7 @@ void LerpSDrawLine(int extraFrames){
       FPlayerPos.x = position.x + 32;
       FPlayerPos.y = position.y + 32;  
       currentPos = FPlayerPos; 
-
+      
       
       // Determine the step size for each fram
       progressStep = 1.0f / ((60/frameSpeed1) * (maxFrames + extraFrames)); 
@@ -417,7 +446,8 @@ void LerpSDrawLine(int extraFrames){
     // Increment currentPos 
     currentPos.x += progressStep * (FMousePos.x - FPlayerPos.x);
     currentPos.y += progressStep * (FMousePos.y - FPlayerPos.y);
-
+    lerpCurrentPos = {currentPos.x, currentPos.y};
+    std::clog << "curentPos after = " + std::to_string(currentPos.x) + " " + std::to_string(currentPos.y) << std::endl;
     Rectangle destRec = {currentPos.x, currentPos.y, width, width};
 
     DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)}, calcRotation(camera1) * (180.0f/PI), WHITE);
@@ -608,6 +638,8 @@ void LerpSDrawLine(int extraFrames){
         void takeDamage(float damagePoints);
         bool mapCollision(std::vector<std::vector<int>> collisionIDs);
         fxPlayer fxPlayerObject;
+        int fxDamage = 1;
+        int weaponDamage = 1;
         player(){
           skillManagerObject = skillManager();
           std::vector<std::string> iPaths; // Idle Paths
@@ -784,6 +816,7 @@ void LerpSDrawLine(int extraFrames){
     
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
     skillManagerObject.draw(camera1);
+    fxPlayerObject.hitBoxDrawLineDraw();
     //playerColor = WHITE;
    // fxPlayerObject.drawDecide();
   } 

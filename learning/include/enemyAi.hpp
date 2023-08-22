@@ -202,7 +202,7 @@ namespace enemyAi_NS {
 
    void circlingMovement() {
     if(*currentState == "attack" || *currentState == "dead"){
-      std::clog << "currentState is " << *currentState << std::endl;
+     // std::clog << "currentState is " << *currentState << std::endl;
       return;
     }
     if(playerPos.x < -1){

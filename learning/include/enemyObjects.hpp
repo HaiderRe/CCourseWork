@@ -103,6 +103,7 @@ namespace enemyObjects_NS{
        std::string* stateMachine; // idle, attack, move, death, hurt(?),
        enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
        slimeAttack_NS::Attack slimeAttack;
+       int frameCountHealth = 60;
              slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
                 slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs);
                 stateMachine = &stateMachineMemAcc;
@@ -138,6 +139,50 @@ namespace enemyObjects_NS{
                 slimeAttack.hitPlayer = false;
             }
          }
+         void takeDamage(int damage){
+            health -= damage;
+            if(health <= 0){
+                *stateMachine = "death";
+            }
+         }
+         void checkIsHitWeapon(){
+            if(thePlayer->currentAnim == "Player/base/Base_Attack"){
+                int direction = 0; // 0 = up , 1 = left, 2 = right, 3 = down
+                direction = thePlayer->direction;
+                float offsetX = 0.0f;
+                float offsetY = 0.0f;
+                if(direction == 0 || direction == 3){
+                    offsetX += 32.0f;
+                }
+                if(direction == 1 || direction == 2){
+                    offsetY += 32.0f;
+                }
+                if(direction == 2){
+                    offsetX += 64.0f;
+                }
+                Rectangle weaponHitBox = {thePlayer->destRecPos.x + offsetX, thePlayer->destRecPos.y + offsetY, 8, 8};
+                if(CheckCollisionRecs(destRec, weaponHitBox)){
+                    takeDamage(thePlayer->weaponDamage);
+                    enemyFrameUtility.color = RED;
+                     slimeAttack.attackFrameUtility.color = RED;
+                     frameCountHealth = 60;
+                     std::clog << "TRUE HIT" << std::endl;
+                }
+            }
+         }
+         void checkIsHit(){
+            checkIsHitFx();
+            checkIsHitWeapon();
+         }
+         void checkIsHitFx(){
+            if(thePlayer->fxPlayerObject.hitBoxDecide(destRec) == 1){
+                takeDamage(thePlayer->fxDamage);
+                enemyFrameUtility.color = RED;
+                std::clog << "TRUE HIT" << std::endl;
+                slimeAttack.attackFrameUtility.color = RED;
+                frameCountHealth = 60;
+            }
+         }
          void update() override{ // overriding update() from basicEnemy
          
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
@@ -147,6 +192,14 @@ namespace enemyObjects_NS{
             slimeAttack.update(thePlayer->destRecPos, {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)}, direction);
             directionCalc();
             checkAttackHit();
+            checkIsHit();
+            if(frameCountHealth > 0){
+                frameCountHealth--;
+            }
+            else{
+                enemyFrameUtility.color = WHITE;
+                slimeAttack.attackFrameUtility.color = WHITE;
+            }
          }
          void unloadTexture() override{
              UnloadTexture(slimeAttack.attackTexture);

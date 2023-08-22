@@ -47,7 +47,7 @@ class Attack{
             }
             if(*currentState == "attack" && coolDownTimer <= 0.00f){
                 getReadyAttack();
-                std::clog << "is getting ready and current state is attack and other shennagins" << std::endl;
+             //   std::clog << "is getting ready and current state is attack and other shennagins" << std::endl;
                 isAttacking = true;
                 if(intialPlayerPosSet == false){
                     intialPlayerPosSet = true;
@@ -56,7 +56,7 @@ class Attack{
                 }
             }
               coolDownTimer -= GetFrameTime(); // Decrement CoolDown
-              std::clog<< "cooldown" << coolDownTimer << std::endl;
+            //    std::clog<< "cooldown" << coolDownTimer << std::endl;
         }
         void getReadyAttack(){
             getReadyToAttack += 1;

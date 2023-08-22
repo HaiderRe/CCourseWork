@@ -13,7 +13,7 @@ def find_files(directory, pattern, ignore_list):
                 yield filename
 
 def main():
-    directory = 'C:/Users/haide/Documents/GitHub/HaiderRe.github.io/learning/CCourseWork/learning'
+    directory = 'C:/Users/HaiderTheBot/Documents/GitHub/CCourseWork/learning'
     patterns = ['*.hpp', '*.cpp']
     ignore_list = ["rlgl.h", "raylib.h", "raymath.h", "rapidxml.hpp", 
                    "rapidxml_iterators.hpp", "rapidxml_print.hpp", 
