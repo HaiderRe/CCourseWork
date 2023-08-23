@@ -190,6 +190,7 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
         UnloadTexture(theEnemyManager.smartPtrEnemies[i]->enemyFrameUtility.texture);
       }
     }
+    
     UnloadTexture(mouseHandlerObject.mouseTexture);
     UnloadTexture(aTexture);
     CloseAudioDevice(); // Close sound device

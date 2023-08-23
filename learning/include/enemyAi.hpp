@@ -494,6 +494,9 @@ else {
         DirectApproachEnemy(){}
         float restTime = 0.20f; // 
        float currentRestTime = 0.00f;
+       bool *isAttacking;
+       float attackTime = 4.00f;
+        float currentAttackTime = 0.00f;
         void update(Vector2 aPlayerPos) {
           playerPos = aPlayerPos;
         }
@@ -508,16 +511,27 @@ else {
     }
 
     float buffer = 3.00f; 
-    float attackBuffer = 0.0f; //
+    float attackBuffer = 112.0f; //
 
     float distanceToPlayer = Vector2Distance(*currentPos, playerPos);
     std::clog << "Distance to Player: " << distanceToPlayer << std::endl;
+    *isAttacking = false;
+    std::clog << "attackRange + attackBuffer is " << attackRange + attackBuffer << std::endl;
+    std::clog << "currentAttackTime is " << currentAttackTime << std::endl;
+    if (distanceToPlayer <= attackRange + attackBuffer && currentAttackTime <= 0) {
 
-    if (distanceToPlayer <= attackRange) {
         currentState = "attack";
             std::clog << "State changed to ATTACK" << std::endl;
-
-    } else if (distanceToPlayer >= attackRange) {
+            *isAttacking = true;
+            currentAttackTime = attackTime;
+    } 
+    if(currentAttackTime > 0){
+      currentAttackTime -= GetFrameTime();
+      if(currentAttackTime <= 0){
+        currentAttackTime = 0;
+      }
+    }
+   if (distanceToPlayer >= attackRange) {
         currentState = "move";
     } else {
         return currentState;

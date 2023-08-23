@@ -246,12 +246,21 @@ namespace enemyObjects_NS{
         enemyAi_NS::simpleEnemyMovement shootingEnemyMovement;
          std::string stateMachineMemAcc = "idle";
          std::string* stateMachine = &stateMachineMemAcc; // idle, attack, move, death, hurt(?),
-         enemyAi_NS::DirectApproachEnemy directApproachEnemy; 
-         
+         enemyAi_NS::DirectApproachEnemy directApproachEnemy;
+         frameUtility_NS::frameUtility projectileFrameUtility;
+         Vector2 projectilePos = {0.0f, 0.0f};
+         Vector2 intialPlayerPos = {0.0f, 0.0f};
+         Vector2 projectileSpeed = {4.0f, 4.0f};
+         bool intialPlayerPosSet = false; 
+         bool isAttacking = false;
+         bool isAttacking1 = false;
        int frameCountHealth = 60;
+       Texture2D projectileTexture = LoadTexture("Assets/proj/fastPixelFire.png");
         shootingEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
                 shootingEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs, 64.00f, 72.00f);
                 directApproachEnemy = enemyAi_NS::DirectApproachEnemy(&destRecPos,  64.00f, 1.50f,  aCollisionIDs); // distance, speed, collisionIDs
+                projectileFrameUtility = frameUtility_NS::frameUtility(projectileTexture, 60, 174, 198, 32, 32, 0);
+                directApproachEnemy.isAttacking = &isAttacking;
                 stateMachine = &stateMachineMemAcc;
                 shootingEnemyMovement.currentState = stateMachine;
                 dWidth = 64;
@@ -283,10 +292,53 @@ namespace enemyObjects_NS{
          }
          void movement () override{
            std::string x = directApproachEnemy.movement();
-           std::clog << "outputted" << x << std::endl;
+           std::clog << " x = " << x << std::endl;
+           std::clog << "is attacking = " << isAttacking << std::endl;
+           if(isAttacking1 ){
+            std::clog << "RAHRAH" << std::endl;
+           }
+              if(x == "attack"){
+                *stateMachine = "attack";
+                    isAttacking1 = true;
+              }
+              else{
+                *stateMachine = "move";
+              }
+         }
+         void projectileMovement(){
+            if(intialPlayerPosSet == false){
+                intialPlayerPos = thePlayer->destRecPos;
+                intialPlayerPosSet = true;
+                projectilePos = destRecPos;
+                isAttacking = true;
+                isAttacking1 = true;
+            }
+            Vector2 direction = Vector2Subtract(intialPlayerPos, projectilePos);
+            float distanceToPlayer = Vector2Distance(projectilePos, intialPlayerPos);
+            direction = Vector2Normalize(direction);
+            direction = Vector2Scale(direction, projectileSpeed.x);
+            projectilePos = Vector2Add(projectilePos, direction);
+            if(Vector2Length(direction) > distanceToPlayer){
+                projectilePos = intialPlayerPos;
+                intialPlayerPosSet = false;
+                isAttacking = false;
+                isAttacking1 = false;
+            }
+            if(CheckCollisionRecs({projectilePos.x - 16, projectilePos.y - 16, 32, 32}, {thePlayer->destRecPos.x + 24, thePlayer->destRecPos.y + 16, 16, 32})){
+                intialPlayerPosSet = false;
+                isAttacking = false;
+                isAttacking1 = false;
+                std::clog << "TRUE HIT" << std::endl;
+            }
+         }
+         void projectileDraw(){
+            Rectangle destRec = {projectilePos.x, projectilePos.y, 32, 32};
+            projectileFrameUtility.frameUtilityUpdateValues(destRec.x, destRec.y, destRec.width, destRec.height);
+            projectileFrameUtility.draw();
+
          }
          void draw() override{
-            if(*stateMachine == "attack"){
+            if(*stateMachine == "attack" || isAttacking == true || isAttacking1 == true){
              enemyFrameUtility.draw();
              std::clog << "attack " << std::endl;
             }
@@ -300,9 +352,13 @@ namespace enemyObjects_NS{
          void update() override{ // overriding update() from basicEnemy
          
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
-            directApproachEnemy.update(thePlayer->destRecPos);
+
             enemyFrameUtility.direction = direction;
             shootingEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
+            if(isAttacking == true || isAttacking1 == true){
+                projectileMovement();
+            }
+            directApproachEnemy.update(thePlayer->destRecPos);
             std::clog << " distance to player = " << Vector2Distance(destRecPos, thePlayer->destRecPos) << std::endl;
             directionCalc();
              movement();
@@ -326,7 +382,13 @@ namespace enemyObjects_NS{
             for(int i = 0; i < enemyProjectile.projectiles.size(); i++){
                 UnloadTexture(enemyProjectile.projectiles[i].projectileTexture);
             }
+            UnloadTexture(projectileTexture);
         }
+     void unloadTexture() override{
+            UnloadTexture(projectileTexture);
+             UnloadTexture(enemyFrameUtility.texture);
+             UnloadTexture(projectileFrameUtility.texture);
+         }
     };
     class enemyManager{
         public:
