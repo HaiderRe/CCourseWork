@@ -129,6 +129,25 @@ namespace enemyAi_NS {
       }
       enemiesRects = someRects;
     }
+    simpleEnemyMovement(Vector2 *aPos, std::vector<Rectangle> someRects, std::vector<std::vector<int>> aCollisionIDs, float aCirclingDistance, float aStopThreshold){ // a prefix for arg 
+      currentPos = aPos;
+      collisionIDs = aCollisionIDs;
+      circlingDistance = aCirclingDistance;
+      aStopThreshold = stopThreshold;
+      for(int i = 0; i < collisionIDs.size(); i++){
+        std::vector<int> temp;
+        for(int j = 0; j < collisionIDs[i].size(); j++){
+          if(collisionIDs[i][j] == 0){
+            temp.push_back(0);
+          }
+          else{
+            temp.push_back(1);
+          }
+        }
+        convertedCollisionIDs.push_back(temp);
+      }
+      enemiesRects = someRects;
+    }
     simpleEnemyMovement(){};
     void update(std::vector<Rectangle> aEnemiesRects, Vector2 aPlayerPos){
       
@@ -412,6 +431,134 @@ else {
 }
 
    }
+    };
+     class DirectApproachEnemy {
+    private:
+        Vector2* currentPos;
+        Vector2 playerPos;
+        Vector2 currentVelocity;
+        float attackRange;
+        float speed;
+        std::string currentState; // "move", "attack", "idle"
+        std::vector<std::vector<int>> collisionIDs;
+
+        void slidingMovement(){
+    auto toGridIndex = [](float coord) -> int {
+        return static_cast<int>((coord - 32) / 16);
+    };
+Vector2 nextPosX = Vector2Add(*currentPos, {currentVelocity.x, 0});
+Vector2 nextPosY = Vector2Add(*currentPos, {0, currentVelocity.y});
+int nextPositionXIndex = toGridIndex(nextPosX.x);
+int nextPositionYIndex = toGridIndex(nextPosY.y);
+bool xCollides = (nextPositionXIndex >= 0 && nextPositionXIndex < 64 &&  collisionIDs[nextPositionYIndex][nextPositionXIndex] != 0);
+nextPositionXIndex = toGridIndex(nextPosY.x);
+nextPositionYIndex = toGridIndex(nextPosY.y);
+
+bool yCollides = (nextPositionYIndex >= 0 && nextPositionYIndex < 64 && collisionIDs[nextPositionYIndex][nextPositionXIndex] != 0);
+if (xCollides && yCollides) {
+    int diagXIndex = toGridIndex(Vector2Add(*currentPos, currentVelocity).x);
+    int diagYIndex = toGridIndex(Vector2Add(*currentPos, currentVelocity).y);
+    bool diagCollides = (diagXIndex >= 0 && diagXIndex < 64 && diagYIndex >= 0 && diagYIndex < 64 && collisionIDs[diagYIndex][diagXIndex] != 0);
+    if (!diagCollides){
+        *currentPos = Vector2Add(*currentPos, currentVelocity);
+        return;
+    }
+}
+if (!xCollides && !yCollides){
+    *currentPos = Vector2Add(*currentPos, currentVelocity);
+} 
+else {
+    if (xCollides) {
+        if(currentPos->y  < playerPos.y){
+          currentVelocity.y += abs(currentVelocity.x);
+        }
+        else{
+          currentVelocity.y += -1 * abs(currentVelocity.x);
+        }
+        currentVelocity.x = 0;
+    }
+    if (yCollides) {
+       if(currentPos->x < playerPos.x){
+          currentVelocity.x += abs(currentVelocity.y);
+        }
+        else{
+          currentVelocity.x += -1 * abs(currentVelocity.y);
+        }        currentVelocity.y = 0;
+    }
+    *currentPos = Vector2Add(*currentPos, currentVelocity);
+}
+
+   }
+    public:
+        DirectApproachEnemy(Vector2* aPos, float aAttackRange, float aSpeed, std::vector<std::vector<int>> aCollisionIDs)  : currentPos(aPos), attackRange(aAttackRange), speed(aSpeed), collisionIDs(aCollisionIDs), currentState("move") {}
+        DirectApproachEnemy(){}
+        float restTime = 0.20f; // 
+       float currentRestTime = 0.00f;
+        void update(Vector2 aPlayerPos) {
+          playerPos = aPlayerPos;
+        }
+     std::string movement() {
+    auto toGridIndex = [](float coord) -> int {
+        return static_cast<int>((coord - 32) / 16);
+    };
+
+    if (currentRestTime > 0) {
+        currentRestTime -= GetFrameTime();
+        return currentState;
+    }
+
+    float buffer = 3.00f; 
+    float attackBuffer = 0.0f; //
+
+    float distanceToPlayer = Vector2Distance(*currentPos, playerPos);
+    std::clog << "Distance to Player: " << distanceToPlayer << std::endl;
+
+    if (distanceToPlayer <= attackRange) {
+        currentState = "attack";
+            std::clog << "State changed to ATTACK" << std::endl;
+
+    } else if (distanceToPlayer >= attackRange) {
+        currentState = "move";
+    } else {
+        return currentState;
+    }
+
+    Vector2 newVelocity = {0.0f, 0.0f};
+
+    if (currentState == "move" ) {
+        Vector2 direction = Vector2Subtract(playerPos, *currentPos);
+        newVelocity = Vector2Scale(Vector2Normalize(direction), speed);
+    } 
+    else if (currentState == "attack" && false) {
+        Vector2 direction = Vector2Subtract(*currentPos, playerPos);
+        newVelocity = Vector2Scale(Vector2Normalize(direction), speed);
+    }
+
+    float velocityChangeMagnitude = Vector2Length(Vector2Subtract(newVelocity, currentVelocity));
+    float velocityChangeThreshold = 4.00f; // change
+
+    if (velocityChangeMagnitude > velocityChangeThreshold || velocityChangeMagnitude > 4) {
+        currentRestTime = restTime; // 
+        return currentState;
+    }
+
+    currentVelocity = newVelocity;
+
+    Vector2 nextPos = Vector2Add(*currentPos, currentVelocity);
+    int nextPositionXIndex = toGridIndex(nextPos.x);
+    int nextPositionYIndex = toGridIndex(nextPos.y);
+
+    if (nextPositionXIndex >= 0 && nextPositionXIndex < 64 &&  nextPositionYIndex >= 0 && nextPositionYIndex < 64) {
+        if (collisionIDs[nextPositionYIndex][nextPositionXIndex] != 0) {
+            slidingMovement();
+        } else {
+            *currentPos = nextPos;
+        }
+    }
+    return currentState;
+}
+
+
     };
 };
 #endif

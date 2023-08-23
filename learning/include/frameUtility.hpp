@@ -58,12 +58,13 @@ namespace frameUtility_NS{
                 frameRec.x = frameWidth * currentFrame;
             }
             Vector2 origin = {frameRec.width * 0.5f, frameRec.height * 0.5f};
-            if(frameWidth == 144){
+            if(true){
              //  std::clog << "all values of dest rec are  " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl; 
-              DrawCircle(destRec.x, destRec.y, 5, BLUE); //  
+              DrawCircle(destRec.x, destRec.y, 5, GREEN); //  TRUE VALUES
                 destRec.x = destRec.x + (origin.x) - (destWidth/4); // No clue why we need special code for 144pixel textures but we do
                 destRec.y = destRec.y + (origin.y) - (destHeight/4); // Additionally both statements offset make the texture the midpoint of the
                                                                       // World position + half the width + half the height of the texture
+               
             }
                else{ 
                 DrawRectangle(destRec.x, destRec.y, destRec.width, destRec.height, BLUE);
@@ -74,7 +75,7 @@ namespace frameUtility_NS{
                 frameRec.x = frameWidth * stayFrame;
             }
             DrawTexturePro(texture, frameRec, destRec, origin, rotation, color);
-        
+            
         }
         void frameUtilityUpdateValues(int destRecx, int destRecy, int destWidth1, int destHeight1){
             destRec.x = float(destRecx);
@@ -87,6 +88,10 @@ namespace frameUtility_NS{
         }
         void frameUtilityDestroy(){
             UnloadTexture(texture);
+        }
+        void drawDebug(){
+            return;
+            
         }
     };
 };

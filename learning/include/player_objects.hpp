@@ -110,6 +110,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       int lineChunks = 0;
       Vector2 currentPos = {0.00f, 0.00f};
       Vector2 lerpCurrentPos = {0.00f, 0.00f};
+      bool testingBool = false;
        float progressStep;
       Camera2D camera1;
       Vector2 mousePos = {0.00f, 0.00f};
@@ -173,8 +174,9 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         return 0;
       }
       int hitBoxDrawLine(Rectangle aEnemyRect){ // 
-      Rectangle destRec = {lerpCurrentPos.x, lerpCurrentPos.y, 32, 32}; //Projectile Dest Rect
-      
+      Rectangle destRec = {lerpCurrentPos.x - 16, lerpCurrentPos.y - 16, 32, 32}; //Projectile Dest Rect
+      std::clog << "lerpCurrentPos = " + std::to_string(lerpCurrentPos.x) + " " + std::to_string(lerpCurrentPos.y) << std::endl;
+      std::clog << "aEnemyRect = " + std::to_string(aEnemyRect.x) + " " + std::to_string(aEnemyRect.y) << std::endl;
       if(CheckCollisionRecs(destRec, aEnemyRect)){
         return 1;
       }
@@ -184,8 +186,8 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       return 0;
       }
       void hitBoxDrawLineDraw(){
-        Rectangle destRec = {currentPos.x, currentPos.y, 32, 32};
-        DrawRectangleLines(lerpCurrentPos.x, lerpCurrentPos.y, destRec.width, destRec.y, GREEN);
+        Rectangle destRec = {(lerpCurrentPos.x - 16), (lerpCurrentPos.y - 16), 32, 32};
+        DrawRectangleLines(destRec.x, destRec.y, 32, 32, GREEN);
       }
       int hitBoxDrawBuff(Rectangle aEnemyRect){
         return 0;
@@ -213,6 +215,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       //Enemies Call this function with their rectangle
       int hitBoxDecide(Rectangle aEnemyRect){ 
         int hit = 0;
+        std::clog << "type of skill = " + currentTypeOfSkill << std::endl;
         if(isCastingN == false){
           return 0;
         }
@@ -431,6 +434,7 @@ void LerpSDrawLine(int extraFrames){
     }
     int width = 32;
     Rectangle frameRec1 = {64 * currentFrame1, 0, 64, 64};
+    testingBool = true;
 
     frames1++;
     if(frames1 > (60/frameSpeed1)){
@@ -447,7 +451,7 @@ void LerpSDrawLine(int extraFrames){
     currentPos.x += progressStep * (FMousePos.x - FPlayerPos.x);
     currentPos.y += progressStep * (FMousePos.y - FPlayerPos.y);
     lerpCurrentPos = {currentPos.x, currentPos.y};
-    std::clog << "curentPos after = " + std::to_string(currentPos.x) + " " + std::to_string(currentPos.y) << std::endl;
+    
     Rectangle destRec = {currentPos.x, currentPos.y, width, width};
 
     DrawTexturePro(currentTexture, frameRec1, destRec, {float(width/2), float(width/2)}, calcRotation(camera1) * (180.0f/PI), WHITE);
@@ -636,6 +640,37 @@ void LerpSDrawLine(int extraFrames){
         void drawOffCamera();
         void takeDamage();
         void takeDamage(float damagePoints);
+        
+        void testingFunctionDraw(){
+                float offsetX = 0.0f;
+                float offsetY = 0.0f;
+                int width = 8;
+                int height = 8;
+                if(direction == 0){
+                    offsetX += 24.0f;
+                    offsetY += 00.0f;
+                    height = 16;
+                    width = 32;
+                }
+                if(direction == 1){
+                    offsetY += 32.0f;
+                    offsetX += 8.00;
+                    width = 32;
+                }
+                if(direction == 2){
+                    offsetX += 32.0f;
+                    offsetY += 32.0f;
+                    width = 32;
+                }
+                if(direction == 3){
+                    offsetY += 32.0f;
+                    offsetX += 24.0f;
+                    width = 32;
+                    height = 16;
+                }
+                Rectangle weaponHitBox = {destRecPos.x + offsetX, destRecPos.y + offsetY, width, height};
+                DrawRectangleLines(weaponHitBox.x, weaponHitBox.y, weaponHitBox.width, weaponHitBox.height, RED);
+        }
         bool mapCollision(std::vector<std::vector<int>> collisionIDs);
         fxPlayer fxPlayerObject;
         int fxDamage = 1;
@@ -816,7 +851,8 @@ void LerpSDrawLine(int extraFrames){
     
     playerAnims.draw(destRecPos.x, destRecPos.y, direction);
     skillManagerObject.draw(camera1);
-    fxPlayerObject.hitBoxDrawLineDraw();
+    skillManagerObject.fxPlayerObject.hitBoxDrawLineDraw();
+    testingFunctionDraw();
     //playerColor = WHITE;
    // fxPlayerObject.drawDecide();
   } 

@@ -78,8 +78,10 @@ int main(void)
 Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
   theEnemyManager.spawnSlimeEnemy(Vector2{100,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
   theEnemyManager.spawnSlimeEnemy(Vector2{200,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
+  theEnemyManager.spawnShootingEnemy(Vector2{300,300}, "fireMan.png", xmlFile.getCollisionTileIDs());
    theEnemyManager.smartPtrEnemies[0]->thePlayer = &nPlayer;
     theEnemyManager.smartPtrEnemies[1]->thePlayer = &nPlayer;
+    theEnemyManager.smartPtrEnemies[2]->thePlayer = &nPlayer;
     
 
 // Main game loop

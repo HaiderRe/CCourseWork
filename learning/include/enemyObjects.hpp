@@ -146,22 +146,41 @@ namespace enemyObjects_NS{
             }
          }
          void checkIsHitWeapon(){
+            std::clog << "thePlayer->currentAnim = " << thePlayer->currentAnim << std::endl;
             if(thePlayer->currentAnim == "Player/base/Base_Attack"){
+                std::clog << "TRUE" << std::endl;
                 int direction = 0; // 0 = up , 1 = left, 2 = right, 3 = down
                 direction = thePlayer->direction;
-                float offsetX = 0.0f;
+                Rectangle destRecPosPlayer = {thePlayer->destRecPos.x, thePlayer->destRecPos.y, 32, 32};
+                 float offsetX = 0.0f;
                 float offsetY = 0.0f;
-                if(direction == 0 || direction == 3){
-                    offsetX += 32.0f;
+                int width = 8;
+                int height = 8;
+                if(direction == 0){
+                    offsetX += 24.0f;
+                    offsetY += 00.0f;
+                    height = 16;
+                    width = 32;
                 }
-                if(direction == 1 || direction == 2){
+                if(direction == 1){
                     offsetY += 32.0f;
+                    offsetX += 8.00;
+                    width = 32;
                 }
                 if(direction == 2){
-                    offsetX += 64.0f;
+                    offsetX += 32.0f;
+                    offsetY += 32.0f;
+                    width = 32;
                 }
-                Rectangle weaponHitBox = {thePlayer->destRecPos.x + offsetX, thePlayer->destRecPos.y + offsetY, 8, 8};
-                if(CheckCollisionRecs(destRec, weaponHitBox)){
+                if(direction == 3){
+                    offsetY += 32.0f;
+                    offsetX += 24.0f;
+                    width = 32;
+                    height = 16;
+                }
+                Rectangle weaponHitBox = {destRecPosPlayer.x + offsetX, destRecPosPlayer.y + offsetY, width, height};
+                Rectangle destRec1 = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
+                if(CheckCollisionRecs(destRec1, weaponHitBox)){
                     takeDamage(thePlayer->weaponDamage);
                     enemyFrameUtility.color = RED;
                      slimeAttack.attackFrameUtility.color = RED;
@@ -171,11 +190,14 @@ namespace enemyObjects_NS{
             }
          }
          void checkIsHit(){
-            checkIsHitFx();
-            checkIsHitWeapon();
+           checkIsHitFx();
+           checkIsHitWeapon();
+
          }
          void checkIsHitFx(){
-            if(thePlayer->fxPlayerObject.hitBoxDecide(destRec) == 1){
+            int isHit = thePlayer->skillManagerObject.fxPlayerObject.hitBoxDecide(Rectangle{destRecPos.x,destRecPos.y, float(dWidth), float(dHeight)});
+            std::clog << "is hit = " << isHit << std::endl;
+            if(isHit){
                 takeDamage(thePlayer->fxDamage);
                 enemyFrameUtility.color = RED;
                 std::clog << "TRUE HIT" << std::endl;
@@ -203,6 +225,7 @@ namespace enemyObjects_NS{
          }
          void unloadTexture() override{
              UnloadTexture(slimeAttack.attackTexture);
+             UnloadTexture(enemyFrameUtility.texture);
          }
          void draw() override{
             if(*stateMachine == "attack"){
@@ -220,7 +243,75 @@ namespace enemyObjects_NS{
     class shootingEnemy : public basicEnemy{
         public:
         projectile_NS::projectileManager enemyProjectile;
+        enemyAi_NS::simpleEnemyMovement shootingEnemyMovement;
+         std::string stateMachineMemAcc = "idle";
+         std::string* stateMachine = &stateMachineMemAcc; // idle, attack, move, death, hurt(?),
+         enemyAi_NS::DirectApproachEnemy directApproachEnemy; 
+         
+       int frameCountHealth = 60;
         shootingEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
+                shootingEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs, 64.00f, 72.00f);
+                directApproachEnemy = enemyAi_NS::DirectApproachEnemy(&destRecPos,  64.00f, 1.50f,  aCollisionIDs); // distance, speed, collisionIDs
+                stateMachine = &stateMachineMemAcc;
+                shootingEnemyMovement.currentState = stateMachine;
+                dWidth = 64;
+                dHeight = 64;
+                UnloadTexture(enemyFrameUtility.texture);
+                if(path.size() > 0){
+                enemyFrameUtility.texture = LoadTexture(("Assets/enemy/" + path).c_str());
+                }
+                else{
+                    enemyFrameUtility.texture = LoadTexture("Assets/enemy/fireMan.png");
+                }
+                
+         }
+          void directionCalc(){
+
+            if(destRecPos.x < thePlayer->destRecPos.x + 64){
+                direction = 2;
+            }
+            else{
+                direction = 1;
+            }
+            if( destRecPos.y  < thePlayer->destRecPos.y - 16) // cjamge cjpde
+            {
+                direction = 0;
+            }
+            else if(destRecPos.y - 32 > thePlayer->destRecPos.y + 32){
+                direction = 3;
+            }
+         }
+         void movement () override{
+           std::string x = directApproachEnemy.movement();
+           std::clog << "outputted" << x << std::endl;
+         }
+         void draw() override{
+            if(*stateMachine == "attack"){
+             enemyFrameUtility.draw();
+             std::clog << "attack " << std::endl;
+            }
+            else{
+            enemyFrameUtility.draw();
+            }
+            enemyFrameUtility.drawDebug();
+          //  DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
+        //    DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
+         }
+         void update() override{ // overriding update() from basicEnemy
+         
+            enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
+            directApproachEnemy.update(thePlayer->destRecPos);
+            enemyFrameUtility.direction = direction;
+            shootingEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
+            std::clog << " distance to player = " << Vector2Distance(destRecPos, thePlayer->destRecPos) << std::endl;
+            directionCalc();
+             movement();
+            if(frameCountHealth > 0){
+                frameCountHealth--;
+            }
+            else{
+                enemyFrameUtility.color = WHITE;
+            }
          }
          void shootLogic(){
             if(enemyProjectile.projectiles.size() < 1){
@@ -251,6 +342,9 @@ namespace enemyObjects_NS{
         }
         void spawnSlimeEnemy(Vector2 spawnPointPos, std::string path, std::vector<std::vector<int>> aCollisionIDs){
            smartPtrEnemies.push_back(std::make_unique<slimeEnemy>(spawnPointPos, "blueSlime.png", aCollisionIDs));
+        }
+        void spawnShootingEnemy(Vector2 spawnPointPos, std::string path, std::vector<std::vector<int>> aCollisionIDs){
+            smartPtrEnemies.push_back(std::make_unique<shootingEnemy>(spawnPointPos, path, aCollisionIDs));
         }
         void draw(){
             for(int i = 0; i < enemies.size(); i++){
@@ -333,7 +427,7 @@ namespace enemyObjects_NS{
          //   std::clog << "enemiesRects.size() = " << enemiesRects.size() << std::endl; 
             for(int k = enemies.size() - 1;  k >= 0; k--){
                 std::vector<Rectangle> tempRects = enemiesRects;
-                tempRects.erase(tempRects.begin() + k);   // Found error; logic error is somewhere here, tempRects has the same value as the currentEnemies position
+                tempRects.erase(tempRects.begin() + k);   // 
                 enemies[k].otherEnemyRects = tempRects;
             }
             //testing output 
