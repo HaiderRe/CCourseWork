@@ -506,7 +506,7 @@ else {
     };
 
     if (currentRestTime > 0) {
-        currentRestTime -= GetFrameTime();
+        currentRestTime -= GetFrameTime(); 
         return currentState;
     }
 
@@ -519,7 +519,6 @@ else {
     std::clog << "attackRange + attackBuffer is " << attackRange + attackBuffer << std::endl;
     std::clog << "currentAttackTime is " << currentAttackTime << std::endl;
     if (distanceToPlayer <= attackRange + attackBuffer && currentAttackTime <= 0) {
-
         currentState = "attack";
             std::clog << "State changed to ATTACK" << std::endl;
             *isAttacking = true;

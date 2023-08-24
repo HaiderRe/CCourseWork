@@ -248,18 +248,28 @@ namespace enemyObjects_NS{
          std::string* stateMachine = &stateMachineMemAcc; // idle, attack, move, death, hurt(?),
          enemyAi_NS::DirectApproachEnemy directApproachEnemy;
          frameUtility_NS::frameUtility projectileFrameUtility;
+         frameUtility_NS::frameUtility explosionFrameUtility;
          Vector2 projectilePos = {0.0f, 0.0f};
          Vector2 intialPlayerPos = {0.0f, 0.0f};
          Vector2 projectileSpeed = {4.0f, 4.0f};
+         float explosionTime = 3.0f;
+         float currentExplosionTime = 0.0f;
+         float projectileLife = 0.0f;
+         Vector2 explosionPos = {0.0f, 0.0f}; // Explosion handling next bye
+         bool intialExplosionPosSet = false;
+         bool isExploding = false;
          bool intialPlayerPosSet = false; 
          bool isAttacking = false;
          bool isAttacking1 = false;
        int frameCountHealth = 60;
-       Texture2D projectileTexture = LoadTexture("Assets/proj/fastPixelFire.png");
+       Texture2D projectileTexture = LoadTexture("Assets/proj/roundExpl/spritesheet.png");
+        Texture2D expTexture = LoadTexture("Assets/proj/fastPixelFire/spritesheet.png");
         shootingEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
                 shootingEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs, 64.00f, 72.00f);
                 directApproachEnemy = enemyAi_NS::DirectApproachEnemy(&destRecPos,  64.00f, 1.50f,  aCollisionIDs); // distance, speed, collisionIDs
-                projectileFrameUtility = frameUtility_NS::frameUtility(projectileTexture, 60, 174, 198, 32, 32, 0);
+                UnloadTexture(projectileFrameUtility.texture);
+                projectileFrameUtility = frameUtility_NS::frameUtility(projectileTexture, 60, 173, 197, 32, 32, 0);
+                explosionFrameUtility = frameUtility_NS::frameUtility(expTexture, 60, 100, 100, 32, 32, 0);
                 directApproachEnemy.isAttacking = &isAttacking;
                 stateMachine = &stateMachineMemAcc;
                 shootingEnemyMovement.currentState = stateMachine;
@@ -293,21 +303,18 @@ namespace enemyObjects_NS{
          void movement () override{
            std::string x = directApproachEnemy.movement();
            std::clog << " x = " << x << std::endl;
-           std::clog << "is attacking = " << isAttacking << std::endl;
-           if(isAttacking1 ){
-            std::clog << "RAHRAH" << std::endl;
+           if(x == "attack"){
+               *stateMachine = "attack";
+               isAttacking1 = true;
            }
-              if(x == "attack"){
-                *stateMachine = "attack";
-                    isAttacking1 = true;
-              }
-              else{
-                *stateMachine = "move";
-              }
+           else{
+               *stateMachine = "idle";
+           }
          }
          void projectileMovement(){
+            projectileLife = projectileLife + GetFrameTime();
             if(intialPlayerPosSet == false){
-                intialPlayerPos = thePlayer->destRecPos;
+                intialPlayerPos = {thePlayer->destRecPos.x + 32, thePlayer->destRecPos.y + 32};
                 intialPlayerPosSet = true;
                 projectilePos = destRecPos;
                 isAttacking = true;
@@ -318,7 +325,13 @@ namespace enemyObjects_NS{
             direction = Vector2Normalize(direction);
             direction = Vector2Scale(direction, projectileSpeed.x);
             projectilePos = Vector2Add(projectilePos, direction);
-            if(Vector2Length(direction) > distanceToPlayer){
+            if(projectileLife > 7.00f){
+                intialPlayerPosSet = false;
+                isAttacking = false;
+                isAttacking1 = false;
+                projectileLife = 0.00f;
+            }
+            if(Vector2Length(direction) > distanceToPlayer && false){ //Testing 
                 projectilePos = intialPlayerPos;
                 intialPlayerPosSet = false;
                 isAttacking = false;
@@ -333,18 +346,20 @@ namespace enemyObjects_NS{
          }
          void projectileDraw(){
             Rectangle destRec = {projectilePos.x, projectilePos.y, 32, 32};
+            Rectangle destRec1 = {projectilePos.x - 16, projectilePos.y - 16, 32, 32};
             projectileFrameUtility.frameUtilityUpdateValues(destRec.x, destRec.y, destRec.width, destRec.height);
             projectileFrameUtility.draw();
+            DrawRectangleLines(destRec1.x, destRec1.y, destRec1.width, destRec1.height, RED);
 
          }
          void draw() override{
             if(*stateMachine == "attack" || isAttacking == true || isAttacking1 == true){
-             enemyFrameUtility.draw();
+             projectileDraw();
              std::clog << "attack " << std::endl;
             }
-            else{
+           
             enemyFrameUtility.draw();
-            }
+            
             enemyFrameUtility.drawDebug();
           //  DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
         //    DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
@@ -355,7 +370,7 @@ namespace enemyObjects_NS{
 
             enemyFrameUtility.direction = direction;
             shootingEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
-            if(isAttacking == true || isAttacking1 == true){
+            if(isAttacking == true || isAttacking1 == true || *stateMachine == "attack"){
                 projectileMovement();
             }
             directApproachEnemy.update(thePlayer->destRecPos);
@@ -517,15 +532,18 @@ namespace enemyObjects_NS{
         }
         void killEnemy(int index){
             UnloadTexture(enemies[index].enemyTexture);
+            enemies[index].deload();
             enemies.erase(enemies.begin() + index);
         }
         void killEnemySPtr(int index){
             UnloadTexture(smartPtrEnemies[index]->enemyTexture);
+            smartPtrEnemies[index]->deload();
             smartPtrEnemies.erase(smartPtrEnemies.begin() + index);
         }
         void killEnemy(Vector2 enemyPos){
             for(int i = 0; i < enemies.size(); i++){
                 if(enemies[i].destRecPos.x == enemyPos.x && enemies[i].destRecPos.y == enemyPos.y){
+                    enemies[i].deload();
                     UnloadTexture(enemies[i].enemyTexture);
                     enemies.erase(enemies.begin() + i);
                 }
