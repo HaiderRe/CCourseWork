@@ -495,7 +495,7 @@ else {
         float restTime = 0.20f; // 
        float currentRestTime = 0.00f;
        bool *isAttacking;
-       float attackTime = 4.00f;
+       float attackTime = 8.00f;
         float currentAttackTime = 0.00f;
         void update(Vector2 aPlayerPos) {
           playerPos = aPlayerPos;

@@ -39,6 +39,15 @@
 // Program main entry point
 //------------------------------------------------------------------------------------
 using namespace tilemap_ns;
+/*void spawnSlimeEnemy(Vector2 aPos, std::string aTextureName, std::vector<std::vector<int>> aCollisionTileIDs, enemyObjects_NS::enemyManager &theEnemyManager, player_objects::player &nPlayer){
+  theEnemyManager.spawnSlimeEnemy(aPos, aTextureName, aCollisionTileIDs);
+  theEnemyManager.smartPtrEnemies[theEnemyManager.smartPtrEnemies.size()-1]->thePlayer = &nPlayer;
+}
+void spawnShootingMan(Vector2 aPos, std::string aTextureName, std::vector<std::vector<int>> aCollisionTileIDs, enemyObjects_NS::enemyManager &theEnemyManager, player_objects::player &nPlayer){
+  theEnemyManager.spawnShootingEnemy(aPos, aTextureName, aCollisionTileIDs);
+  theEnemyManager.smartPtrEnemies[theEnemyManager.smartPtrEnemies.size()-1]->thePlayer = &nPlayer;
+}
+*/
 int main(void)
 {
     // Initialization

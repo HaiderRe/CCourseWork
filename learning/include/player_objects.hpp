@@ -638,10 +638,13 @@ void LerpSDrawLine(int extraFrames){
         void update(std::vector<std::vector<int>> collisionIDs);
         void movement();
         void drawOffCamera();
-        void takeDamage();
-        void takeDamage(float damagePoints);
-        
-        void testingFunctionDraw(){
+        int takeDamage();
+        int takeDamage(float damagePoints);
+        int takeDamage(float damagePoints, int direction);
+        int takeDamage(float damagePoints, Rectangle aPreviousEnemyRectangle); //For None-Slimes
+        int takeDamage(float damagePoints, Vector2 aPreviousEnemy); //For Slimes
+
+        int testingFunctionDraw(){
                 float offsetX = 0.0f;
                 float offsetY = 0.0f;
                 int width = 8;
@@ -741,15 +744,94 @@ void LerpSDrawLine(int extraFrames){
         }
         // void stateManager();    
     };
-    void player::takeDamage(){
+    int player::takeDamage(){
       health = health - 1;
       playerColor = RED;
       colorCountDown = 60;
+      return 0;
     }
-    void player::takeDamage(float damagePoints){
+    int player::takeDamage(float damagePoints){
       health = health - damagePoints;
       playerColor = RED;
       colorCountDown = 60;
+      return 0;
+    }
+    int player::takeDamage(float damagePoints, int direction){
+      health = health - damagePoints;
+      playerColor = RED;
+      colorCountDown = 60;
+      Vector2 nextDestRecPos = {destRecPos.x, destRecPos.y};
+      int knockBack = 6;
+      if(direction == 0){
+        nextDestRecPos = {destRecPos.x, destRecPos.y + knockBack};
+      }
+      else if(direction == 1){
+        nextDestRecPos = {destRecPos.x + knockBack, destRecPos.y};
+      }
+      else if(direction == 2){
+        nextDestRecPos = {destRecPos.x - knockBack, destRecPos.y};
+      }
+      else if(direction == 3){
+        nextDestRecPos = {destRecPos.x, destRecPos.y - knockBack};
+      }
+      if(collisionIDsMap[nextDestRecPos.y/16][nextDestRecPos.x/16] == 0){
+        destRecPos = nextDestRecPos;
+      }
+      return 0;
+    }
+    int player::takeDamage(float damagePoints, Rectangle aPreviousEnemyRectangle){
+      health = health - damagePoints;
+      playerColor = RED;
+      colorCountDown = 60;
+      Vector2 nextDestRecPos = {destRecPos.x, destRecPos.y};
+      int knockBack = 6;
+      Vector2 enemyCenter = {0.00f,0.00f};
+       enemyCenter.x = aPreviousEnemyRectangle.x + aPreviousEnemyRectangle.width / 2;
+       enemyCenter.y = aPreviousEnemyRectangle.y + aPreviousEnemyRectangle.height / 2;
+       Vector2 direction = {0.00f, 0.00f};
+       direction.x = destRecPos.x - enemyCenter.x;
+       direction.y = destRecPos.y - enemyCenter.y;
+       float length = sqrt(direction.x * direction.x + direction.y * direction.y);
+       if (length != 0) { 
+         direction.x /= length;
+         direction.y /= length;
+       }
+       direction.x *= knockBack;
+       direction.y *= knockBack;
+       nextDestRecPos = {0.00f, 0.00f};
+       nextDestRecPos.x = destRecPos.x + direction.x;
+       nextDestRecPos.y = destRecPos.y + direction.y;
+         if(collisionIDsMap[nextDestRecPos.y/16][nextDestRecPos.x/16] == 0){
+         destRecPos = nextDestRecPos;
+       }
+       return 0;
+    }
+    int player::takeDamage(float damagePoints, Vector2 aPreviousEnemy){
+      health = health - damagePoints;
+      playerColor = RED;
+      colorCountDown = 60;
+      Vector2 nextDestRecPos = {destRecPos.x, destRecPos.y};
+      int knockBack = 6;
+      Vector2 enemyCenter = {0.00f,0.00f};
+       enemyCenter.x = aPreviousEnemy.x;
+       enemyCenter.y = aPreviousEnemy.y;
+       Vector2 direction = {0.00f, 0.00f};
+       direction.x = destRecPos.x - enemyCenter.x;
+       direction.y = destRecPos.y - enemyCenter.y;
+       float length = sqrt(direction.x * direction.x + direction.y * direction.y);
+       if (length != 0) { 
+         direction.x /= length;
+         direction.y /= length;
+       }
+       direction.x *= knockBack;
+       direction.y *= knockBack;
+        nextDestRecPos = {0.00f, 0.00f};
+       nextDestRecPos.x = destRecPos.x + direction.x;
+       nextDestRecPos.y = destRecPos.y + direction.y;
+         if(collisionIDsMap[nextDestRecPos.y/16][nextDestRecPos.x/16] == 0){
+         destRecPos = nextDestRecPos;
+       }
+       return 0;
     }
     void player::movement(){
       bool isRight = false;

@@ -256,14 +256,15 @@ namespace enemyObjects_NS{
          float currentExplosionTime = 0.0f;
          float projectileLife = 0.0f;
          Vector2 explosionPos = {0.0f, 0.0f}; // Explosion handling next bye
+         Vector2 directionVector = {0.0f, 0.0f};
          bool intialExplosionPosSet = false;
          bool isExploding = false;
          bool intialPlayerPosSet = false; 
          bool isAttacking = false;
          bool isAttacking1 = false;
        int frameCountHealth = 60;
-       Texture2D projectileTexture = LoadTexture("Assets/proj/roundExpl/spritesheet.png");
-        Texture2D expTexture = LoadTexture("Assets/proj/fastPixelFire/spritesheet.png");
+       Texture2D expTexture = LoadTexture("Assets/proj/roundExpl/spritesheet.png");
+        Texture2D projectileTexture = LoadTexture("Assets/proj/fastPixelFire/spritesheet.png");
         shootingEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
                 shootingEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs, 64.00f, 72.00f);
                 directApproachEnemy = enemyAi_NS::DirectApproachEnemy(&destRecPos,  64.00f, 1.50f,  aCollisionIDs); // distance, speed, collisionIDs
@@ -311,6 +312,18 @@ namespace enemyObjects_NS{
                *stateMachine = "idle";
            }
          }
+         void explosionMove(){
+            if(intialExplosionPosSet == false){
+                explosionPos = projectilePos;
+                intialExplosionPosSet = true;
+            }
+            currentExplosionTime = currentExplosionTime + GetFrameTime();
+            if(currentExplosionTime >= explosionTime){
+                intialExplosionPosSet = false;
+                isExploding = false;
+                currentExplosionTime = 0.0f;
+            }
+         }
          void projectileMovement(){
             projectileLife = projectileLife + GetFrameTime();
             if(intialPlayerPosSet == false){
@@ -319,19 +332,22 @@ namespace enemyObjects_NS{
                 projectilePos = destRecPos;
                 isAttacking = true;
                 isAttacking1 = true;
+                projectileLife = 0.00f;
+                 directionVector = Vector2Subtract(intialPlayerPos, projectilePos);
+                  float distanceToPlayer = Vector2Distance(projectilePos, intialPlayerPos);
+                 directionVector = Vector2Normalize(directionVector);
+                 directionVector = Vector2Scale(directionVector, projectileSpeed.x);
             }
-            Vector2 direction = Vector2Subtract(intialPlayerPos, projectilePos);
-            float distanceToPlayer = Vector2Distance(projectilePos, intialPlayerPos);
-            direction = Vector2Normalize(direction);
-            direction = Vector2Scale(direction, projectileSpeed.x);
-            projectilePos = Vector2Add(projectilePos, direction);
+            
+            projectilePos = Vector2Add(projectilePos, directionVector);
             if(projectileLife > 7.00f){
                 intialPlayerPosSet = false;
                 isAttacking = false;
                 isAttacking1 = false;
                 projectileLife = 0.00f;
+                isExploding = true;
             }
-            if(Vector2Length(direction) > distanceToPlayer && false){ //Testing 
+            if(false){ //Testing  Vector2Length(direction) > distanceToPlayer  && 
                 projectilePos = intialPlayerPos;
                 intialPlayerPosSet = false;
                 isAttacking = false;
@@ -341,6 +357,9 @@ namespace enemyObjects_NS{
                 intialPlayerPosSet = false;
                 isAttacking = false;
                 isAttacking1 = false;
+                isExploding = true;
+                thePlayer->takeDamage(1);
+                projectileLife = 0.00f;
                 std::clog << "TRUE HIT" << std::endl;
             }
          }
@@ -357,9 +376,11 @@ namespace enemyObjects_NS{
              projectileDraw();
              std::clog << "attack " << std::endl;
             }
-           
+           if(isExploding == true){
+               explosionFrameUtility.frameUtilityUpdateValues(explosionPos.x, explosionPos.y, 32, 32);
+              // explosionFrameUtility.draw();
+           }
             enemyFrameUtility.draw();
-            
             enemyFrameUtility.drawDebug();
           //  DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
         //    DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
@@ -372,6 +393,9 @@ namespace enemyObjects_NS{
             shootingEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
             if(isAttacking == true || isAttacking1 == true || *stateMachine == "attack"){
                 projectileMovement();
+            }
+            if(isExploding = true){
+                explosionMove();
             }
             directApproachEnemy.update(thePlayer->destRecPos);
             std::clog << " distance to player = " << Vector2Distance(destRecPos, thePlayer->destRecPos) << std::endl;
@@ -398,6 +422,7 @@ namespace enemyObjects_NS{
                 UnloadTexture(enemyProjectile.projectiles[i].projectileTexture);
             }
             UnloadTexture(projectileTexture);
+            UnloadTexture(expTexture);
         }
      void unloadTexture() override{
             UnloadTexture(projectileTexture);
