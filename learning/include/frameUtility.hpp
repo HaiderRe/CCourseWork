@@ -58,16 +58,22 @@ namespace frameUtility_NS{
                 frameRec.x = frameWidth * currentFrame;
             }
             Vector2 origin = {frameRec.width * 0.5f, frameRec.height * 0.5f};
-            if(true){
+            if(frameRec.width == 144){
              //  std::clog << "all values of dest rec are  " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl; 
-              DrawCircle(destRec.x, destRec.y, 5, GREEN); //  TRUE VALUES
+           //   DrawCircle(destRec.x, destRec.y, 5, GREEN); //  TRUE VALUES
                 destRec.x = destRec.x + (origin.x) - (destWidth/4); // No clue why we need special code for 144pixel textures but we do
                 destRec.y = destRec.y + (origin.y) - (destHeight/4); // Additionally both statements offset make the texture the midpoint of the
                                                                       // World position + half the width + half the height of the texture
                
             }
+            else if(frameWidth == 100){
+                std::clog << "explosion dest rec = " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;         
+                destRec.x = destRec.x;
+                destRec.y = destRec.y;    
+                origin = {0.00f, 0.00f};
+            }
                else{ 
-                DrawRectangle(destRec.x, destRec.y, destRec.width, destRec.height, BLUE);
+              //  DrawRectangle(destRec.x, destRec.y, destRec.width, destRec.height, BLUE);
                 destRec.x = destRec.x + origin.x; // Top left corner of the texture is the destrec position
                 destRec.y = destRec.y + origin.y;
                }

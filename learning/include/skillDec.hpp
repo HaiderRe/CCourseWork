@@ -47,6 +47,13 @@ class skill{
         typeOfSkill = StypeOfSkill;
         skillIcon = LoadTexture(("Assets/player/icons/" + iconPath).c_str());
        }
+       void deload(){
+        for(int i = 0; i < textures.size(); i++){
+      UnloadTexture(textures[i]);
+      }
+    UnloadTexture(texture1);
+    UnloadTexture(skillIcon);
+  }
     }; 
   std::vector<skill> getAllSkills(){
     std::vector<skill> skills; 
@@ -62,5 +69,6 @@ class skill{
     skills.push_back(skill("Skill_Whirlwind_FX.png", "Line", "462_Air_Tornado.png"));
     return skills;    
   }
+  
 };
   #endif

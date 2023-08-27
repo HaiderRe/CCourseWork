@@ -16,10 +16,15 @@
 #include "enemyAiNew.hpp"
 #include "slimeAttack.hpp"
 #include <memory>
+#include "sound.hpp"
 namespace enemyObjects_NS{
+    struct sound{
+        std::string name;
+        int index = -1;
+    };
     class basicEnemy{
         public:
-        int health = 120;
+        int health = 3;
         int dWidth = 32;
         int dHeight = 32;
         int direction = 0; // 0 = up, 1 = left, 2 = right, 3 = down (Different to other textures)
@@ -33,6 +38,7 @@ namespace enemyObjects_NS{
         std::vector<Rectangle> otherEnemyRects; 
         frameUtility_NS::frameUtility enemyFrameUtility;
         std::vector<std::vector<int>> collisionIDs;
+        sound damageSound;
         basicEnemy(Vector2 spawnPointPos){
             destRecPos = spawnPointPos;
             destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
@@ -52,6 +58,9 @@ namespace enemyObjects_NS{
         }
         void deload(){
             std::clog << "In basicEnemy deload" << std::endl;
+        }
+        virtual void deloadSound(){
+            return;
         }
         virtual void movement(){
             //Move towards player
@@ -95,21 +104,32 @@ namespace enemyObjects_NS{
            // shootLogic();
         }
         virtual void unloadTexture(){}
+    bool isColliding(int x, int y, std::vector<std::vector<int>> collisionIDsMap){
+    if (x < 0 || x >= collisionIDsMap[0].size() || y < 0 || y >= collisionIDsMap.size()){
+        return true; 
+    }
+    bool isCol = collisionIDsMap[y][x] != 0;
+    return isCol;
+    }
     };
     class slimeEnemy : public basicEnemy{
         public:
        // enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
        std::string stateMachineMemAcc = "idle";
+       SoundManager& manager = SoundManager::getInstance();
        std::string* stateMachine; // idle, attack, move, death, hurt(?),
        enemyAi_NS::simpleEnemyMovement slimeEnemyMovement;
        slimeAttack_NS::Attack slimeAttack;
        int frameCountHealth = 60;
+       float damageSoundTime = 0.0f;
+         float damageSoundTimeMax = 0.5f;
              slimeEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
                 slimeEnemyMovement = enemyAi_NS::simpleEnemyMovement(&destRecPos,  otherEnemyRects, aCollisionIDs);
                 stateMachine = &stateMachineMemAcc;
                 slimeEnemyMovement.currentState = stateMachine;
                 slimeAttack = slimeAttack_NS::Attack(&destRecPos);
                 slimeAttack.currentState = stateMachine;
+                damageSound = {"damage", manager.loadSound("enemy/slimeHit.wav")};
 
          }
          void movement() override{
@@ -135,16 +155,34 @@ namespace enemyObjects_NS{
          }
          void checkAttackHit(){
             if(slimeAttack.hitPlayer == true){
-                thePlayer->takeDamage(1.00f);
+                float damage = thePlayer->takeDamage(1.00f,destRecPos);
+                if(damage > 0){
+                    changeColorDamage();
+                    takeDamage(damage);
+                }
                 slimeAttack.hitPlayer = false;
             }
          }
          void takeDamage(int damage){
+            if(thePlayer->firstAttack == false){
+                return;
+            }
             health -= damage;
+            if(damageSoundTime <= 0.00f){
+            manager.playSound(damageSound.index);
+            damageSoundTime = damageSoundTimeMax;
+            }
             if(health <= 0){
                 *stateMachine = "death";
             }
+            knockBack();
          }
+         void changeColorDamage(){
+                    enemyFrameUtility.color = RED;
+                     slimeAttack.attackFrameUtility.color = RED;
+                     frameCountHealth = 60;
+         }
+
          void checkIsHitWeapon(){
             std::clog << "thePlayer->currentAnim = " << thePlayer->currentAnim << std::endl;
             if(thePlayer->currentAnim == "Player/base/Base_Attack"){
@@ -206,7 +244,9 @@ namespace enemyObjects_NS{
             }
          }
          void update() override{ // overriding update() from basicEnemy
-         
+            if(damageSoundTime > 0.00f){
+                damageSoundTime -= GetFrameTime();
+            }
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
             enemyFrameUtility.direction = direction;
             slimeEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
@@ -236,9 +276,35 @@ namespace enemyObjects_NS{
             }
           //  DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
         //    DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
-            slimeEnemyMovement.testingDrawDebug();
+            //slimeEnemyMovement.testingDrawDebug();
          }
-         
+    void knockBack(){
+
+      Vector2 playerOffsetPos = {destRecPos.x , destRecPos.y }; 
+      Vector2 enemyCenter = Vector2Add(thePlayer->destRecPos, Vector2{16 ,16}) ;
+      Vector2 direction = {playerOffsetPos.x - enemyCenter.x, playerOffsetPos.y - enemyCenter.y};
+      float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
+      if (magnitude == 0){
+        return; 
+      }
+    Vector2 normalizedDirection = {direction.x / magnitude, direction.y / magnitude};
+    float knockbackDistance = 48.0f;
+    Vector2 knockback = {normalizedDirection.x * knockbackDistance, normalizedDirection.y * knockbackDistance};
+    Vector2 newPos = {destRecPos.x + knockback.x, destRecPos.y + knockback.y};
+    int playerX = newPos.x / 16;
+    int playerY = newPos.y / 16;
+    float stepSize = 1.0f; 
+    int maxAttempts = 16;  
+    int attempts = 0;
+    while (isColliding(playerX, playerY, thePlayer->collisionIDsMap) && attempts < maxAttempts) {
+        newPos.x += normalizedDirection.x * stepSize;
+        newPos.y += normalizedDirection.y * stepSize;
+        playerX = newPos.x / 16;
+        playerY = newPos.y / 16;
+        attempts++;
+    }
+    destRecPos = newPos;
+    }
     };
     class shootingEnemy : public basicEnemy{
         public:
@@ -252,17 +318,20 @@ namespace enemyObjects_NS{
          Vector2 projectilePos = {0.0f, 0.0f};
          Vector2 intialPlayerPos = {0.0f, 0.0f};
          Vector2 projectileSpeed = {4.0f, 4.0f};
-         float explosionTime = 3.0f;
+         float explosionTime = 6.0f;
          float currentExplosionTime = 0.0f;
          float projectileLife = 0.0f;
+         float damageSoundTime = 0.0f;
+         float damageSoundTimeMax = 0.5f;
          Vector2 explosionPos = {0.0f, 0.0f}; // Explosion handling next bye
-         Vector2 directionVector = {0.0f, 0.0f};
          bool intialExplosionPosSet = false;
          bool isExploding = false;
          bool intialPlayerPosSet = false; 
          bool isAttacking = false;
          bool isAttacking1 = false;
+         Vector2 directionPos = {0.00f, 0.00f};
        int frameCountHealth = 60;
+        SoundManager& manager = SoundManager::getInstance();
        Texture2D expTexture = LoadTexture("Assets/proj/roundExpl/spritesheet.png");
         Texture2D projectileTexture = LoadTexture("Assets/proj/fastPixelFire/spritesheet.png");
         shootingEnemy(Vector2 aPos, std::string path, std::vector<std::vector<int>> aCollisionIDs): basicEnemy(aPos, path, aCollisionIDs) {
@@ -277,6 +346,7 @@ namespace enemyObjects_NS{
                 dWidth = 64;
                 dHeight = 64;
                 UnloadTexture(enemyFrameUtility.texture);
+                damageSound = {"damage", manager.loadSound("enemy/damage.wav")};
                 if(path.size() > 0){
                 enemyFrameUtility.texture = LoadTexture(("Assets/enemy/" + path).c_str());
                 }
@@ -284,6 +354,101 @@ namespace enemyObjects_NS{
                     enemyFrameUtility.texture = LoadTexture("Assets/enemy/fireMan.png");
                 }
                 
+         }
+
+         void takeDamage(int damage){
+            if(thePlayer->firstAttack == false){
+                return;
+            }
+            health -= damage;
+            knockBack();
+            if(damageSoundTime <= 0.00f){
+            manager.playSound(damageSound.index);
+            damageSoundTime = damageSoundTimeMax;
+            }
+            if(health <= 0){
+                *stateMachine = "death";
+            }
+         }
+void knockBack(){
+
+      Vector2 playerOffsetPos = {destRecPos.x + 32, destRecPos.y + 32}; 
+      Vector2 enemyCenter = Vector2Add(thePlayer->destRecPos, Vector2{16 ,16}) ;
+      Vector2 direction = {playerOffsetPos.x - enemyCenter.x, playerOffsetPos.y - enemyCenter.y};
+      float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
+      if (magnitude == 0){
+        return; 
+      }
+    Vector2 normalizedDirection = {direction.x / magnitude, direction.y / magnitude};
+    float knockbackDistance = 48.0f;
+    Vector2 knockback = {normalizedDirection.x * knockbackDistance, normalizedDirection.y * knockbackDistance};
+    Vector2 newPos = {destRecPos.x + knockback.x, destRecPos.y + knockback.y};
+    int playerX = newPos.x / 16;
+    int playerY = newPos.y / 16;
+    float stepSize = 1.0f; 
+    int maxAttempts = 16;  
+    int attempts = 0;
+    while (isColliding(playerX, playerY, thePlayer->collisionIDsMap) && attempts < maxAttempts) {
+        newPos.x += normalizedDirection.x * stepSize;
+        newPos.y += normalizedDirection.y * stepSize;
+        playerX = newPos.x / 16;
+        playerY = newPos.y / 16;
+        attempts++;
+    }
+    destRecPos = newPos;
+    }
+             void checkIsHitFx(){
+            int isHit = thePlayer->skillManagerObject.fxPlayerObject.hitBoxDecide(Rectangle{destRecPos.x,destRecPos.y, 32, float(dHeight)});
+            if(isHit){
+                takeDamage(thePlayer->fxDamage);
+                enemyFrameUtility.color = RED;
+                frameCountHealth = 60;
+            }
+         }
+          void checkIsHitWeapon(){
+            if(thePlayer->currentAnim == "Player/base/Base_Attack"){
+               int direction = 0; // 0 = up , 1 = left, 2 = right, 3 = down
+                direction = thePlayer->direction;
+                Rectangle destRecPosPlayer = {thePlayer->destRecPos.x, thePlayer->destRecPos.y, 32, 32};
+                 float offsetX = 0.0f;
+                float offsetY = 0.0f;
+                int width = 8;
+                int height = 8;
+                if(direction == 0){
+                    offsetX += 24.0f;
+                    offsetY += 00.0f;
+                    height = 16;
+                    width = 32;
+                }
+                if(direction == 1){
+                    offsetY += 32.0f;
+                    offsetX += 8.00;
+                    width = 32;
+                }
+                if(direction == 2){
+                    offsetX += 32.0f;
+                    offsetY += 32.0f;
+                    width = 32;
+                }
+                if(direction == 3){
+                    offsetY += 32.0f;
+                    offsetX += 24.0f;
+                    width = 32;
+                    height = 16;
+                }
+                width = 16;
+                 Rectangle weaponHitBox = {destRecPosPlayer.x + offsetX, destRecPosPlayer.y + offsetY, width, height};
+                Rectangle destRec1 = {destRecPos.x, destRecPos.y, 32, float(dHeight)};
+
+                if(CheckCollisionRecs(destRec1, weaponHitBox)){
+                    takeDamage(thePlayer->weaponDamage);
+                    enemyFrameUtility.color = RED;
+                     frameCountHealth = 60;
+                }
+            }
+         }
+         void testingDrawDebugD(){
+                return;
          }
           void directionCalc(){
 
@@ -303,7 +468,6 @@ namespace enemyObjects_NS{
          }
          void movement () override{
            std::string x = directApproachEnemy.movement();
-           std::clog << " x = " << x << std::endl;
            if(x == "attack"){
                *stateMachine = "attack";
                isAttacking1 = true;
@@ -312,93 +476,121 @@ namespace enemyObjects_NS{
                *stateMachine = "idle";
            }
          }
-         void explosionMove(){
-            if(intialExplosionPosSet == false){
-                explosionPos = projectilePos;
-                intialExplosionPosSet = true;
-            }
-            currentExplosionTime = currentExplosionTime + GetFrameTime();
-            if(currentExplosionTime >= explosionTime){
-                intialExplosionPosSet = false;
-                isExploding = false;
-                currentExplosionTime = 0.0f;
-            }
-         }
          void projectileMovement(){
             projectileLife = projectileLife + GetFrameTime();
             if(intialPlayerPosSet == false){
+                directionPos = {0.00f, 0.00f};
                 intialPlayerPos = {thePlayer->destRecPos.x + 32, thePlayer->destRecPos.y + 32};
                 intialPlayerPosSet = true;
                 projectilePos = destRecPos;
                 isAttacking = true;
                 isAttacking1 = true;
-                projectileLife = 0.00f;
-                 directionVector = Vector2Subtract(intialPlayerPos, projectilePos);
-                  float distanceToPlayer = Vector2Distance(projectilePos, intialPlayerPos);
-                 directionVector = Vector2Normalize(directionVector);
-                 directionVector = Vector2Scale(directionVector, projectileSpeed.x);
+                isExploding = false;
+            directionPos = Vector2Subtract(intialPlayerPos, projectilePos);
+            float distanceToPlayer = Vector2Distance(projectilePos, intialPlayerPos);
+            directionPos = Vector2Normalize(directionPos);
+            directionPos = Vector2Scale(directionPos, projectileSpeed.x);
             }
-            
-            projectilePos = Vector2Add(projectilePos, directionVector);
+            float distanceToPlayer = Vector2Distance(projectilePos, intialPlayerPos);
+            projectilePos = Vector2Add(projectilePos, directionPos);
+            if(Vector2Distance(projectilePos, intialPlayerPos) < 8.00f && false){
+                 intialPlayerPosSet = false;
+                isAttacking = false;
+                isAttacking1 = false;
+                projectileLife = 0.00f;
+                isExploding = true;
+                explosionFrameUtility.frameUtilityUpdateValues(projectilePos.x, projectilePos.y, 32, 32);
+                explosionFrameUtility.destRec = {projectilePos.x, projectilePos.y, 32, 32};
+                *stateMachine = "idle";
+                directApproachEnemy.attackDone = true;
+            }
             if(projectileLife > 7.00f){
                 intialPlayerPosSet = false;
                 isAttacking = false;
                 isAttacking1 = false;
                 projectileLife = 0.00f;
-                isExploding = true;
+               isExploding = true;
+                explosionFrameUtility.frameUtilityUpdateValues(projectilePos.x, projectilePos.y, 32, 32);
+                explosionFrameUtility.destRec = {projectilePos.x, projectilePos.y, 32, 32};
+                *stateMachine = "idle";
+                directApproachEnemy.attackDone = true;
             }
-            if(false){ //Testing  Vector2Length(direction) > distanceToPlayer  && 
-                projectilePos = intialPlayerPos;
-                intialPlayerPosSet = false;
+            if(Vector2Length(directionPos) > distanceToPlayer && false){ //Testing 
+               intialPlayerPosSet = false;
                 isAttacking = false;
                 isAttacking1 = false;
-            }
-            if(CheckCollisionRecs({projectilePos.x - 16, projectilePos.y - 16, 32, 32}, {thePlayer->destRecPos.x + 24, thePlayer->destRecPos.y + 16, 16, 32})){
-                intialPlayerPosSet = false;
-                isAttacking = false;
-                isAttacking1 = false;
-                isExploding = true;
-                thePlayer->takeDamage(1);
                 projectileLife = 0.00f;
-                std::clog << "TRUE HIT" << std::endl;
+                isExploding = true;
+                explosionFrameUtility.frameUtilityUpdateValues(projectilePos.x, projectilePos.y, 32, 32);
+                explosionFrameUtility.destRec = {projectilePos.x, projectilePos.y, 32, 32};
+                *stateMachine = "idle";
+                directApproachEnemy.attackDone = true;
+            }
+            if(CheckCollisionRecs({projectilePos.x, projectilePos.y, 32, 32}, {thePlayer->destRecPos.x + 24, thePlayer->destRecPos.y + 16, 16, 32})){
+                 intialPlayerPosSet = false;
+                isAttacking = false;
+                isAttacking1 = false;
+                projectileLife = 0.00f; 
+                isExploding = true;
+                explosionFrameUtility.frameUtilityUpdateValues(projectilePos.x, projectilePos.y, 32, 32);
+                explosionFrameUtility.destRec = {projectilePos.x, projectilePos.y, 32, 32};
+               *stateMachine = "idle";
+                directApproachEnemy.attackDone = true;
+                float damage = thePlayer->takeDamage(1.00f,destRecPos);
+                if(damage){
+                    takeDamage(damage);
+                    enemyFrameUtility.color = RED;
+                     frameCountHealth = 60;
+                }
             }
          }
          void projectileDraw(){
             Rectangle destRec = {projectilePos.x, projectilePos.y, 32, 32};
-            Rectangle destRec1 = {projectilePos.x - 16, projectilePos.y - 16, 32, 32};
+            Rectangle destRec1 = {projectilePos.x , projectilePos.y , 32, 32};
             projectileFrameUtility.frameUtilityUpdateValues(destRec.x, destRec.y, destRec.width, destRec.height);
             projectileFrameUtility.draw();
-            DrawRectangleLines(destRec1.x, destRec1.y, destRec1.width, destRec1.height, RED);
+          //  DrawRectangleLines(destRec1.x, destRec1.y, destRec1.width, destRec1.height, RED);
 
          }
          void draw() override{
             if(*stateMachine == "attack" || isAttacking == true || isAttacking1 == true){
              projectileDraw();
-             std::clog << "attack " << std::endl;
             }
-           if(isExploding == true){
-               explosionFrameUtility.frameUtilityUpdateValues(explosionPos.x, explosionPos.y, 32, 32);
-              // explosionFrameUtility.draw();
-           }
+           
             enemyFrameUtility.draw();
             enemyFrameUtility.drawDebug();
+            if(isExploding){
+                explosionFrameUtility.draw();
+                // DrawRectangleLines(explosionFrameUtility.destRec.x, explosionFrameUtility.destRec.y, explosionFrameUtility.destRec.width, explosionFrameUtility.destRec.height, RED);
+            }
+            testingDrawDebugD();
           //  DrawLine(destRecPos.x, destRecPos.y, otherEnemyRects[0].x, otherEnemyRects[0].y, RED);
         //    DrawText(std::to_string(Vector2Distance(destRecPos, Vector2{otherEnemyRects[0].x, otherEnemyRects[0].y})).c_str(), destRecPos.x, destRecPos.y - 10, 12, BLACK);
          }
+         void explodeLife(){
+            currentExplosionTime = currentExplosionTime + GetFrameTime();
+            if(currentExplosionTime > explosionTime){
+                isExploding = false;
+                currentExplosionTime = 0.0f;
+            }
+         }
          void update() override{ // overriding update() from basicEnemy
-         
+         if(damageSoundTime > 0.00f){
+             damageSoundTime += -GetFrameTime();
+         }
             enemyFrameUtility.destRec = {destRecPos.x, destRecPos.y, float(dWidth), float(dHeight)};
-
             enemyFrameUtility.direction = direction;
+            
             shootingEnemyMovement.update(otherEnemyRects, thePlayer->destRecPos);
             if(isAttacking == true || isAttacking1 == true || *stateMachine == "attack"){
                 projectileMovement();
             }
-            if(isExploding = true){
-                explosionMove();
+            if(isExploding){
+                explodeLife();
             }
+            checkIsHitWeapon();
+            checkIsHitFx();
             directApproachEnemy.update(thePlayer->destRecPos);
-            std::clog << " distance to player = " << Vector2Distance(destRecPos, thePlayer->destRecPos) << std::endl;
             directionCalc();
              movement();
             if(frameCountHealth > 0){
@@ -421,8 +613,11 @@ namespace enemyObjects_NS{
             for(int i = 0; i < enemyProjectile.projectiles.size(); i++){
                 UnloadTexture(enemyProjectile.projectiles[i].projectileTexture);
             }
+            
             UnloadTexture(projectileTexture);
-            UnloadTexture(expTexture);
+        }
+        void deloadSound() override{
+            manager.unloadSound(damageSound.index);
         }
      void unloadTexture() override{
             UnloadTexture(projectileTexture);
@@ -434,7 +629,7 @@ namespace enemyObjects_NS{
         public:
         std::vector<basicEnemy> enemies;
         std::vector<std::unique_ptr<basicEnemy>> smartPtrEnemies; // (Example) smartPtrEnemies.push_back(std::make_unique<slimeEnemy>(Vector2{100,100}, "blueSlime.png"));
-
+        SoundManager& manager = SoundManager::getInstance();
         enemyManager(){
             std::clog << "In enemyManager constructor" << std::endl;
             
@@ -557,11 +752,14 @@ namespace enemyObjects_NS{
         }
         void killEnemy(int index){
             UnloadTexture(enemies[index].enemyTexture);
+            manager.unloadSound(enemies[index].damageSound.index);
             enemies[index].deload();
             enemies.erase(enemies.begin() + index);
+            
         }
         void killEnemySPtr(int index){
             UnloadTexture(smartPtrEnemies[index]->enemyTexture);
+             smartPtrEnemies[index]->deloadSound();
             smartPtrEnemies[index]->deload();
             smartPtrEnemies.erase(smartPtrEnemies.begin() + index);
         }

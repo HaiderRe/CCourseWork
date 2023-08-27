@@ -239,7 +239,7 @@ namespace enemyAi_NS {
         NewchooseCirclePoint();    
         validOffset = true;
     }
-    if(IsKeyPressed(KEY_F)){
+    if(IsKeyPressed(KEY_F) && false){ //Stop
         NewchooseCirclePoint();
         moveToNewPos(Vector2Add(stopOffsetCircle, playerPos));
     }
@@ -497,6 +497,7 @@ else {
        bool *isAttacking;
        float attackTime = 8.00f;
         float currentAttackTime = 0.00f;
+        bool attackDone = false;
         void update(Vector2 aPlayerPos) {
           playerPos = aPlayerPos;
         }
@@ -514,13 +515,15 @@ else {
     float attackBuffer = 112.0f; //
 
     float distanceToPlayer = Vector2Distance(*currentPos, playerPos);
-    std::clog << "Distance to Player: " << distanceToPlayer << std::endl;
     *isAttacking = false;
-    std::clog << "attackRange + attackBuffer is " << attackRange + attackBuffer << std::endl;
-    std::clog << "currentAttackTime is " << currentAttackTime << std::endl;
+    if(attackDone = true){
+      *isAttacking = false;
+      currentState = "idle";
+    }
     if (distanceToPlayer <= attackRange + attackBuffer && currentAttackTime <= 0) {
         currentState = "attack";
-            std::clog << "State changed to ATTACK" << std::endl;
+        attackDone = false;
+            std::clog << "Roar" << std::endl;
             *isAttacking = true;
             currentAttackTime = attackTime;
     } 

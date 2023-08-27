@@ -75,7 +75,12 @@ namespace animations_h {
          Vector2 origin = { width/2, height/2 };
          DrawTexturePro(texture1, frameRec, destRec, origin, rotation, playerColor1);
         }
-        
+        void deload(){
+            UnloadTexture(texture1);
+            for(int i = 0; i < texturesVector.size(); i++){
+                UnloadTexture(texturesVector[i]);
+            }
+        }
         void draw(float x, float y, int direction){
             if(hasVector){
                 drawV(x, y, direction);

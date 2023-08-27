@@ -12,6 +12,7 @@
 #include "json.hpp"
 #include "dialogue.hpp"
 #include "skillDec.hpp"
+#include "sound.hpp"
 using namespace skills_NS;
 namespace player_objects{
   class playerAnimations{
@@ -30,6 +31,11 @@ namespace player_objects{
     anim.sWidth = width;
     anim.sHeight = height;
     anim.amount_of_frames = anim.sWidth / width;
+}
+void deload(){
+  for(int i = 0 ; i < animations.size(); i++){
+    animations[i].deload();
+  }
 }
 void addAnimation(std::string path, int width, int height, std::vector<std::string> iPaths){
     // Make the animation manager have the amount of frames equal to its width divided by the player's width.
@@ -123,6 +129,12 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
         frameRec.width = fWidth;
         frameRec.height = fHeight;
       }
+      void deload(){
+        for(int i = 0; i < textures.size(); i++){
+          UnloadTexture(textures[i]);
+        }
+        UnloadTexture(texture1);
+      }
       void update(std::string cAnim, Vector2 playerPos, int direction){ // Update the animation, cAnim is the current Animation being played, Im thinking of having skills all use the same basic animation of the player and the rest being handled by the fxPlayer 
         cDirection = direction;
         position = playerPos;
@@ -187,7 +199,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       }
       void hitBoxDrawLineDraw(){
         Rectangle destRec = {(lerpCurrentPos.x - 16), (lerpCurrentPos.y - 16), 32, 32};
-        DrawRectangleLines(destRec.x, destRec.y, 32, 32, GREEN);
+      //  DrawRectangleLines(destRec.x, destRec.y, 32, 32, GREEN);
       }
       int hitBoxDrawBuff(Rectangle aEnemyRect){
         return 0;
@@ -546,6 +558,17 @@ void LerpSDrawLine(int extraFrames){
           }
         }
       }
+      void deload(){
+        for(int i = 0; i < skills.size(); i++){
+        skills[i].deload();
+        }
+        for(int j = 0; j < currentSkills.size(); j++){
+          currentSkills[j].deload();
+        }
+        for(int k = 0; k < equippedSkills.size(); k++){
+          equippedSkills[k].deload();
+        }
+      }
     };
     class skillManager{
       public:
@@ -559,6 +582,13 @@ void LerpSDrawLine(int extraFrames){
       skillManager(){
         skillSlotsObject.getAllSkills2();
         skillSlotsObject.adminGiveAllSkills();
+      }
+      void deload(){
+        skillSlotsObject.deload();
+        fxPlayerObject.deload();
+        for(int i = 0; i < skills.size(); i++){
+          skills[i].deload();
+        }
       }
       void addSkill(std::string path, std::string typeOfSkill){
         skills.push_back(skill(path, typeOfSkill));
@@ -611,10 +641,105 @@ void LerpSDrawLine(int extraFrames){
         
       }
     };
-  
+  class deflect{
+    public: 
+    float currentCoolDownTime = 0.00f;
+    float maxCoolDownTime = 5.00f;
+    float deflectTime = 0.00f;
+    float deflectMaxTime = 0.50f;
+    float fxTime = 0.00f;
+    float fxMaxTime = 0.50f;
+    // All max times can be changed later
+    bool isDeflecting = false;
+    bool successFullDeflect = false;
+    bool intialFx = false;
+    Texture2D fxTexture = LoadTexture("Assets/vfx/flare.png");
+    Color deflectColor = {211,211,211, 145};
+    Vector2 playerPosCenter = {0.00f, 0.00f};
+    void deload(){
+      UnloadTexture(fxTexture);
+      std::clog << "deloaded deflect" << std::endl;
+    }
+    void draw(){
+    //  DrawCircle(playerPosCenter.x, playerPosCenter.y, 5, GREEN);
+      if(isDeflecting == false){
+        return;
+      }
+      if(intialFx == false){
+        fxTime = fxMaxTime;
+        intialFx = true;
+      }
+      float width = 180.00f;
+      float height = 102.00f;
+      Vector2 origin = {width/2, height/2};  
+      Rectangle destRect = {playerPosCenter.x - origin.x, playerPosCenter.y - origin.y, width, height};
+      DrawTexturePro(fxTexture, {0.00f, 0.00f, 1920.00f, 1080.00f}, destRect, {0.00f, 0.00f}, 0.00f, WHITE);
+      std::clog << "drawn" << std::endl;
+    }
+    void updatePlayerPos(Vector2 aPlayerPosCenter){
+      playerPosCenter = aPlayerPosCenter;
+    }
+    void update(){
+      if(currentCoolDownTime > 0.00f){
+        currentCoolDownTime -= GetFrameTime();
+        if(successFullDeflect){
+          currentCoolDownTime = 0.00f;
+          successFullDeflect = false;
+        }
+      }
+      if(fxTime > 0.00f){
+        fxTime -= GetFrameTime();
+        if(fxTime <= 0.00f){
+          fxTime = fxMaxTime;
+          intialFx = false;
+        }
+      }
+      if(isDeflecting){
+        deflectTime -= GetFrameTime();
+        if(deflectTime <= 0.00f){
+          isDeflecting = false;
+        }
+      }
+      if(IsKeyPressed(KEY_E) || IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)){
+        if(currentCoolDownTime <= 0.00f  && isDeflecting == false){
+          currentCoolDownTime = maxCoolDownTime;
+          isDeflecting = true;
+          deflectTime = deflectMaxTime;
+        }
+      }
+    }
+    bool getIsDeflecting(){
+      return isDeflecting;
+    }
+    Color getColor(){
+      if(isDeflecting){
+        return deflectColor;
+      }
+      else{
+        return WHITE;
+      }
+    }
+  };
+  struct frameData{
+    int framesCounter = 0;
+    int maxFrames = 7;
+    int currentFrame = 0;
+    int framesPerSecond = 0;
+    int frameWidth = 0;
+    int frameHeight = 0;
+  };
+  struct sound{
+    int index = -1;
+  };
     class player{
         public:
         skillManager skillManagerObject;
+        SoundManager* manager;
+        float currentDashTime = 0.00f;
+        float dashCoolDownTime = 1.50f;
+        bool isDashing = false;
+        float drawDashTime = 0.00f;
+        float drawDashMaxTime = 0.25f;
         int colorCountDown = -1;
         float xCord;
         float yCord;
@@ -622,6 +747,7 @@ void LerpSDrawLine(int extraFrames){
         int height = 64; // Rect
         float speedX = 0.00f;
         float speedY = 0.00f;
+        bool firstAttack = false;
         Vector2 destRecPos = {0.0f,0.0f};
         std::string currentAnim;
         int direction = 0; // 0 = up , 1 = left, 2 = right, 3 = down
@@ -633,18 +759,21 @@ void LerpSDrawLine(int extraFrames){
         Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
         float health = 5.00f; 
         Camera2D camera1;
+        deflect deflectObject;
+        frameData dashFrameData;
+        Texture2D dashTexture = LoadTexture("Assets/player/fx/dashFx.png");
+        void deload();
         void draw();
         void update();
         void update(std::vector<std::vector<int>> collisionIDs);
         void movement();
         void drawOffCamera();
-        int takeDamage();
-        int takeDamage(float damagePoints);
-        int takeDamage(float damagePoints, int direction);
-        int takeDamage(float damagePoints, Rectangle aPreviousEnemyRectangle); //For None-Slimes
-        int takeDamage(float damagePoints, Vector2 aPreviousEnemy); //For Slimes
-
-        int testingFunctionDraw(){
+        void takeDamage();
+        void takeDamage(float damagePoints);
+        float takeDamage(float damagePoints, Vector2 aPreviousRect);
+        void knockBack(Vector2 aPreviousRect);
+        bool isColliding(int x, int y);
+        void testingFunctionDraw(){
                 float offsetX = 0.0f;
                 float offsetY = 0.0f;
                 int width = 8;
@@ -672,13 +801,20 @@ void LerpSDrawLine(int extraFrames){
                     height = 16;
                 }
                 Rectangle weaponHitBox = {destRecPos.x + offsetX, destRecPos.y + offsetY, width, height};
-                DrawRectangleLines(weaponHitBox.x, weaponHitBox.y, weaponHitBox.width, weaponHitBox.height, RED);
+                //DrawRectangleLines(weaponHitBox.x, weaponHitBox.y, weaponHitBox.width, weaponHitBox.height, RED);
         }
         bool mapCollision(std::vector<std::vector<int>> collisionIDs);
         fxPlayer fxPlayerObject;
         int fxDamage = 1;
         int weaponDamage = 1;
+        sound damageSound;
         player(){
+          manager = &SoundManager::getInstance();
+         damageSound.index = manager->loadSound("player/humanHurt.wav");
+          dashFrameData.framesPerSecond = 12;
+          dashFrameData.maxFrames = 7;
+          dashFrameData.frameWidth = 59; 
+          dashFrameData.frameHeight= 42;
           skillManagerObject = skillManager();
           std::vector<std::string> iPaths; // Idle Paths
           iPaths.push_back("Player/base/Base_Idle");
@@ -738,101 +874,164 @@ void LerpSDrawLine(int extraFrames){
         void changeRotation1(float rotation){
           playerAnims.changeRotation(rotation);
         }
+        void drawDash(){
+          if(isDashing == false){
+            
+            return;
+          }
+          Rectangle destRec = {destRecPos.x + 32 - 59/2, destRecPos.y + 32 - 42/2, 59, 42};
+          Vector2 origin = {59/2, 42/2};
+          float rotation = 0.00f;
+          Rectangle frameRec = {0.00f, 0.00f, dashFrameData.frameWidth, dashFrameData.frameHeight};
+           dashFrameData.framesCounter++;
+            frameRec.y = dashFrameData.frameHeight;
+            if (dashFrameData.framesCounter >= (60/dashFrameData.framesPerSecond))
+            {
+                dashFrameData.framesCounter = 0;
+                dashFrameData.currentFrame++;
+                if (dashFrameData.currentFrame > dashFrameData.maxFrames) {
+                    dashFrameData.currentFrame = 0;
+                }
+            }
+            frameRec.x = dashFrameData.frameWidth * dashFrameData.currentFrame;
+             // 0 = up , 1 = left, 2 = right, 3 = down
+          if(direction == 0){
+            destRec.x += 46;
+            destRec.y += 40;
+            rotation = 90.00f;
+          }
+          else if(direction == 1){
+            destRec.x += 40;
+            destRec.y += 24;
+          }
+          else if(direction == 2){
+            destRec.x += 0;
+            destRec.y += 8;
+            frameRec.width = frameRec.width * -1;
+          }
+          else if(direction == 3){
+            destRec.x += 16;
+            rotation = -90.00f;
+          }
+            std::clog << "frameRec values " << frameRec.x << " " << frameRec.y << " " << frameRec.width << " " << frameRec.height << std::endl;
+            std::clog << "destRec values " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;
+          DrawTexturePro(dashTexture, frameRec, destRec, origin, rotation, WHITE);
+        }
+        void trackAttack(){
+          if(currentAnim == "Player/base/Base_Attack"){
+            firstAttack = true;
+          }
+          else{
+            firstAttack = false;
+          }
+        }
+        void dashM(){
+           if(isDashing){
+            drawDashTime -= GetFrameTime();
+            if(drawDashTime <= 0.00f){
+              isDashing = false;
+              drawDashTime = drawDashMaxTime;
+            }
+          }
+          if(currentDashTime > 0){
+            currentDashTime -= GetFrameTime();
+            return;
+          }
+         
+          if(IsKeyPressed(KEY_LEFT_SHIFT)){
+            currentDashTime = dashCoolDownTime;
+            dashFrameData.framesCounter = 0;
+            dashFrameData.currentFrame = 0;
+            isDashing = true;
+            float speedIncrease = 32.00f;
+            if(speedX > 0.00f){
+              speedX = speedIncrease;
+            }
+            else if(speedX < 0.00f){
+              speedX = -speedIncrease;
+            }
+            if(speedY > 0.00f){
+              speedY = speedIncrease;
+            }
+            else if(speedY < 0.00f){
+              speedY = -speedIncrease;
+            }
+            drawDashTime = drawDashMaxTime;
+            destRecPos = {destRecPos.x + speedX, destRecPos.y + speedY};
+          }
+
+        }
         void changeColor(Color aColor){
           playerAnims.playerColor = aColor;
           playerAnims.changeColor(aColor);
         }
+        void changeColorQuick(Color aColor, int countDown){
+          if(playerColor.r == aColor.r && playerColor.b == aColor.b && playerColor.g == aColor.g){
+            return;
+          }
+          playerColor = aColor;
+          colorCountDown = countDown;
+        }
         // void stateManager();    
     };
-    int player::takeDamage(){
+    void player::takeDamage(){
       health = health - 1;
       playerColor = RED;
       colorCountDown = 60;
-      return 0;
     }
-    int player::takeDamage(float damagePoints){
+    void player::takeDamage(float damagePoints){
       health = health - damagePoints;
       playerColor = RED;
       colorCountDown = 60;
-      return 0;
     }
-    int player::takeDamage(float damagePoints, int direction){
-      health = health - damagePoints;
-      playerColor = RED;
-      colorCountDown = 60;
-      Vector2 nextDestRecPos = {destRecPos.x, destRecPos.y};
-      int knockBack = 6;
-      if(direction == 0){
-        nextDestRecPos = {destRecPos.x, destRecPos.y + knockBack};
+    float player::takeDamage(float damagePoints, Vector2 aPreviousRect){
+      if(deflectObject.getIsDeflecting()){
+        deflectObject.successFullDeflect = true;
+        return damagePoints;
       }
-      else if(direction == 1){
-        nextDestRecPos = {destRecPos.x + knockBack, destRecPos.y};
+      else{
+        manager->playSound(damageSound.index);
+        health = health - damagePoints;
+        playerColor = RED;
+        colorCountDown = 60;
+        knockBack(aPreviousRect);
+        return 0.00f;
       }
-      else if(direction == 2){
-        nextDestRecPos = {destRecPos.x - knockBack, destRecPos.y};
-      }
-      else if(direction == 3){
-        nextDestRecPos = {destRecPos.x, destRecPos.y - knockBack};
-      }
-      if(collisionIDsMap[nextDestRecPos.y/16][nextDestRecPos.x/16] == 0){
-        destRecPos = nextDestRecPos;
-      }
-      return 0;
     }
-    int player::takeDamage(float damagePoints, Rectangle aPreviousEnemyRectangle){
-      health = health - damagePoints;
-      playerColor = RED;
-      colorCountDown = 60;
-      Vector2 nextDestRecPos = {destRecPos.x, destRecPos.y};
-      int knockBack = 6;
-      Vector2 enemyCenter = {0.00f,0.00f};
-       enemyCenter.x = aPreviousEnemyRectangle.x + aPreviousEnemyRectangle.width / 2;
-       enemyCenter.y = aPreviousEnemyRectangle.y + aPreviousEnemyRectangle.height / 2;
-       Vector2 direction = {0.00f, 0.00f};
-       direction.x = destRecPos.x - enemyCenter.x;
-       direction.y = destRecPos.y - enemyCenter.y;
-       float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-       if (length != 0) { 
-         direction.x /= length;
-         direction.y /= length;
-       }
-       direction.x *= knockBack;
-       direction.y *= knockBack;
-       nextDestRecPos = {0.00f, 0.00f};
-       nextDestRecPos.x = destRecPos.x + direction.x;
-       nextDestRecPos.y = destRecPos.y + direction.y;
-         if(collisionIDsMap[nextDestRecPos.y/16][nextDestRecPos.x/16] == 0){
-         destRecPos = nextDestRecPos;
-       }
-       return 0;
+    void player::knockBack(Vector2 aPreviousRect){
+      Vector2 playerOffsetPos = {destRecPos.x + 32, destRecPos.y + 32}; 
+      Vector2 enemyCenter = aPreviousRect;
+      Vector2 direction = {playerOffsetPos.x - enemyCenter.x, playerOffsetPos.y - enemyCenter.y};
+      float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
+      if (magnitude == 0){
+        return; 
+      }
+    Vector2 normalizedDirection = {direction.x / magnitude, direction.y / magnitude};
+    float knockbackDistance = 48.0f;
+    Vector2 knockback = {normalizedDirection.x * knockbackDistance, normalizedDirection.y * knockbackDistance};
+    Vector2 newPos = {destRecPos.x + knockback.x, destRecPos.y + knockback.y};
+    int playerX = newPos.x / 16;
+    int playerY = newPos.y / 16;
+    float stepSize = 1.0f; 
+    int maxAttempts = 16;  
+    int attempts = 0;
+    while (isColliding(playerX, playerY) && attempts < maxAttempts) {
+        newPos.x += normalizedDirection.x * stepSize;
+        newPos.y += normalizedDirection.y * stepSize;
+        playerX = newPos.x / 16;
+        playerY = newPos.y / 16;
+        attempts++;
     }
-    int player::takeDamage(float damagePoints, Vector2 aPreviousEnemy){
-      health = health - damagePoints;
-      playerColor = RED;
-      colorCountDown = 60;
-      Vector2 nextDestRecPos = {destRecPos.x, destRecPos.y};
-      int knockBack = 6;
-      Vector2 enemyCenter = {0.00f,0.00f};
-       enemyCenter.x = aPreviousEnemy.x;
-       enemyCenter.y = aPreviousEnemy.y;
-       Vector2 direction = {0.00f, 0.00f};
-       direction.x = destRecPos.x - enemyCenter.x;
-       direction.y = destRecPos.y - enemyCenter.y;
-       float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-       if (length != 0) { 
-         direction.x /= length;
-         direction.y /= length;
-       }
-       direction.x *= knockBack;
-       direction.y *= knockBack;
-        nextDestRecPos = {0.00f, 0.00f};
-       nextDestRecPos.x = destRecPos.x + direction.x;
-       nextDestRecPos.y = destRecPos.y + direction.y;
-         if(collisionIDsMap[nextDestRecPos.y/16][nextDestRecPos.x/16] == 0){
-         destRecPos = nextDestRecPos;
-       }
-       return 0;
+    destRecPos = newPos;
     }
+    bool player::isColliding(int x, int y){
+    if (x < 0 || x >= collisionIDsMap[0].size() || y < 0 || y >= collisionIDsMap.size()){
+        return true; 
+    }
+    bool isCol = collisionIDsMap[y][x] != 0;
+    return isCol;
+    }
+
     void player::movement(){
       bool isRight = false;
       bool isLeft = false;
@@ -904,7 +1103,7 @@ void LerpSDrawLine(int extraFrames){
  //   fxPlayerObject.update(currentAnim, destRecPos, direction);
     skillManagerObject.update(destRecPos, direction);
     movement();
-    currentAnim = playerAnims.currentAnimationPath();
+    currentAnim = playerAnims.currentAnimationPath(); //Not used I be;oieve
   //  draw();
   }
   void player::update(std::vector<std::vector<int>> collisionIDs){
@@ -915,6 +1114,12 @@ void LerpSDrawLine(int extraFrames){
     collisionIDsMap = collisionIDs;
     movement();
     currentAnim = playerAnims.currentAnimationPath();
+    deflectObject.update();
+    changeColorQuick(deflectObject.getColor(), 30);
+    Vector2 playerPosCenter = {destRecPos.x + 38, destRecPos.y + 32};
+    deflectObject.updatePlayerPos(playerPosCenter);
+    dashM();
+    trackAttack();
   //  draw();
   }
   void player::drawOffCamera(){
@@ -922,7 +1127,9 @@ void LerpSDrawLine(int extraFrames){
    
   }
   void player::draw(){
+    deflectObject.draw();
     changeColor(playerColor);
+    drawDash();
     if(colorCountDown > -1){
       colorCountDown = colorCountDown - 1;
       if(colorCountDown < 0){
@@ -935,6 +1142,7 @@ void LerpSDrawLine(int extraFrames){
     skillManagerObject.draw(camera1);
     skillManagerObject.fxPlayerObject.hitBoxDrawLineDraw();
     testingFunctionDraw();
+    
     //playerColor = WHITE;
    // fxPlayerObject.drawDecide();
   } 
@@ -966,7 +1174,14 @@ void LerpSDrawLine(int extraFrames){
     }
     return isColliding;
   }
-  
+  void player::deload(){
+    UnloadTexture(playerSprite);
+    skillManagerObject.deload();
+    fxPlayerObject.deload();
+    playerAnims.deload();
+    deflectObject.deload();
+    UnloadTexture(dashTexture);
+    }
 };
 
 

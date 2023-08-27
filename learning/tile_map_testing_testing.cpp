@@ -35,19 +35,11 @@
 //#include "include/aStar.hpp"
 //#include "include/enemy_objects.hpp"
 #include "include/tile_map.hpp"
+#include "include/sound.hpp"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 using namespace tilemap_ns;
-/*void spawnSlimeEnemy(Vector2 aPos, std::string aTextureName, std::vector<std::vector<int>> aCollisionTileIDs, enemyObjects_NS::enemyManager &theEnemyManager, player_objects::player &nPlayer){
-  theEnemyManager.spawnSlimeEnemy(aPos, aTextureName, aCollisionTileIDs);
-  theEnemyManager.smartPtrEnemies[theEnemyManager.smartPtrEnemies.size()-1]->thePlayer = &nPlayer;
-}
-void spawnShootingMan(Vector2 aPos, std::string aTextureName, std::vector<std::vector<int>> aCollisionTileIDs, enemyObjects_NS::enemyManager &theEnemyManager, player_objects::player &nPlayer){
-  theEnemyManager.spawnShootingEnemy(aPos, aTextureName, aCollisionTileIDs);
-  theEnemyManager.smartPtrEnemies[theEnemyManager.smartPtrEnemies.size()-1]->thePlayer = &nPlayer;
-}
-*/
 int main(void)
 {
     // Initialization
@@ -56,13 +48,14 @@ int main(void)
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
     SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
-    InitWindow(screenWidth, screenHeight, "Raylib Test");
+    InitWindow(screenWidth, screenHeight, "Game");
     InitAudioDevice(); // For sound
     int y_size = default_map.y_size;
     int y = 0;
     int x  = 0; 
     int oldx = 0; 
     int oldy = 0;
+    SoundManager& manager = SoundManager::getInstance();
     game_renderer_h_1::game_renderer gameRenderer;
     player_objects::player nPlayer;
     camera_h::camera_class camera(nPlayer);
@@ -199,7 +192,8 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
         UnloadTexture(theEnemyManager.smartPtrEnemies[i]->enemyFrameUtility.texture);
       }
     }
-    
+    nPlayer.deload();
+    manager.unloadAll();
     UnloadTexture(mouseHandlerObject.mouseTexture);
     UnloadTexture(aTexture);
     CloseAudioDevice(); // Close sound device

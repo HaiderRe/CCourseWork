@@ -98,9 +98,9 @@ class Attack{
             }
         }
         void drawAttack(){
-            DrawCircle(intialPlayerPos.x, intialPlayerPos.y, 5, RED);
-            DrawCircle(currentPos->x, currentPos->y, 5, BLUE);
-            DrawRectangleLines(playerPos.x + 24, playerPos.y + 16, 16, 32, RED);
+          //  DrawCircle(intialPlayerPos.x, intialPlayerPos.y, 5, RED);
+          //  DrawCircle(currentPos->x, currentPos->y, 5, BLUE);
+          //  DrawRectangleLines(playerPos.x + 24, playerPos.y + 16, 16, 32, RED);
             if(gettingReadyToAttack){
                 Color aGrey = {189, 195, 199, 255};
                 attackFrameUtility.color = aGrey;
