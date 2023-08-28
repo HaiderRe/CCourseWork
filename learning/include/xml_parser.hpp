@@ -391,7 +391,7 @@ bool file_to_read::new_draw_tilemap(){
     Rectangle destRect;
     //N std::cout << "size of TileIds " << std::to_string(tileIDs.size()) << std::endl;
    //N std::cout << "size of TileIds[0] " << std::to_string(tileIDs[0].size()) << std::endl;
-   std::vector<Rectangle> checker;  
+
 
 
   //  std::cout << "tile column = " << std::to_string(tileColumns) << std::endl;
@@ -417,26 +417,8 @@ bool file_to_read::new_draw_tilemap(){
             // Draw the tile.
 
             //DrawTextureRec(mapTexture.texture, sourceRect, { destRect.x, destRect.y }, WHITE);
-            Color color = WHITE;
-            color.a = 100;
-            DrawTexturePro(mapTexture.texture, sourceRect, destRect, {0,0}, 0, color);
-            DrawRectangleLinesEx(destRect, 0.1, RED);
-            Vector2 mousePos = GetMousePosition();
-            if(CheckCollisionPointRec(mousePos, destRect)){
-                std::clog << "Mouse" << std::to_string(tileId) << std::endl;
-            }
-            if(checker.size() > 0 ){
-                for(auto rect : checker){
-                    if(destRect.x == rect.x && destRect.y == rect.y){
-                        std::clog << "Duplicate" << std::endl;
-                        std::clog << "tileID " << std::to_string(tileId) << std::endl;
-                        std::clog << "Tile [" << j << "][" << k << "]:" << std::endl;
-                    }
-                }
-            }
-            DrawText(std::to_string(tileId).c_str(), destRect.x, destRect.y, 5, BLACK);   
-            checker.push_back(destRect);
-
+            
+            DrawTexturePro(mapTexture.texture, sourceRect, destRect, {0,0}, 0, WHITE);
 
         }
     }

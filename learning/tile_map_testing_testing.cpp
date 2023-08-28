@@ -4,7 +4,7 @@
 // Then have image as same name as tilemap 
 // Then get image divide into sections by tile width and height  
 // And then pray 
-// std::cout << " pass bullshit" << std::endl;
+// std::cout << " pass " << std::endl;
   //      std::cout << "Size of xmlTileIDs: " << xmlTileIDs.size() << std::endl;
 
       /*  for(int aB = 0; aB < xmlTileIDs.size(); aB++){
@@ -40,6 +40,80 @@
 // Program main entry point
 //------------------------------------------------------------------------------------
 using namespace tilemap_ns;
+enum currentMap {
+    water_map,
+    default_map,
+    test_map
+};
+Vector2 chooseValidPos(std::vector<std::vector<int>> collisionTileIDs, bool ignoreFirstRow){
+  Vector2 validPos = {0.00f, 0.00f};
+  int rowX = 0;
+  for(int i = 1; i < 64; i++){
+    for(int j = 0; j < 64; j++){
+      if(collisionTileIDs[i][j] == 0){
+        rowX++;
+        if(rowX < 10){
+          continue;
+        }
+        validPos.x = i * 16;
+        validPos.y = j * 16;
+        return validPos;
+      }
+    }
+  }
+  std::clog << "no valid pos found" << std::endl;
+  return validPos;
+}
+Vector2 chooseValidPos(std::vector<std::vector<int>> collisionTileIDs){
+  Vector2 validPos = {0.00f, 0.00f};
+  for(int i = 1; i < 64; i++){
+    for(int j = 0; j < 64; j++){
+      if(collisionTileIDs[i][j] == 0){
+        validPos.x = i * 16;
+        validPos.y = j * 16;
+        return validPos;
+      }
+    }
+  }
+  std::clog << "no valid pos found" << std::endl;
+  return validPos;
+}
+Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs){
+  Vector2 validPos = {0.00f, 0.00f};
+  SetRandomSeed(GetTime());
+  int amountOfIter = 0;
+  while(true){
+    int randX = GetRandomValue(0, 63);
+    int randY = GetRandomValue(0, 63);
+    if(collisionTileIDs[randX][randY] == 0){
+      validPos.x = randX * 16;
+      validPos.y = randY * 16;
+      return validPos;
+    }
+    amountOfIter = amountOfIter + 1;
+    if(amountOfIter > 1000){ // Just in case it gets stuck in a loop
+      return chooseValidPos(collisionTileIDs);
+    }
+  }
+    
+  
+  std::clog << "no valid pos found" << std::endl;
+  return validPos;
+}
+void spawnNShootingEnemies(int amouunt, enemyObjects_NS::enemyManager& theEnemyManager, std::vector<std::vector<int>> collisionTileIDs, player_objects::player& nPlayer){
+  for(int i = 0; i < amouunt; i++){
+    theEnemyManager.spawnShootingEnemy(chooseValidPos(collisionTileIDs), "fireMan.png", collisionTileIDs);
+    theEnemyManager.smartPtrEnemies[i]->thePlayer = &nPlayer;
+  }
+}
+void spawnNSlimeEnemies(int amount, enemyObjects_NS::enemyManager& theEnemyManager, std::vector<std::vector<int>> collisionTileIDs, player_objects::player& nPlayer){
+  for(int i = 0; i < amount; i++){
+    theEnemyManager.spawnSlimeEnemy(chooseValidPosRandom(collisionTileIDs), "blueSlime.png", collisionTileIDs);
+    theEnemyManager.smartPtrEnemies[i]->thePlayer = &nPlayer;
+  }
+}
+
+
 int main(void)
 {
     // Initialization
@@ -71,21 +145,26 @@ int main(void)
 
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
-  my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
-  // my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); Water_map
+  /// my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
+   my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); // Water_map
+   currentMap aCurrentMap = water_map;
+   
  xmlFile.set_map_texture();
  xmlFile.set_column();
  //xmlFile.make_tileset_file();
  SetExitKey(KEY_NULL);
  SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
 Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
-  theEnemyManager.spawnSlimeEnemy(Vector2{100,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
+  /* theEnemyManager.spawnSlimeEnemy(Vector2{100,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
   theEnemyManager.spawnSlimeEnemy(Vector2{200,100}, "blueSlime.png", xmlFile.getCollisionTileIDs());
   theEnemyManager.spawnShootingEnemy(Vector2{300,300}, "fireMan.png", xmlFile.getCollisionTileIDs());
    theEnemyManager.smartPtrEnemies[0]->thePlayer = &nPlayer;
     theEnemyManager.smartPtrEnemies[1]->thePlayer = &nPlayer;
     theEnemyManager.smartPtrEnemies[2]->thePlayer = &nPlayer;
-    
+    */
+   spawnNSlimeEnemies(2, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
+  nPlayer.destRecPos = chooseValidPos(xmlFile.getCollisionTileIDs(), true); 
+  // spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
 
 // Main game loop
     while (!WindowShouldClose() && shouldClose != 1)    // Detect window close button or ESC key
@@ -123,8 +202,13 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
         std::vector<std::vector<int>> xmlTileIDs = xmlFile.get_tileIDs();
        
          BeginDrawing();
-
-            ClearBackground(WHITE);
+         if(aCurrentMap == water_map){
+         ClearBackground(BLUE);
+         }
+         else{
+           ClearBackground(WHITE);
+         }
+           
             
             DrawFPS(10, 10);  // Draw current FPS
             

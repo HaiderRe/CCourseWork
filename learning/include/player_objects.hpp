@@ -1150,13 +1150,14 @@ void LerpSDrawLine(int extraFrames){
    // std::clog<<"We are in the collsiion" << std::endl;
    // std::clog << " size of collision map " << collisionIDs.size() << std::endl;
    // std::clog << "size y of collision map " << collisionIDs[0].size() << std::endl;
-   return false; // testing other functions 
+  
     bool isColliding = false;
   
     //int playerX = destRecPos.x / 16; // player cordinates to tile map cordiantes
     // int playerY = destRecPos.y / 16;
-    int playerX = (destRecPos.x + speedX) / 16; // player cordinates to tile map cordiantes
-    int playerY = (destRecPos.y + speedY) / 16;
+    
+    int playerX = ((destRecPos.x + 24 ) + speedX) / 16; // player cordinates to tile map cordiantes
+    int playerY = ((destRecPos.y + 16) + speedY) / 16;  //  ALSO CENTERING
    // / std::clog << "player x " << playerX << " player y " << playerY << std::endl;
    // / std::clog << "collision vector at player x " << collisionIDs[playerY][playerX] << std::endl;
     // Later Change collision Code as this is garbage
