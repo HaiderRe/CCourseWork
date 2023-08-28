@@ -1150,6 +1150,7 @@ void LerpSDrawLine(int extraFrames){
    // std::clog<<"We are in the collsiion" << std::endl;
    // std::clog << " size of collision map " << collisionIDs.size() << std::endl;
    // std::clog << "size y of collision map " << collisionIDs[0].size() << std::endl;
+   return false; // testing other functions 
     bool isColliding = false;
   
     //int playerX = destRecPos.x / 16; // player cordinates to tile map cordiantes

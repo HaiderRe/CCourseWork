@@ -71,7 +71,8 @@ int main(void)
 
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
- my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
+  my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
+  // my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); Water_map
  xmlFile.set_map_texture();
  xmlFile.set_column();
  //xmlFile.make_tileset_file();
