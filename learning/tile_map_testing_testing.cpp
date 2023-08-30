@@ -50,14 +50,22 @@ using namespace tilemap_ns;
 std::string enumToString(currentMap map) {
     switch (map) {
         case water_map:
-            return "water_map.xml";
+            return "water_tilemap.xml";
         case default_map:
             return "testing_functionalilty_of_parser.xml";
         case test_map:
             return "testing_functionalilty_of_parser.xml";
+        case town_map:
+            return "town.xml";
         default:
             return "Unknown";
     }
+}
+Vector2 chooseValidPosPlayer(std::vector<std::vector<int>> collisionTileIDs, bool ignoreFirstRow){
+  Vector2 validPos = {0.00f, 0.00f};
+  validPos.x = 32 * 16;
+  validPos.y = 32 * 16;
+  return validPos;
 }
 Vector2 chooseValidPos(std::vector<std::vector<int>> collisionTileIDs, bool ignoreFirstRow){
   Vector2 validPos = {0.00f, 0.00f};
@@ -127,6 +135,10 @@ Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs, Rec
     randYMax = 54;
     randYMin = 26;
   }
+  else if(enumToString(aCurrentMap1) == "town.xml"){
+    randYMax = 41;
+    randYMin = 20;
+  }
   else{
     randYMax = 63;
     randYMin = 0;
@@ -156,7 +168,7 @@ Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs, Rec
     }
     }
     amountOfIter = amountOfIter + 1;
-    if(amountOfIter > 4000){ // Just in case it gets stuck in a loop
+    if(amountOfIter > 1000000){ // Just in case it gets stuck in a loop
       return chooseValidPos(collisionTileIDs);
     }
   }
@@ -218,8 +230,9 @@ int main(void)
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
   /// my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
-  my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); // Water_map
- currentMap aCurrentMap = water_map;
+ // my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); // Water_map
+ my_xml_parser::file_to_read xmlFile("include/town.xml");
+ currentMap aCurrentMap = town_map;
  xmlFile.set_map_texture();
  xmlFile.set_column();
  //xmlFile.make_tileset_file();
@@ -234,9 +247,9 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
     theEnemyManager.smartPtrEnemies[2]->thePlayer = &nPlayer;
     */
   // spawnNSlimeEnemies(2, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
-  nPlayer.destRecPos = chooseValidPos(xmlFile.getCollisionTileIDs(), true); 
+  nPlayer.destRecPos = chooseValidPosPlayer(xmlFile.getCollisionTileIDs(), true); 
   //spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
-
+nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skillManagerObject.skillSlotsObject.skills[6]);
 // Main game loop
     while (!WindowShouldClose() && shouldClose != 1 )    // Detect window close button or ESC key
     {
@@ -264,7 +277,7 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
         default_map.arr_tiles[0*y_size+2171].is_black = true;
         mouseHandlerObject.update();
         aLevelManager.update(theEnemyManager.howManyEnemies());
-        std::clog << "enemies left: " << theEnemyManager.howManyEnemies() << std::endl;
+       // std::clog << "enemies left: " << theEnemyManager.howManyEnemies() << std::endl;
         if(aLevelManager.getCurrentMap() != aCurrentMap){
           std::string map = enumToString(aLevelManager.getCurrentMap());
           std::string path = "include/" + map;
@@ -274,6 +287,7 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
            xmlFile.set_map_texture();
             xmlFile.set_column();
             aCurrentMap = aLevelManager.getCurrentMap();
+            nPlayer.destRecPos = chooseValidPosPlayer(xmlFile.getCollisionTileIDs(), true); 
         }
         if(aLevelManager.isLevelComplete() == true){
           if(levelWait > 0){
@@ -343,6 +357,7 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
               DrawText("Press F to continue", GetScreenWidth()/2 - 10, 140, 20, BLACK);
               std::string stringUpgrade = aUpgrade.draw(); 
               if(stringUpgrade != "null"){
+                std::clog << "upgrade = " << stringUpgrade << std::endl;
                 nPlayer.chooseUpgrade(stringUpgrade);
               }
             }

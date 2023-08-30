@@ -577,6 +577,7 @@ void LerpSDrawLine(int extraFrames){
       bool isCasting = false;
       std::string skillType;
       fxPlayer fxPlayerObject;
+      int indexAdded = 0;
       skillManager(){
         skillSlotsObject.getAllSkills2();
         //skillSlotsObject.adminGiveAllSkills(); // Developer Command
@@ -608,23 +609,12 @@ void LerpSDrawLine(int extraFrames){
       void addSkill(){
         SetRandomSeed(GetTime());
         bool isFound = false;
-        int index = GetRandomValue(0, skillSlotsObject.skills.size() - 1);
-        for(int i = 0; i < skillSlotsObject.currentSkills.size(); i++){
-         for(int j = 0; j < skillSlotsObject.skills.size(); j++){
-            if(skillSlotsObject.currentSkills[i].dPath == skillSlotsObject.skills[j].dPath){
-              isFound = true;
-              break;
-            }
-         }
+        int index = indexAdded;
+        indexAdded = indexAdded+1; 
+        if(index < 0 || index > skillSlotsObject.skills.size()){
+        return;
         }
-        if(isFound == false){
           skillSlotsObject.currentSkills.push_back(skillSlotsObject.skills[index]);
-        }
-        else{
-          addSkill();
-          return;
-        }
-        skillSlotsObject.currentSkills.push_back(skillSlotsObject.skills[index]);
       }
       std::vector<skill> getSkills(){
         return skillSlotsObject.currentSkills;

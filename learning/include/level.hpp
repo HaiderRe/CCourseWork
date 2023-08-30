@@ -13,11 +13,12 @@
    enum currentMap {
     water_map,
     default_map,
-    test_map
+    test_map,
+    town_map
 };
 class levelManager{
       public: 
-      currentMap aCurrentMap = water_map;
+      currentMap aCurrentMap = town_map;
       int currentLevel = 0; 
       int enemiesLeft = 0;
       int enemiesKilled = 0;
@@ -49,7 +50,7 @@ class levelManager{
       }
       currentMap getCurrentMap(){
         if(currentLevel == 5){
-            aCurrentMap = default_map;
+            aCurrentMap = water_map;
         }
         return aCurrentMap;
       }
@@ -75,23 +76,29 @@ class upgrade{
       upgradeNames.push_back("Armor");
       upgradeNames.push_back("Skill");
    }
-   std::string draw(){
+  std::string draw() {
     Vector2 mousePos = GetMousePosition();
+    mousePos.x = mousePos.x + 28;
+    mousePos.y = mousePos.y + 28;
     chosenUpgrade = "null";
-     for(int i = 0; i < currentUpgradeChoices.size(); i++){
-       DrawText(currentUpgradeChoices[i].c_str(), 100, 100 + (i * 50), 20, BLACK);
-       DrawRectangle(100, 100 + (i * 50), 200, 50, WHITE);
-       if(CheckCollisionPointRec(mousePos, Rectangle{100, (float)(100 + (i * 50)), 200, 50})){
-         if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
-           chosenUpgrade = currentUpgradeChoices[i];
-           currentUpgradeChoices.clear();
-           return chosenUpgrade;
-         }
-       }
-     }
-     
-     return chosenUpgrade;
-   }
+    
+    for (int i = 0; i < currentUpgradeChoices.size(); i++) {
+        int y = 100 + (i * 50);
+        DrawText(currentUpgradeChoices[i].c_str(), 110, y + 10, 20, BLACK);
+        DrawCircle(mousePos.x, mousePos.y, 5, RED);
+        DrawRectangleLines(100, y, 200, 50, WHITE);
+        Rectangle rec = {100.0f, (float)y, 200.0f, 50.0f};
+        if (CheckCollisionPointRec(mousePos, rec)) {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                chosenUpgrade = currentUpgradeChoices[i];
+                currentUpgradeChoices.clear();
+                return chosenUpgrade;
+            }
+        }
+    }
+    return chosenUpgrade;
+}
+
    std::string getUpgrade(){
     if(currentUpgradeChoices.size() > 3){
       std::vector<std::string> emptyChoice;
