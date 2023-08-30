@@ -187,8 +187,6 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       }
       int hitBoxDrawLine(Rectangle aEnemyRect){ // 
       Rectangle destRec = {lerpCurrentPos.x - 16, lerpCurrentPos.y - 16, 32, 32}; //Projectile Dest Rect
-      std::clog << "lerpCurrentPos = " + std::to_string(lerpCurrentPos.x) + " " + std::to_string(lerpCurrentPos.y) << std::endl;
-      std::clog << "aEnemyRect = " + std::to_string(aEnemyRect.x) + " " + std::to_string(aEnemyRect.y) << std::endl;
       if(CheckCollisionRecs(destRec, aEnemyRect)){
         return 1;
       }
@@ -641,6 +639,9 @@ void LerpSDrawLine(int extraFrames){
         
       }
     };
+    struct sound{
+    int index = -1;
+  };
   class deflect{
     public: 
     float currentCoolDownTime = 0.00f;
@@ -649,6 +650,8 @@ void LerpSDrawLine(int extraFrames){
     float deflectMaxTime = 0.50f;
     float fxTime = 0.00f;
     float fxMaxTime = 0.50f;
+    SoundManager* manager;
+    sound deflectSound;
     // All max times can be changed later
     bool isDeflecting = false;
     bool successFullDeflect = false;
@@ -656,6 +659,10 @@ void LerpSDrawLine(int extraFrames){
     Texture2D fxTexture = LoadTexture("Assets/vfx/flare.png");
     Color deflectColor = {211,211,211, 145};
     Vector2 playerPosCenter = {0.00f, 0.00f};
+    deflect(){
+        manager = &SoundManager::getInstance();
+      deflectSound.index = manager->loadSound("player/deflect.wav");
+    }
     void deload(){
       UnloadTexture(fxTexture);
       std::clog << "deloaded deflect" << std::endl;
@@ -705,6 +712,7 @@ void LerpSDrawLine(int extraFrames){
           currentCoolDownTime = maxCoolDownTime;
           isDeflecting = true;
           deflectTime = deflectMaxTime;
+          manager->playSound(deflectSound.index);
         }
       }
     }
@@ -728,9 +736,7 @@ void LerpSDrawLine(int extraFrames){
     int frameWidth = 0;
     int frameHeight = 0;
   };
-  struct sound{
-    int index = -1;
-  };
+  
     class player{
         public:
         skillManager skillManagerObject;
@@ -772,7 +778,7 @@ void LerpSDrawLine(int extraFrames){
         void takeDamage(float damagePoints);
         float takeDamage(float damagePoints, Vector2 aPreviousRect);
         void knockBack(Vector2 aPreviousRect);
-        bool isColliding(int x, int y);
+        bool isColliding(int x, int y); // expects 
         void testingFunctionDraw(){
                 float offsetX = 0.0f;
                 float offsetY = 0.0f;
@@ -1013,23 +1019,26 @@ void LerpSDrawLine(int extraFrames){
     int playerX = newPos.x / 16;
     int playerY = newPos.y / 16;
     float stepSize = 1.0f; 
-    int maxAttempts = 16;  
+    int maxAttempts = 1000;  
     int attempts = 0;
     while (isColliding(playerX, playerY) && attempts < maxAttempts) {
-        newPos.x += normalizedDirection.x * stepSize;
-        newPos.y += normalizedDirection.y * stepSize;
-        playerX = newPos.x / 16;
-        playerY = newPos.y / 16;
-        attempts++;
-    }
+    newPos.x -= normalizedDirection.x * stepSize; 
+    newPos.y -= normalizedDirection.y * stepSize; 
+    playerX = newPos.x / 16;
+    playerY = newPos.y / 16;
+    attempts++;
+}
     destRecPos = newPos;
     }
     bool player::isColliding(int x, int y){
     if (x < 0 || x >= collisionIDsMap[0].size() || y < 0 || y >= collisionIDsMap.size()){
         return true; 
     }
-    bool isCol = collisionIDsMap[y][x] != 0;
-    return isCol;
+    if(collisionIDsMap[y][x] != 0){
+      return true;
+    }
+    return false;
+    
     }
 
     void player::movement(){

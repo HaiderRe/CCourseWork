@@ -62,6 +62,9 @@ namespace enemyObjects_NS{
         virtual void deloadSound(){
             return;
         }
+        virtual void unloadTexture(){
+            return;
+        }
         virtual void movement(){
             //Move towards player
             if(destRecPos.x < 0 || destRecPos.x > 4000 || destRecPos.y < 0 || destRecPos.y > 4000){
@@ -103,7 +106,7 @@ namespace enemyObjects_NS{
             enemyFrameUtility.direction = direction;
            // shootLogic();
         }
-        virtual void unloadTexture(){}
+    
     bool isColliding(int x, int y, std::vector<std::vector<int>> collisionIDsMap){
     if (x < 0 || x >= collisionIDsMap[0].size() || y < 0 || y >= collisionIDsMap.size()){
         return true; 
@@ -177,6 +180,18 @@ namespace enemyObjects_NS{
             }
             knockBack();
          }
+         void takeDamage(int damage, bool x){
+            health -= damage;
+            if(damageSoundTime <= 0.00f){
+            manager.playSound(damageSound.index);
+            damageSoundTime = damageSoundTimeMax;
+            }
+            if(health <= 0){
+                *stateMachine = "death";
+            }
+            knockBack();
+         }
+         
          void changeColorDamage(){
                     enemyFrameUtility.color = RED;
                      slimeAttack.attackFrameUtility.color = RED;
@@ -236,7 +251,7 @@ namespace enemyObjects_NS{
             int isHit = thePlayer->skillManagerObject.fxPlayerObject.hitBoxDecide(Rectangle{destRecPos.x,destRecPos.y, float(dWidth), float(dHeight)});
             std::clog << "is hit = " << isHit << std::endl;
             if(isHit){
-                takeDamage(thePlayer->fxDamage);
+                takeDamage(thePlayer->fxDamage, true);
                 enemyFrameUtility.color = RED;
                 std::clog << "TRUE HIT" << std::endl;
                 slimeAttack.attackFrameUtility.color = RED;
@@ -370,6 +385,17 @@ namespace enemyObjects_NS{
                 *stateMachine = "death";
             }
          }
+         void takeDamage(int damage, bool x){
+            health -= damage;
+            knockBack();
+            if(damageSoundTime <= 0.00f){
+            manager.playSound(damageSound.index);
+            damageSoundTime = damageSoundTimeMax;
+            }
+            if(health <= 0){
+                *stateMachine = "death";
+            }
+         }
 void knockBack(){
 
       Vector2 playerOffsetPos = {destRecPos.x + 32, destRecPos.y + 32}; 
@@ -400,7 +426,7 @@ void knockBack(){
              void checkIsHitFx(){
             int isHit = thePlayer->skillManagerObject.fxPlayerObject.hitBoxDecide(Rectangle{destRecPos.x,destRecPos.y, 32, float(dHeight)});
             if(isHit){
-                takeDamage(thePlayer->fxDamage);
+                takeDamage(thePlayer->fxDamage, true);
                 enemyFrameUtility.color = RED;
                 frameCountHealth = 60;
             }
@@ -610,9 +636,9 @@ void knockBack(){
             enemyProjectile.update();
         }
         void deload(){
-            for(int i = 0; i < enemyProjectile.projectiles.size(); i++){
-                UnloadTexture(enemyProjectile.projectiles[i].projectileTexture);
-            }
+          //  for(int i = 0; i < enemyProjectile.projectiles.size(); i++){
+         //       UnloadTexture(enemyProjectile.projectiles[i].projectileTexture);
+        //    }
             
             UnloadTexture(projectileTexture);
         }
@@ -630,9 +656,21 @@ void knockBack(){
         std::vector<basicEnemy> enemies;
         std::vector<std::unique_ptr<basicEnemy>> smartPtrEnemies; // (Example) smartPtrEnemies.push_back(std::make_unique<slimeEnemy>(Vector2{100,100}, "blueSlime.png"));
         SoundManager& manager = SoundManager::getInstance();
+        int enemiesKilled = 0;
         enemyManager(){
             std::clog << "In enemyManager constructor" << std::endl;
             
+        }
+        void reset(){
+            for(int i = 0; i < smartPtrEnemies.size(); i++){
+                smartPtrEnemies[i]->unloadTexture();
+            }
+            enemies.clear();
+            smartPtrEnemies.clear();
+            enemiesKilled = 0;
+        }
+        int howManyEnemies(){
+            return enemies.size() + smartPtrEnemies.size();
         }
         void spawnEnemy(Vector2 spawnPointPos){
             enemies.push_back(basicEnemy(spawnPointPos));
@@ -652,6 +690,9 @@ void knockBack(){
             }
         }
         void sDraw(){
+            if(enemies.size() && smartPtrEnemies.size() == 0){
+                return;
+            }
             for(int i = 0; i < enemies.size(); i++){
                 if(enemies[i].health == 199990){
                     killEnemy(i);
@@ -704,6 +745,9 @@ void knockBack(){
             */
         }
         void sUpdate(){
+            if(enemies.size() && smartPtrEnemies.size() == 0){
+                return;
+            }
             std::vector<Rectangle> enemiesRects;
             for(int i = enemies.size() - 1; i >= 0; i--){ // since killEnemy() resizes vector 
                 enemies[i].update();
@@ -714,11 +758,14 @@ void knockBack(){
                 }
             } 
             for(int j = smartPtrEnemies.size() - 1 ; j >= 0; j--){
+                if(j >= smartPtrEnemies.size()){
+                    break;
+                }
                 smartPtrEnemies[j]->update();
                 enemiesRects.push_back(Rectangle{smartPtrEnemies[j]->destRecPos.x, smartPtrEnemies[j]->destRecPos.y, float(smartPtrEnemies[j]->dWidth), float(smartPtrEnemies[j]->dHeight)});
                 if(smartPtrEnemies[j]->health <= 0){
                     killEnemySPtr(j);
-                    --j; // since killEnemy resizes vector
+                    --j; 
                 }
             }
          //   std::clog << "enemiesRects.size() = " << enemiesRects.size() << std::endl; 
@@ -755,13 +802,17 @@ void knockBack(){
             manager.unloadSound(enemies[index].damageSound.index);
             enemies[index].deload();
             enemies.erase(enemies.begin() + index);
-            
+            enemiesKilled++;
         }
         void killEnemySPtr(int index){
-            UnloadTexture(smartPtrEnemies[index]->enemyTexture);
+             UnloadTexture(smartPtrEnemies[index]->enemyTexture);
              smartPtrEnemies[index]->deloadSound();
             smartPtrEnemies[index]->deload();
+          //  smartPtrEnemies[index]->unloadTexture();
+          //  UnloadTexture(smartPtrEnemies[index]->enemyFrameUtility.texture);
+             
             smartPtrEnemies.erase(smartPtrEnemies.begin() + index);
+            enemiesKilled++;
         }
         void killEnemy(Vector2 enemyPos){
             for(int i = 0; i < enemies.size(); i++){
@@ -769,6 +820,8 @@ void knockBack(){
                     enemies[i].deload();
                     UnloadTexture(enemies[i].enemyTexture);
                     enemies.erase(enemies.begin() + i);
+                    enemiesKilled++;
+                    break;
                 }
             }
         }

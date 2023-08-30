@@ -41,7 +41,7 @@ class tileset{
     //}
 };
 class file_to_read{
-    private:
+    public:
     std::string path; //create a string to hold the path
     std::vector<std::vector<int>> tileIDs; // Vector of a vector of ints containing the tileIDs of a tilemap.
     std::vector<std::vector<int>> tileIDsCollision;  // Vector of a vector of ints containing the tileIDs of a tilemap for collision.
@@ -140,6 +140,7 @@ bool isInteger(const std::string& str) {
     }
     return true;
 }
+
 game_renderer_h_1::textureWrapper file_to_read::get_map_texture(){
     return mapTexture;
 }

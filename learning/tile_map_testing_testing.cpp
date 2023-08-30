@@ -36,15 +36,29 @@
 //#include "include/enemy_objects.hpp"
 #include "include/tile_map.hpp"
 #include "include/sound.hpp"
+#include "include/level.hpp"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 using namespace tilemap_ns;
-enum currentMap {
+/*enum currentMap {
     water_map,
     default_map,
     test_map
 };
+*/
+std::string enumToString(currentMap map) {
+    switch (map) {
+        case water_map:
+            return "water_map.xml";
+        case default_map:
+            return "testing_functionalilty_of_parser.xml";
+        case test_map:
+            return "testing_functionalilty_of_parser.xml";
+        default:
+            return "Unknown";
+    }
+}
 Vector2 chooseValidPos(std::vector<std::vector<int>> collisionTileIDs, bool ignoreFirstRow){
   Vector2 validPos = {0.00f, 0.00f};
   int rowX = 0;
@@ -100,16 +114,68 @@ Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs){
   std::clog << "no valid pos found" << std::endl;
   return validPos;
 }
-void spawnNShootingEnemies(int amouunt, enemyObjects_NS::enemyManager& theEnemyManager, std::vector<std::vector<int>> collisionTileIDs, player_objects::player& nPlayer){
+Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs, Rectangle enemyRect, bool isSlime, currentMap aCurrentMap1){
+  Vector2 validPos = {0.00f, 0.00f};
+  SetRandomSeed(GetTime());
+  Vector2 center = {0.00f, 0.00f};
+  Vector2 widthHeight = {0.00f, 0.00f};
+  int randXMax = 63;
+  int randYMax = 63;
+  int randXMin = 0;
+  int randYMin = 0;
+  if(enumToString(aCurrentMap1) == "water_map.xml"){
+    randYMax = 54;
+    randYMin = 26;
+  }
+  else{
+    randYMax = 63;
+    randYMin = 0;
+  }
+  if(isSlime){
+    center = {enemyRect.x, enemyRect.y};
+    widthHeight = {0.00f, 0.00f};
+  }
+  else{
+    center = {enemyRect.x + enemyRect.width/2, enemyRect.y + enemyRect.height/2};
+    widthHeight = {enemyRect.width, enemyRect.height};
+  }
+  int amountOfIter = 0;
+  while(true){
+    int randX = GetRandomValue(0, 63);
+    int randY = GetRandomValue(0, 63);
+    Vector2 randPos = {randX * 16, randY * 16};
+    randPos.x = randPos.x + widthHeight.x/2;
+    randPos.y = randPos.y + widthHeight.y/2;
+    randX = randPos.x / 16;
+    randY = randPos.y / 16;
+    if(collisionTileIDs[randX][randY] == 0 && randY > randYMin && randY < randYMax){
+      validPos.x = randX * 16;
+      validPos.y = randY * 16;
+      return validPos;
+    }
+    amountOfIter = amountOfIter + 1;
+    if(amountOfIter > 1000){ // Just in case it gets stuck in a loop
+      return chooseValidPos(collisionTileIDs);
+    }
+  }
+    
+  
+  std::clog << "no valid pos found" << std::endl;
+  return validPos;
+}
+void spawnNShootingEnemies(int amouunt, enemyObjects_NS::enemyManager& theEnemyManager, std::vector<std::vector<int>> collisionTileIDs, player_objects::player& nPlayer, currentMap aCurrentMap){
   for(int i = 0; i < amouunt; i++){
-    theEnemyManager.spawnShootingEnemy(chooseValidPos(collisionTileIDs), "fireMan.png", collisionTileIDs);
-    theEnemyManager.smartPtrEnemies[i]->thePlayer = &nPlayer;
+    theEnemyManager.spawnShootingEnemy(chooseValidPosRandom(collisionTileIDs, Rectangle{0.00f, 0.00f, 64, 64}, false, aCurrentMap), "fireMan.png", collisionTileIDs);
+   // theEnemyManager.smartPtrEnemies[i]->thePlayer = &nPlayer;
+    theEnemyManager.smartPtrEnemies.back()->thePlayer = &nPlayer;
   }
 }
-void spawnNSlimeEnemies(int amount, enemyObjects_NS::enemyManager& theEnemyManager, std::vector<std::vector<int>> collisionTileIDs, player_objects::player& nPlayer){
+void spawnNSlimeEnemies(int amount, enemyObjects_NS::enemyManager& theEnemyManager, std::vector<std::vector<int>> collisionTileIDs, player_objects::player& nPlayer, currentMap aCurrentMap){
   for(int i = 0; i < amount; i++){
-    theEnemyManager.spawnSlimeEnemy(chooseValidPosRandom(collisionTileIDs), "blueSlime.png", collisionTileIDs);
-    theEnemyManager.smartPtrEnemies[i]->thePlayer = &nPlayer;
+    theEnemyManager.spawnSlimeEnemy(chooseValidPosRandom(collisionTileIDs, Rectangle{0.00f, 0.00f, 0.00f, 0.00f}, true, aCurrentMap), "blueSlime.png", collisionTileIDs);
+  ///  theEnemyManager.smartPtrEnemies[i]->thePlayer = &nPlayer;
+     theEnemyManager.smartPtrEnemies.back()->thePlayer = &nPlayer;
+
   }
 }
 
@@ -121,7 +187,7 @@ int main(void)
    tilemap default_map; 
     const int screenWidth = GetScreenWidth();
     const int screenHeight = GetScreenHeight();
-    SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
+   SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
     InitWindow(screenWidth, screenHeight, "Game");
     InitAudioDevice(); // For sound
     int y_size = default_map.y_size;
@@ -129,6 +195,9 @@ int main(void)
     int x  = 0; 
     int oldx = 0; 
     int oldy = 0;
+    int levelWait = 0;
+    int maxLevelwait = 600;
+    levelManager aLevelManager;
     SoundManager& manager = SoundManager::getInstance();
     game_renderer_h_1::game_renderer gameRenderer;
     player_objects::player nPlayer;
@@ -146,9 +215,8 @@ int main(void)
     // Create an instance of file_to_read and read the XML file
   // Create an instance of file_to_read and read the XML file
   /// my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
-   my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); // Water_map
-   currentMap aCurrentMap = water_map;
-   
+  my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); // Water_map
+ currentMap aCurrentMap = water_map;
  xmlFile.set_map_texture();
  xmlFile.set_column();
  //xmlFile.make_tileset_file();
@@ -162,9 +230,9 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
     theEnemyManager.smartPtrEnemies[1]->thePlayer = &nPlayer;
     theEnemyManager.smartPtrEnemies[2]->thePlayer = &nPlayer;
     */
-   spawnNSlimeEnemies(2, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
+  // spawnNSlimeEnemies(2, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
   nPlayer.destRecPos = chooseValidPos(xmlFile.getCollisionTileIDs(), true); 
-  // spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
+  //spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
 
 // Main game loop
     while (!WindowShouldClose() && shouldClose != 1)    // Detect window close button or ESC key
@@ -191,8 +259,44 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
  
         default_map.arr_tiles[0*y_size+2171].is_black = true;
         mouseHandlerObject.update();
-        
-     
+        aLevelManager.update(theEnemyManager.howManyEnemies());
+        std::clog << "enemies left: " << theEnemyManager.howManyEnemies() << std::endl;
+        if(aLevelManager.getCurrentMap() != aCurrentMap){
+          std::string map = enumToString(aLevelManager.getCurrentMap());
+          std::string path = "include/" + map;
+         // UnloadTexture(xmlFile.mapTexture.texture); 
+          UnloadTexture(xmlFile.get_map_texture().texture);
+          xmlFile = my_xml_parser::file_to_read(path);
+           xmlFile.set_map_texture();
+            xmlFile.set_column();
+            aCurrentMap = aLevelManager.getCurrentMap();
+        }
+        if(aLevelManager.isLevelComplete() == true){
+          if(levelWait > 0){
+            levelWait--;
+            if(IsKeyPressed(KEY_F)){
+                levelWait = -1;
+              }
+            if(levelWait == 0){
+              levelWait = -1;
+              
+            }
+          }
+          else if (levelWait == 0){
+            levelWait = maxLevelwait;
+          }
+          else{
+          aLevelManager.newLevelSetup();
+          theEnemyManager.reset();
+          int amount = aLevelManager.enemiesToSpawn;
+          int amountOfSlime = amount - 1;
+          int amountOfShooting = amount - amountOfSlime;
+          spawnNSlimeEnemies(amountOfSlime, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer, aCurrentMap);
+          spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer, aCurrentMap);
+          levelWait = 0;
+
+          }
+        }
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
         //----------------------------------------------------------------------------------
@@ -227,6 +331,11 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
             EndMode2D();
             nPlayer.drawOffCamera();
             mouseHandlerObject.draw();
+            if(levelWait > 0){
+              DrawText("Level Complete", GetScreenWidth() / 2 - 10, 100, 20, BLACK);
+              DrawText(std::to_string(levelWait).c_str(), GetScreenWidth()/2 - 10, 120, 20, BLACK);
+              DrawText("Press F to continue", GetScreenWidth()/2 - 10, 140, 20, BLACK);
+            }
             
             }
             else{

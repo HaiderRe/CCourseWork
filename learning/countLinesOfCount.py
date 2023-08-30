@@ -17,7 +17,7 @@ def main():
     patterns = ['*.hpp', '*.cpp']
     ignore_list = ["rlgl.h", "raylib.h", "raymath.h", "rapidxml.hpp", 
                    "rapidxml_iterators.hpp", "rapidxml_print.hpp", 
-                   "rapidxml_utils.hpp", "json.hpp", "aStar.hpp", "dyn_mem_acc.cpp", "main.cpp" , "ping_pong.cpp", "short_if.cpp", "testing_cin_clear.cpp"]
+                   "rapidxml_utils.hpp", "json.hpp", "aStar.hpp", "dyn_mem_acc.cpp", "main.cpp" , "ping_pong.cpp", "short_if.cpp", "testing_cin_clear.cpp", "AStar.cpp"]
     total_lines = 0
 
     for pattern in patterns:
