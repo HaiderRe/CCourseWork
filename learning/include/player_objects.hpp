@@ -579,8 +579,56 @@ void LerpSDrawLine(int extraFrames){
       fxPlayer fxPlayerObject;
       skillManager(){
         skillSlotsObject.getAllSkills2();
-        skillSlotsObject.adminGiveAllSkills();
+        //skillSlotsObject.adminGiveAllSkills(); // Developer Command
+        //                                                           skillSlotsObject.currentSkills.push_back(skillSlotsObject.skills[0]);
       }
+      int nameToIndex(std::string aNameOfSkill){
+        for(int i = 0; i < skills.size(); i++){
+          if(skillSlotsObject.skills[i].dPath == aNameOfSkill){
+            return i;
+          }
+        }
+        return -1;
+      }
+      void addSkill(std::string nameOfSkill){
+        int index = nameToIndex(nameOfSkill);
+        if(index == -1 || index > skills.size()){
+          std::cout << "Skill not found" << std::endl;
+          return;
+        }
+        skillSlotsObject.currentSkills.push_back(skillSlotsObject.skills[index]);
+      } 
+       void addSkill(int index){
+        if(index == -1 || index > skills.size()){
+          std::cout << "Skill not found" << std::endl;
+          return;
+        }
+        skillSlotsObject.currentSkills.push_back(skillSlotsObject.skills[index]);
+      }
+      void addSkill(){
+        SetRandomSeed(GetTime());
+        bool isFound = false;
+        int index = GetRandomValue(0, skillSlotsObject.skills.size() - 1);
+        for(int i = 0; i < skillSlotsObject.currentSkills.size(); i++){
+         for(int j = 0; j < skillSlotsObject.skills.size(); j++){
+            if(skillSlotsObject.currentSkills[i].dPath == skillSlotsObject.skills[j].dPath){
+              isFound = true;
+              break;
+            }
+         }
+        }
+        if(isFound == false){
+          skillSlotsObject.currentSkills.push_back(skillSlotsObject.skills[index]);
+        }
+        else{
+          addSkill();
+          return;
+        }
+        skillSlotsObject.currentSkills.push_back(skillSlotsObject.skills[index]);
+      }
+      std::vector<skill> getSkills(){
+        return skillSlotsObject.currentSkills;
+      } 
       void deload(){
         skillSlotsObject.deload();
         fxPlayerObject.deload();
@@ -753,6 +801,7 @@ void LerpSDrawLine(int extraFrames){
         int height = 64; // Rect
         float speedX = 0.00f;
         float speedY = 0.00f;
+        int armor = 0;
         bool firstAttack = false;
         Vector2 destRecPos = {0.0f,0.0f};
         std::string currentAnim;
@@ -763,11 +812,13 @@ void LerpSDrawLine(int extraFrames){
         Vector2 sourceRecPos; 
         std::vector<std::vector<int>> collisionIDsMap;
         Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
-        float health = 5.00f; 
+        float health = 20.00f; 
         Camera2D camera1;
         deflect deflectObject;
         frameData dashFrameData;
         Texture2D dashTexture = LoadTexture("Assets/player/fx/dashFx.png");
+        Texture2D hudTexture = LoadTexture("Assets/player/hud/bars.png");
+        float healthRegen = 0.01;
         void deload();
         void draw();
         void update();
@@ -778,7 +829,19 @@ void LerpSDrawLine(int extraFrames){
         void takeDamage(float damagePoints);
         float takeDamage(float damagePoints, Vector2 aPreviousRect);
         void knockBack(Vector2 aPreviousRect);
-        bool isColliding(int x, int y); // expects 
+        bool isColliding(int x, int y); // expects
+        void upgradeArmor(){
+          armor++;
+        } 
+        void drawBars(){
+          Rectangle destRecHealth = {100, 150, 36, 32};
+          Rectangle sourceRecHealth = {16,48, 10, 8};
+          int amountOfHealthBars = health / 4;
+          for(int i = 0; i < amountOfHealthBars; i++){
+            destRecHealth.x = 200 + (i * 32);
+            DrawTexturePro(hudTexture, sourceRecHealth, destRecHealth, {0,0}, 0.00f, WHITE);
+          }
+        }
         void testingFunctionDraw(){
                 float offsetX = 0.0f;
                 float offsetY = 0.0f;
@@ -814,6 +877,34 @@ void LerpSDrawLine(int extraFrames){
         int fxDamage = 1;
         int weaponDamage = 1;
         sound damageSound;
+         void upgradeDamage(){
+      
+         fxDamage += 1;
+         weaponDamage += 1;
+        }
+       void addSkill(){
+        skillManagerObject.addSkill();
+       }
+       void chooseUpgrade(std::string upgrade){
+         if(upgrade == "Health"){
+          health = health +5;
+         }
+         else if(upgrade == "Armor"){
+          upgradeArmor();
+         }
+         else if(upgrade == "Damage"){
+          upgradeDamage();
+         }
+         else if(upgrade == "Skill"){
+          addSkill();
+         }
+         else if(upgrade == "Health Regen"){
+          healthRegen += 0.01;
+         }
+         else{
+          return;
+         }
+       }
         player(){
           manager = &SoundManager::getInstance();
          damageSound.index = manager->loadSound("player/humanHurt.wav");
@@ -869,6 +960,9 @@ void LerpSDrawLine(int extraFrames){
           playerAnims.addAnimation("player6", width, height);
           */
         }
+      //  void addSkill(){
+     //     // skillManagerObject
+        //}
         void set_animationManagerWidthAndHeight(int width, int height){
           playerAnims.animations[playerAnims.pKey].sWidth = width;
           playerAnims.animations[playerAnims.pKey].sHeight = height;
@@ -996,7 +1090,12 @@ void LerpSDrawLine(int extraFrames){
         return damagePoints;
       }
       else{
+        damagePoints = damagePoints - armor;
+        if(damagePoints <= 0){
+          return 0.00f;
+        }
         manager->playSound(damageSound.index);
+        
         health = health - damagePoints;
         playerColor = RED;
         colorCountDown = 60;
@@ -1129,16 +1228,18 @@ void LerpSDrawLine(int extraFrames){
     deflectObject.updatePlayerPos(playerPosCenter);
     dashM();
     trackAttack();
+    health = health + healthRegen;
   //  draw();
   }
   void player::drawOffCamera(){
    skillManagerObject.normalDraw();
-   
+   drawBars();
   }
   void player::draw(){
     deflectObject.draw();
     changeColor(playerColor);
     drawDash();
+    
     if(colorCountDown > -1){
       colorCountDown = colorCountDown - 1;
       if(colorCountDown < 0){
@@ -1187,6 +1288,7 @@ void LerpSDrawLine(int extraFrames){
   }
   void player::deload(){
     UnloadTexture(playerSprite);
+    UnloadTexture(hudTexture);
     skillManagerObject.deload();
     fxPlayerObject.deload();
     playerAnims.deload();

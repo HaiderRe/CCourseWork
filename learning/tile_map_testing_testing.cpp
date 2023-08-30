@@ -148,13 +148,15 @@ Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs, Rec
     randPos.y = randPos.y + widthHeight.y/2;
     randX = randPos.x / 16;
     randY = randPos.y / 16;
+    if(randX >= 0 && randX < collisionTileIDs.size() && randY >= 0 && randY < collisionTileIDs[0].size()){
     if(collisionTileIDs[randX][randY] == 0 && randY > randYMin && randY < randYMax){
       validPos.x = randX * 16;
       validPos.y = randY * 16;
       return validPos;
     }
+    }
     amountOfIter = amountOfIter + 1;
-    if(amountOfIter > 1000){ // Just in case it gets stuck in a loop
+    if(amountOfIter > 4000){ // Just in case it gets stuck in a loop
       return chooseValidPos(collisionTileIDs);
     }
   }
@@ -203,6 +205,7 @@ int main(void)
     player_objects::player nPlayer;
     camera_h::camera_class camera(nPlayer);
     mouseHandler::mouseHandlerClass mouseHandlerObject;
+    upgrade aUpgrade;
     int shouldClose = 0;
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -235,10 +238,11 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
   //spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
 
 // Main game loop
-    while (!WindowShouldClose() && shouldClose != 1)    // Detect window close button or ESC key
+    while (!WindowShouldClose() && shouldClose != 1 )    // Detect window close button or ESC key
     {
-      
-
+      if(nPlayer.health <= 0.00f){
+        break;
+      }
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         DisableCursor();
         // Update
@@ -283,13 +287,16 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
             }
           }
           else if (levelWait == 0){
+            aUpgrade.getUpgrade();
+            aUpgrade.getUpgrade();
+            aUpgrade.getUpgrade();
             levelWait = maxLevelwait;
           }
           else{
           aLevelManager.newLevelSetup();
           theEnemyManager.reset();
           int amount = aLevelManager.enemiesToSpawn;
-          int amountOfSlime = amount - 1;
+          int amountOfSlime = amount - 1 ;
           int amountOfShooting = amount - amountOfSlime;
           spawnNSlimeEnemies(amountOfSlime, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer, aCurrentMap);
           spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer, aCurrentMap);
@@ -313,7 +320,6 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
            ClearBackground(WHITE);
          }
            
-            
             DrawFPS(10, 10);  // Draw current FPS
             
             if(isPaused == false){
@@ -335,6 +341,10 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
               DrawText("Level Complete", GetScreenWidth() / 2 - 10, 100, 20, BLACK);
               DrawText(std::to_string(levelWait).c_str(), GetScreenWidth()/2 - 10, 120, 20, BLACK);
               DrawText("Press F to continue", GetScreenWidth()/2 - 10, 140, 20, BLACK);
+              std::string stringUpgrade = aUpgrade.draw(); 
+              if(stringUpgrade != "null"){
+                nPlayer.chooseUpgrade(stringUpgrade);
+              }
             }
             
             }
@@ -348,7 +358,7 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
               }
               gameRenderer.drawPauseMenu();
               nPlayer.drawOffCamera();
-              
+             
             }
 
         EndDrawing();
@@ -357,6 +367,45 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+      std::vector<Texture2D> gameOver; 
+      for(int i = 1; i < 29; i++){
+        gameOver.push_back(LoadTexture(("Assets/UI/gameOver/" + std::to_string(i) + ".png").c_str()));
+      }
+      int frameWidth  = 1542;
+      int frameHeight = 1201;
+      int frameSpeed = 4;
+      int currentFrame  = 0; 
+      int framesCounter = 0;
+      int maxFrames = 28;
+      bool isDone = false;
+      int frame = 0;
+      Rectangle frameRec = {0, 0, frameWidth, frameHeight};
+      Rectangle frameRec1= {0, 0, frameWidth, frameHeight};
+
+      while(isDone == false){
+      framesCounter++;
+              frameRec.y = frameHeight;
+              if (framesCounter >= (60/frameSpeed))
+              {
+                  framesCounter = 0;
+                  currentFrame++;
+                  if (currentFrame > maxFrames) {
+                      currentFrame = 0;
+                      isDone = true;
+                  }
+                  frameRec.x = frameWidth * currentFrame;
+                  frame = currentFrame;
+              }
+              BeginDrawing();
+              ClearBackground(BLACK);
+           //   DrawTextureRec(gameOver[frame], frameRec1, {0,0}, WHITE);
+              DrawTexturePro(gameOver[frame], frameRec, {0,0, (float)GetScreenWidth(), (float)GetScreenHeight()}, {0,0}, 0.00f, WHITE);
+              EndDrawing();
+      }
+    for (int i = 0; i < gameOver.size(); i++){
+      UnloadTexture(gameOver[i]);
+    }
+    
     delete[] default_map.arr_tiles;
     UnloadTexture(xmlFile.get_map_texture().texture);
     for(int k = 0; k < nPlayer.playerAnims.animations.size(); k++){

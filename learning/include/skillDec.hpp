@@ -32,12 +32,14 @@ class skill{
       std::string path;
       Rectangle sourceRec = {0.00f, 0.00f, 0.00f, 0.00f};
       Texture2D skillIcon;
+      std::string dPath;
       skill(std::string path, std::string StypeOfSkill){
         textures.push_back(LoadTexture(("Assets/player/03_FX/" + path).c_str()));
         texture1 = textures[0];
         frameRec.width = fWidth;
         frameRec.height = fHeight;
         typeOfSkill = StypeOfSkill;
+        dPath = path;
        }
        skill(std::string path , std::string StypeOfSkill, std::string iconPath){
         textures.push_back(LoadTexture(("Assets/player/03_FX/" + path).c_str()));
@@ -46,6 +48,7 @@ class skill{
         frameRec.height = fHeight;
         typeOfSkill = StypeOfSkill;
         skillIcon = LoadTexture(("Assets/player/icons/" + iconPath).c_str());
+        dPath = path;
        }
        void deload(){
         for(int i = 0; i < textures.size(); i++){
