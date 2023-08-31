@@ -14,11 +14,12 @@
     water_map,
     default_map,
     test_map,
-    town_map
+    town_map,
+    grass_map
 };
 class levelManager{
       public: 
-      currentMap aCurrentMap = town_map;
+      currentMap aCurrentMap = grass_map;
       int currentLevel = 0; 
       int enemiesLeft = 0;
       int enemiesKilled = 0;
@@ -52,6 +53,9 @@ class levelManager{
       currentMap getCurrentMap(){
         if(currentLevel == 5){
             aCurrentMap = water_map;
+        }
+        else if(currentLevel == 10){
+          aCurrentMap = town_map;
         }
         return aCurrentMap;
       }

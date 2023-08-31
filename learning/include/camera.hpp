@@ -21,7 +21,7 @@ namespace camera_h {
 
       camera_class::camera_class(player_objects::player& player_input) : player(player_input) {
         cam = {0};
-        cam.zoom = 2.0f;
+        cam.zoom = 4.0f;
         cam.target = Vector2{ 0.0f, 0.0f };
         cam.offset = Vector2{ GetScreenWidth()/2.0f, GetScreenHeight()/2.0f };
         cam.rotation = 0.0f;

@@ -1047,7 +1047,23 @@ void LerpSDrawLine(int extraFrames){
               speedY = -speedIncrease;
             }
             drawDashTime = drawDashMaxTime;
-            destRecPos = {destRecPos.x + speedX, destRecPos.y + speedY};
+            Vector2 newPos = {destRecPos.x  + speedX, destRecPos.y  + speedY};
+          Vector2 direction = {destRecPos.x - newPos.x, destRecPos.y  - newPos.y};
+          float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
+          Vector2 normalizedDirection = {direction.x / magnitude, direction.y / magnitude};
+            int playerX = newPos.x / 16;
+            int playerY = newPos.y / 16;
+            float stepSize = 1.0f; 
+              int maxAttempts = 1000;  
+             int attempts = 0;
+            while (isColliding(playerX, playerY) && attempts < maxAttempts) {
+              newPos.x -= normalizedDirection.x * stepSize; 
+              newPos.y -= normalizedDirection.y * stepSize; 
+            playerX = newPos.x / 16;
+           playerY = newPos.y / 16;
+           attempts++;
+            }
+            destRecPos = newPos;
           }
 
         }

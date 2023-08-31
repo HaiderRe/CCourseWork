@@ -17,6 +17,7 @@
        // Draw the tilemap and tileset
                 // xmlFile.draw_xml_file();
                  // replace 0 with the index of the tileset you want to draw
+                
 #ifndef main_game
 #define main_game
 #include <iostream>
@@ -48,7 +49,7 @@ using namespace tilemap_ns;
     test_map
 };
 */
-std::vector<Rectangle> stringToSourceRectV(const std::string& text) {
+std::vector<Rectangle> stringToSourceRectV(std::string text) {
     std::vector<Rectangle> sourceRects;
     std::string charset = "0123456789AaaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"; 
     std::unordered_map<char, int> charToIndex;
@@ -72,6 +73,9 @@ std::vector<Rectangle> stringToSourceRectV(const std::string& text) {
     }
     return sourceRects;
 }
+void drawLevelText(std::string aText){
+  std::vector<Rectangle> sourceRects = stringToSourceRectV(aText);
+}
 std::string enumToString(currentMap map) {
     switch (map) {
         case water_map:
@@ -82,6 +86,8 @@ std::string enumToString(currentMap map) {
             return "testing_functionalilty_of_parser.xml";
         case town_map:
             return "town.xml";
+        case grass_map:
+            return "new_map.xml";
         default:
             return "Unknown";
     }
@@ -217,6 +223,36 @@ void spawnNSlimeEnemies(int amount, enemyObjects_NS::enemyManager& theEnemyManag
 
   }
 }
+bool drawMainMenu(Texture2D aBigMenuTexture, Texture2D aLogo) {
+    Vector2 mousePos = GetMousePosition();
+    mousePos.x = mousePos.x + 28;
+    mousePos.y = mousePos.y + 28; // Offset the mouse position
+
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    Rectangle destRec = {(float)(screenWidth / 2 - (screenWidth / 24)),(float)(screenHeight / 2 - screenHeight / 8 - screenHeight / 24 + screenHeight / 18), (float)(screenWidth / 12),  (float)(screenHeight / 12)};
+    Rectangle destRec1 = destRec;
+    destRec1.width = GetScreenWidth();
+    destRec1.height = GetScreenHeight();
+    destRec1.x = 0;
+    destRec1.y = 0;
+    DrawTexturePro(aLogo, {0,0, (float)aLogo.width, (float)aLogo.height}, destRec1, {0,0}, 0.0f, WHITE);
+    DrawTexturePro(aBigMenuTexture, {0, 0, (float)aBigMenuTexture.width, (float)aBigMenuTexture.height}, destRec, {0, 0}, 0.0f, WHITE);
+    
+    
+    
+    const char* text = "Play";
+    Vector2 textSize = MeasureTextEx(GetFontDefault(), text, 40, 1);
+    DrawText(text, destRec.x + (destRec.width - textSize.x) / 2, destRec.y + (destRec.height - textSize.y) / 2, 40, Color{232, 222, 149,255});
+    bool buttonClicked = false;
+    if (CheckCollisionPointRec(mousePos, destRec)) {
+        DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, RED);
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            buttonClicked = true;
+        }
+    }
+    return buttonClicked;
+}
 
 
 int main(void)
@@ -244,6 +280,10 @@ int main(void)
     mouseHandler::mouseHandlerClass mouseHandlerObject;
     upgrade aUpgrade;
     int shouldClose = 0;
+    bool mainMenuDone = false;
+    Texture2D mainMenuButtonBig = LoadTexture("Assets/UI/mainMenu/active6.png");
+    Texture2D logo = LoadTexture("Assets/UI/mainMenu/legendOfRehawi.png");
+    
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     default_map.set_width_height_of_arr(256,256);
@@ -256,8 +296,8 @@ int main(void)
   // Create an instance of file_to_read and read the XML file
   /// my_xml_parser::file_to_read xmlFile("include/testing_functionalilty_of_parser.xml");
  // my_xml_parser::file_to_read xmlFile("include/water_tilemap.xml"); // Water_map
- my_xml_parser::file_to_read xmlFile("include/town.xml");
- currentMap aCurrentMap = town_map;
+ my_xml_parser::file_to_read xmlFile("include/new_map.xml");
+ currentMap aCurrentMap = grass_map;
  xmlFile.set_map_texture();
  xmlFile.set_column();
  //xmlFile.make_tileset_file();
@@ -278,9 +318,21 @@ nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skil
 // Main game loop
     while (!WindowShouldClose() && shouldClose != 1 )    // Detect window close button or ESC key
     {
-      if(nPlayer.health <= 0.00f){
-        break;
+      if(mainMenuDone == false){
+        BeginDrawing();
+        ClearBackground(Color{43, 70, 101,255});
+    
+      mainMenuDone = drawMainMenu(mainMenuButtonBig,logo);
+      EndDrawing();
+      if(mainMenuDone == true){
+        UnloadTexture(mainMenuButtonBig);
+        UnloadTexture(logo);
       }
+      }
+      else{
+      //if(nPlayer.health <= 0.00f){
+     //   break;
+     // }
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) ToggleFullscreen();
         DisableCursor();
         // Update
@@ -358,6 +410,9 @@ nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skil
          else if(aCurrentMap == town_map){
           ClearBackground(GRAY);
          }
+         else if(aCurrentMap == grass_map){
+            ClearBackground(Color{114, 117, 27,255});
+         }
          else{
            ClearBackground(WHITE);
          }
@@ -406,6 +461,7 @@ nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skil
 
         EndDrawing();
         //----------------------------------------------------------------------------------
+      }
     }
 
     // De-Initialization
