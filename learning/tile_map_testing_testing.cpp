@@ -19,7 +19,8 @@
                  // replace 0 with the index of the tileset you want to draw
 #ifndef main_game
 #define main_game
-#include <iostream> 
+#include <iostream>
+#include <unordered_map> 
 #include <string>
 #include <cmath>
 #include "include/raylib.h"
@@ -47,6 +48,30 @@ using namespace tilemap_ns;
     test_map
 };
 */
+std::vector<Rectangle> stringToSourceRectV(const std::string& text) {
+    std::vector<Rectangle> sourceRects;
+    std::string charset = "0123456789AaaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"; 
+    std::unordered_map<char, int> charToIndex;
+    for (int i = 0; i < charset.size(); ++i) {
+        if (charToIndex.find(charset[i]) == charToIndex.end()) { 
+            charToIndex[charset[i]] = i;
+        }
+    }
+    int width = 32; 
+    int height = 32;
+    int charsPerRow = 18; 
+    for (char c : text) {
+        auto it = charToIndex.find(c);
+        if (it != charToIndex.end()) {
+            int index = it->second;
+            int x = (index % charsPerRow) * width;
+            int y = (index / charsPerRow) * height;           
+            Rectangle rect = { (float)x, (float)y, (float)width, (float)height};
+            sourceRects.push_back(rect);
+        }
+    }
+    return sourceRects;
+}
 std::string enumToString(currentMap map) {
     switch (map) {
         case water_map:
@@ -131,7 +156,7 @@ Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs, Rec
   int randYMax = 63;
   int randXMin = 0;
   int randYMin = 0;
-  if(enumToString(aCurrentMap1) == "water_map.xml"){
+  if(enumToString(aCurrentMap1) == "water_tilemap.xml"){
     randYMax = 54;
     randYMin = 26;
   }
@@ -330,6 +355,9 @@ nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skil
          if(aCurrentMap == water_map){
          ClearBackground(BLUE);
          }
+         else if(aCurrentMap == town_map){
+          ClearBackground(GRAY);
+         }
          else{
            ClearBackground(WHITE);
          }
@@ -417,10 +445,10 @@ nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skil
               DrawTexturePro(gameOver[frame], frameRec, {0,0, (float)GetScreenWidth(), (float)GetScreenHeight()}, {0,0}, 0.00f, WHITE);
               EndDrawing();
       }
-    for (int i = 0; i < gameOver.size(); i++){
+    
+     for (int i = 0; i < gameOver.size(); i++){
       UnloadTexture(gameOver[i]);
     }
-    
     delete[] default_map.arr_tiles;
     UnloadTexture(xmlFile.get_map_texture().texture);
     for(int k = 0; k < nPlayer.playerAnims.animations.size(); k++){
@@ -452,6 +480,7 @@ nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skil
     }
     nPlayer.deload();
     manager.unloadAll();
+    aUpgrade.deload();
     UnloadTexture(mouseHandlerObject.mouseTexture);
     UnloadTexture(aTexture);
     CloseAudioDevice(); // Close sound device
