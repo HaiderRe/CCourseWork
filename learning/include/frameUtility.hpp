@@ -67,7 +67,6 @@ namespace frameUtility_NS{
                
             }
             else if(frameWidth == 100){
-                std::clog << "explosion dest rec = " << destRec.x << " " << destRec.y << " " << destRec.width << " " << destRec.height << std::endl;         
                 destRec.x = destRec.x;
                 destRec.y = destRec.y;    
                 origin = {0.00f, 0.00f};

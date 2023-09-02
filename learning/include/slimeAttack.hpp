@@ -74,7 +74,6 @@ class Attack{
             *currentPos = Vector2Add(*currentPos, direction);
             if(Vector2Length(direction) > distanceToPlayer){
                 *currentPos = intialPlayerPos;
-                std::clog << "true" << std::endl;
             }
             if(CheckCollisionRecs({currentPos->x - 32, currentPos->y - 32, 64, 64}, {playerPos.x + 24, playerPos.y + 16, 16, 32})){
                 intialPlayerPosSet = false;
@@ -83,11 +82,8 @@ class Attack{
                 coolDownTimer = coolDown; //Set cooldown
                 getReadyToAttack = 0;
                 attackFrameUtility.rotation = 0.0f;
-                std::clog << "collided" << std::endl;
             }
-            std::clog << "direction is " << direction.x << " " << direction.y << std::endl;
-            std::clog << "distance is " << distanceToPlayer << std::endl;
-
+            
             //check if we reached the intial player pos or if we overshot
             if(Vector2Equals(*currentPos, intialPlayerPos)){
                 coolDownTimer = coolDown; //Set cooldown;

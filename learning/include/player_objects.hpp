@@ -225,7 +225,7 @@ void addAnimation(std::string path, int width, int height, std::vector<std::stri
       //Enemies Call this function with their rectangle
       int hitBoxDecide(Rectangle aEnemyRect){ 
         int hit = 0;
-        std::clog << "type of skill = " + currentTypeOfSkill << std::endl;
+  
         if(isCastingN == false){
           return 0;
         }

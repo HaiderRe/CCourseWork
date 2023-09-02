@@ -199,9 +199,7 @@ namespace enemyObjects_NS{
          }
 
          void checkIsHitWeapon(){
-            std::clog << "thePlayer->currentAnim = " << thePlayer->currentAnim << std::endl;
             if(thePlayer->currentAnim == "Player/base/Base_Attack"){
-                std::clog << "TRUE" << std::endl;
                 int direction = 0; // 0 = up , 1 = left, 2 = right, 3 = down
                 direction = thePlayer->direction;
                 Rectangle destRecPosPlayer = {thePlayer->destRecPos.x, thePlayer->destRecPos.y, 32, 32};
@@ -238,7 +236,6 @@ namespace enemyObjects_NS{
                     enemyFrameUtility.color = RED;
                      slimeAttack.attackFrameUtility.color = RED;
                      frameCountHealth = 60;
-                     std::clog << "TRUE HIT" << std::endl;
                 }
             }
          }
@@ -249,11 +246,9 @@ namespace enemyObjects_NS{
          }
          void checkIsHitFx(){
             int isHit = thePlayer->skillManagerObject.fxPlayerObject.hitBoxDecide(Rectangle{destRecPos.x,destRecPos.y, float(dWidth), float(dHeight)});
-            std::clog << "is hit = " << isHit << std::endl;
             if(isHit){
                 takeDamage(thePlayer->fxDamage, true);
                 enemyFrameUtility.color = RED;
-                std::clog << "TRUE HIT" << std::endl;
                 slimeAttack.attackFrameUtility.color = RED;
                 frameCountHealth = 60;
             }

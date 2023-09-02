@@ -55,8 +55,7 @@ namespace enemyAi_NS {
     float circlingOffsetY = circlingDistance * sin(theta);
     stopOffsetCircle = {circleCenterX + stopOffsetX, circleCenterY + stopOffsetY};
     circlingOffsetCircle = {circleCenterX + circlingOffsetX, circleCenterY + circlingOffsetY};
-    std::clog << "stopOffsetCircle Values = " << stopOffsetCircle.x << " " << stopOffsetCircle.y << std::endl;
-    std::clog << "circlingOffsetCircle Values = " << circlingOffsetCircle.x << " " << circlingOffsetCircle.y << std::endl;
+    
 }
 
 
@@ -73,9 +72,7 @@ namespace enemyAi_NS {
     stopOffsetCircle.y = stopThreshold * sin(angle);
     circlingOffsetCircle.x = circlingDistance * cos(angle);
     circlingOffsetCircle.y = circlingDistance * sin(angle);
-    std::clog << "stopOffsetCircle Values = " << stopOffsetCircle.x << " " << stopOffsetCircle.y << std::endl;
-    std::clog << "circlingOffsetCircle Values = " << circlingOffsetCircle.x << " " << circlingOffsetCircle.y << std::endl;
-    std::clog << "angle = " << angle << std::endl;
+   
 }
 
     void OldChooseCirclePoint(){
@@ -86,7 +83,6 @@ namespace enemyAi_NS {
     // Generate a random number within the range
     int rotationOffset = rand() % (upperBound - lowerBound + 1) + lowerBound;
 
-        std::clog << "rotationOffset = " << rotationOffset << std::endl;
         float x = 0.00f;
         float y = 0.00f;
         x = (circlingDistance * cos(rotationOffset));
@@ -174,9 +170,7 @@ namespace enemyAi_NS {
              }
          }
          path = generator.findPath({(int)start.x, (int)start.y}, {(int)end.x, (int)end.y});
-         for(int i = 0; i < path.size(); i++){
-             std::clog << "path[" << i << "] = " << path[i].x << ", " << path[i].y << std::endl;
-         }
+        
          if(!path.empty()){
              isTakingAlternatePath = true;
          }
@@ -210,7 +204,6 @@ namespace enemyAi_NS {
       return true;
     }
     if(convertedCollisionIDs[floor(aPoint.y / 16)][floor(aPoint.x / 16)] == 1){
-      std::clog << " True " << std::endl;
       return true;
     }
     return false;
@@ -226,12 +219,10 @@ namespace enemyAi_NS {
     }
     if(playerPos.x < -1){
       *currentState = "idle";
-      std::clog << "player Out Of Bounds " << std::endl;
       return;
     }
     *currentState = "move";
     if (!currentPos) {
-        std::clog << "currentPos is nullptr" << std::endl;
         return;
     }
     
@@ -254,7 +245,6 @@ namespace enemyAi_NS {
             currentSeekOffset = Vector2Add(stopOffsetCircle, playerPos);
             CurrentCircleOffset = Vector2Add(circlingOffsetCircle, playerPos);
             if(x > 30){
-                std::clog << "stuck in collision Checks" << std::endl;
                 break; 
             }
         }
@@ -324,7 +314,7 @@ namespace enemyAi_NS {
        if(shouldSeperate && isStopping == false){
         seperationForce = Vector2Scale(Vector2Normalize(seperationForce), maxSpeed);
         desiredVelocity = Vector2Add(desiredVelocity, Vector2Scale(seperationForce, separationWeight));
-        std::clog << "SHOULD SEPERATE" << std::endl;
+        
         }
         if(isStopping == false){
         seekingForce = Vector2Scale(Vector2Normalize(Vector2Subtract(currentSeekOffset, *currentPos)), maxSpeed);
@@ -361,7 +351,7 @@ namespace enemyAi_NS {
         }
         nextPosition = aStarAlternativeMovement(passInto); 
         if (nextPosition.x == -2 && nextPosition.y == -2){
-            std::clog << "next position return was -2, so END" << std::endl;
+            
             isTakingAlternatePath = false;
         } 
         else{
@@ -375,9 +365,7 @@ namespace enemyAi_NS {
         } 
         }
 
-        if (nextPosition.x == -1 && nextPosition.y == -1){
-            std::clog << "next position return was -1, so BAD" << std::endl;
-        }
+        
         
     }
     
@@ -523,7 +511,7 @@ else {
     if (distanceToPlayer <= attackRange + attackBuffer && currentAttackTime <= 0) {
         currentState = "attack";
         attackDone = false;
-            std::clog << "Roar" << std::endl;
+    
             *isAttacking = true;
             currentAttackTime = attackTime;
     } 
