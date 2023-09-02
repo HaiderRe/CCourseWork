@@ -165,6 +165,8 @@ Vector2 chooseValidPosRandom(std::vector<std::vector<int>> collisionTileIDs, Rec
   if(enumToString(aCurrentMap1) == "water_tilemap.xml"){
     randYMax = 54;
     randYMin = 26;
+    randXMin = 10;
+    randXMax = 53;
   }
   else if(enumToString(aCurrentMap1) == "town.xml"){
     randYMax = 41;
@@ -230,7 +232,7 @@ bool drawMainMenu(Texture2D aBigMenuTexture, Texture2D aLogo) {
 
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
-    Rectangle destRec = {(float)(screenWidth / 2 - (screenWidth / 24)),(float)(screenHeight / 2 - screenHeight / 8 - screenHeight / 24 + screenHeight / 18), (float)(screenWidth / 12),  (float)(screenHeight / 12)};
+    Rectangle destRec = {(float)(screenWidth / 2 - (screenWidth / 24)),(float)(screenHeight / 2 - screenHeight / 8 - screenHeight / 24 + screenHeight / 8), (float)(screenWidth / 12),  (float)(screenHeight / 12)};
     Rectangle destRec1 = destRec;
     destRec1.width = GetScreenWidth();
     destRec1.height = GetScreenHeight();
@@ -246,7 +248,6 @@ bool drawMainMenu(Texture2D aBigMenuTexture, Texture2D aLogo) {
     DrawText(text, destRec.x + (destRec.width - textSize.x) / 2, destRec.y + (destRec.height - textSize.y) / 2, 40, Color{232, 222, 149,255});
     bool buttonClicked = false;
     if (CheckCollisionPointRec(mousePos, destRec)) {
-        DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, RED);
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             buttonClicked = true;
         }
