@@ -49,6 +49,11 @@ using namespace tilemap_ns;
     test_map
 };
 */
+void drawParralax(Texture2D bg1, Texture2D bg2, Texture2D bg3, Texture2D bg4, Texture2D bg5, Texture2D bg6, Texture2D bg7, Texture2D bg8){
+    
+
+
+}
 std::vector<Rectangle> stringToSourceRectV(std::string text) {
     std::vector<Rectangle> sourceRects;
     std::string charset = "0123456789AaaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"; 
@@ -238,7 +243,7 @@ bool drawMainMenu(Texture2D aBigMenuTexture, Texture2D aLogo) {
     destRec1.height = GetScreenHeight();
     destRec1.x = 0;
     destRec1.y = 0;
-    DrawTexturePro(aLogo, {0,0, (float)aLogo.width, (float)aLogo.height}, destRec1, {0,0}, 0.0f, WHITE);
+   // DrawTexturePro(aLogo, {0,0, (float)aLogo.width, (float)aLogo.height}, destRec1, {0,0}, 0.0f, WHITE);
     DrawTexturePro(aBigMenuTexture, {0, 0, (float)aBigMenuTexture.width, (float)aBigMenuTexture.height}, destRec, {0, 0}, 0.0f, WHITE);
     
     
@@ -255,7 +260,19 @@ bool drawMainMenu(Texture2D aBigMenuTexture, Texture2D aLogo) {
     return buttonClicked;
 }
 
-
+ void DrawParallaxBackground(Texture2D bg, Vector2* bgPos, float speed){
+ Rectangle windowRect = {0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()};
+Vector2 origin = {0, 0};
+float windowWidth = (float)GetScreenWidth();
+float windowHeight = (float)GetScreenHeight();
+bgPos->x -= speed;
+if(bgPos->x <= -windowWidth){
+bgPos->x += windowWidth;
+}
+   Rectangle sourceRect = {0, 0, bg.width, bg.height};
+   DrawTexturePro(bg, sourceRect, Rectangle{bgPos->x, 0, windowWidth, windowHeight}, origin, 0.0, WHITE);
+   DrawTexturePro(bg, sourceRect, Rectangle{bgPos->x + windowWidth, 0, windowWidth, windowHeight}, origin, 0.0, WHITE);
+}
 int main(void)
 {
     // Initialization
@@ -316,18 +333,54 @@ Texture2D aTexture = LoadTexture("Assets/enemy/blueSlime.png");
   nPlayer.destRecPos = chooseValidPosPlayer(xmlFile.getCollisionTileIDs(), true); 
   //spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer);
 nPlayer.skillManagerObject.skillSlotsObject.currentSkills.push_back(nPlayer.skillManagerObject.skillSlotsObject.skills[6]);
+Texture2D bg1 = LoadTexture("Assets/UI/mainMenu/8.png");
+Texture2D bg2 = LoadTexture("Assets/UI/mainMenu/7.png");
+Texture2D bg3 = LoadTexture("Assets/UI/mainMenu/6.png");
+Texture2D bg4 = LoadTexture("Assets/UI/mainMenu/5.png");
+Texture2D bg5 = LoadTexture("Assets/UI/mainMenu/4.png");
+Texture2D bg6 = LoadTexture("Assets/UI/mainMenu/3.png");
+Texture2D bg7 = LoadTexture("Assets/UI/mainMenu/2.png");
+Texture2D bg8 = LoadTexture("Assets/UI/mainMenu/1.png");
+    Vector2 bg1Pos = {0, 0};
+    Vector2 bg2Pos = {0, 0};
+    Vector2 bg3Pos = {0, 0};
+    Vector2 bg4Pos = {0, 0};
+    Vector2 bg5Pos = {0, 0};
+    Vector2 bg6Pos = {0, 0};
+    Vector2 bg7Pos = {0, 0};
+    Vector2 bg8Pos = {0, 0};
+    Rectangle windowRect = {0, 0, (float) GetScreenWidth(), (float) GetScreenHeight()};
+    Vector2 origin = {0, 0};
+
 // Main game loop
     while (!WindowShouldClose() && shouldClose != 1 )    // Detect window close button or ESC key
     {
       if(mainMenuDone == false){
         BeginDrawing();
-        ClearBackground(Color{43, 70, 101,255});
+        ClearBackground(WHITE);
     
+        DrawParallaxBackground(bg1, &bg1Pos, 0.5);
+        DrawParallaxBackground(bg2, &bg2Pos, 1.0);
+        DrawParallaxBackground(bg3, &bg3Pos, 1.5);
+        DrawParallaxBackground(bg4, &bg4Pos, 2.0);
+        DrawParallaxBackground(bg5, &bg5Pos, 2.5);
+        DrawParallaxBackground(bg6, &bg6Pos, 3.0);
+        DrawParallaxBackground(bg7, &bg7Pos, 3.5);
+        DrawParallaxBackground(bg8, &bg8Pos, 4.0);
+
       mainMenuDone = drawMainMenu(mainMenuButtonBig,logo);
       EndDrawing();
       if(mainMenuDone == true){
         UnloadTexture(mainMenuButtonBig);
         UnloadTexture(logo);
+        UnloadTexture(bg1);
+        UnloadTexture(bg2);
+        UnloadTexture(bg3);
+        UnloadTexture(bg4);
+        UnloadTexture(bg5);
+        UnloadTexture(bg6);
+        UnloadTexture(bg7);
+        UnloadTexture(bg8);
       }
       }
       else{
