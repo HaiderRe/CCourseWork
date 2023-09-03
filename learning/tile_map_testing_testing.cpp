@@ -49,10 +49,16 @@ using namespace tilemap_ns;
     test_map
 };
 */
-void drawParralax(Texture2D bg1, Texture2D bg2, Texture2D bg3, Texture2D bg4, Texture2D bg5, Texture2D bg6, Texture2D bg7, Texture2D bg8){
-    
 
-
+void drawMainMenuText(Font aCustomFont){
+  Vector2 textPosition = {(float) GetScreenWidth() / 2 - GetScreenWidth() / 8, 200};
+   int outlineThickness = 3;
+        for (int x = -outlineThickness; x <= outlineThickness; x++){
+            for (int y = -outlineThickness; y <= outlineThickness; y++){
+                DrawTextEx(aCustomFont, "Legend of Rehawi", Vector2{textPosition.x + x, textPosition.y + y}, 80, 1, BLACK);
+            }
+        }
+        DrawTextEx(aCustomFont, "Legend of Rehawi", textPosition, 80, 1, ORANGE);
 }
 std::vector<Rectangle> stringToSourceRectV(std::string text) {
     std::vector<Rectangle> sourceRects;
@@ -351,7 +357,7 @@ Texture2D bg8 = LoadTexture("Assets/UI/mainMenu/1.png");
     Vector2 bg8Pos = {0, 0};
     Rectangle windowRect = {0, 0, (float) GetScreenWidth(), (float) GetScreenHeight()};
     Vector2 origin = {0, 0};
-
+  Font customFont = LoadFont("Assets/font/ThaleahFat.ttf");  
 // Main game loop
     while (!WindowShouldClose() && shouldClose != 1 )    // Detect window close button or ESC key
     {
@@ -367,6 +373,7 @@ Texture2D bg8 = LoadTexture("Assets/UI/mainMenu/1.png");
         DrawParallaxBackground(bg6, &bg6Pos, 3.0);
         DrawParallaxBackground(bg7, &bg7Pos, 3.5);
         DrawParallaxBackground(bg8, &bg8Pos, 4.0);
+        drawMainMenuText(customFont);
 
       mainMenuDone = drawMainMenu(mainMenuButtonBig,logo);
       EndDrawing();
@@ -381,6 +388,7 @@ Texture2D bg8 = LoadTexture("Assets/UI/mainMenu/1.png");
         UnloadTexture(bg6);
         UnloadTexture(bg7);
         UnloadTexture(bg8);
+        UnloadFont(customFont);
       }
       }
       else{

@@ -695,6 +695,7 @@ void LerpSDrawLine(int extraFrames){
     bool successFullDeflect = false;
     bool intialFx = false;
     Texture2D fxTexture = LoadTexture("Assets/vfx/flare.png");
+    Texture2D deflectIcon = LoadTexture("Assets/UI/icons/deflect.png");
     Color deflectColor = {211,211,211, 145};
     Vector2 playerPosCenter = {0.00f, 0.00f};
     deflect(){
@@ -703,6 +704,7 @@ void LerpSDrawLine(int extraFrames){
     }
     void deload(){
       UnloadTexture(fxTexture);
+      UnloadTexture(deflectIcon);
       std::clog << "deloaded deflect" << std::endl;
     }
     void draw(){
@@ -719,8 +721,17 @@ void LerpSDrawLine(int extraFrames){
       Vector2 origin = {width/2, height/2};  
       Rectangle destRect = {playerPosCenter.x - origin.x, playerPosCenter.y - origin.y, width, height};
       DrawTexturePro(fxTexture, {0.00f, 0.00f, 1920.00f, 1080.00f}, destRect, {0.00f, 0.00f}, 0.00f, WHITE);
-      std::clog << "drawn" << std::endl;
     }
+    void drawDeflectIcon(){
+      Rectangle destRec = {GetScreenWidth() / 16,GetScreenHeight() - 100, 64, 64};
+      DrawTexturePro(deflectIcon, {0.00f, 0.00f, 512.00f, 512.00f}, destRec, {0.00f, 0.00f}, 0.00f, WHITE); 
+      DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, WHITE);
+      DrawText("E", destRec.x + destRec.width/2 - 8, destRec.y - 20, 20, WHITE);
+      float cooldownRatio = currentCoolDownTime / maxCoolDownTime;
+      float greyHeight = destRec.height * cooldownRatio;
+      Color transparentGrey = {128, 128, 128, 128}; 
+      DrawRectangle(destRec.x, destRec.y + destRec.height - greyHeight, destRec.width, greyHeight, transparentGrey);
+}
     void updatePlayerPos(Vector2 aPlayerPosCenter){
       playerPosCenter = aPlayerPosCenter;
     }
@@ -799,6 +810,7 @@ void LerpSDrawLine(int extraFrames){
         Color playerColor = WHITE;
         playerAnimations playerAnims;
         Texture2D playerSprite;
+        Texture2D dashIcon = LoadTexture("Assets/UI/icons/dash.png");
         Vector2 sourceRecPos; 
         std::vector<std::vector<int>> collisionIDsMap;
         Rectangle playerRect = {destRecPos.x, destRecPos.y, float(width), float(height)};
@@ -874,6 +886,16 @@ void LerpSDrawLine(int extraFrames){
         }
        void addSkill(){
         skillManagerObject.addSkill();
+       }
+       void drawDashIcon(){
+        Rectangle destRec = {GetScreenWidth() / 16 + 64,GetScreenHeight() - 100, 64, 64};
+      DrawTexturePro(dashIcon, {0.00f, 0.00f, 512.00f, 512.00f}, destRec, {0.00f, 0.00f}, 0.00f, WHITE); 
+      DrawRectangleLines(destRec.x, destRec.y, destRec.width, destRec.height, WHITE);
+      DrawText("Shift", destRec.x + destRec.width/2 - 20, destRec.y - 20, 20, WHITE);
+      float cooldownRatio = currentDashTime / dashCoolDownTime;
+      float greyHeight = destRec.height * cooldownRatio;
+      Color transparentGrey = {128, 128, 128, 128}; 
+      DrawRectangle(destRec.x, destRec.y + destRec.height - greyHeight, destRec.width, greyHeight, transparentGrey);
        }
        void chooseUpgrade(std::string upgrade){
          if(upgrade == "Health"){
@@ -1239,10 +1261,13 @@ void LerpSDrawLine(int extraFrames){
   }
   void player::drawOffCamera(){
    skillManagerObject.normalDraw();
+   deflectObject.drawDeflectIcon();
+   drawDashIcon();
    drawBars();
   }
   void player::draw(){
     deflectObject.draw();
+    
     changeColor(playerColor);
     drawDash();
     
@@ -1300,6 +1325,7 @@ void LerpSDrawLine(int extraFrames){
     playerAnims.deload();
     deflectObject.deload();
     UnloadTexture(dashTexture);
+    UnloadTexture(dashIcon);
     }
 };
 
