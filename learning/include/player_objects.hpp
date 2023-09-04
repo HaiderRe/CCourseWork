@@ -1256,7 +1256,7 @@ void LerpSDrawLine(int extraFrames){
     deflectObject.updatePlayerPos(playerPosCenter);
     dashM();
     trackAttack();
-    health = health + healthRegen;
+    
   //  draw();
   }
   void player::drawOffCamera(){

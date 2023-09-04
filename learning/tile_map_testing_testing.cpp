@@ -449,10 +449,10 @@ Texture2D bg8 = LoadTexture("Assets/UI/mainMenu/1.png");
           aLevelManager.newLevelSetup();
           theEnemyManager.reset();
           int amount = aLevelManager.enemiesToSpawn;
-          int amountOfSlime = amount - 1 ;
+          int amountOfSlime = amount / 2 ;
           int amountOfShooting = amount - amountOfSlime;
           spawnNSlimeEnemies(amountOfSlime, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer, aCurrentMap);
-          spawnNShootingEnemies(1, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer, aCurrentMap);
+          spawnNShootingEnemies(amountOfShooting, theEnemyManager, xmlFile.getCollisionTileIDs(), nPlayer, aCurrentMap);
           levelWait = 0;
 
           }
@@ -464,7 +464,9 @@ Texture2D bg8 = LoadTexture("Assets/UI/mainMenu/1.png");
         // Draw
         //----------------------------------------------------------------------------------
         std::vector<std::vector<int>> xmlTileIDs = xmlFile.get_tileIDs();
-       
+         if(nPlayer.health <= 0){
+          break;
+         }
          BeginDrawing();
          if(aCurrentMap == water_map){
          ClearBackground(BLUE);
